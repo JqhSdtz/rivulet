@@ -36,6 +36,8 @@ const loopMenuItem = menus =>
         children: children && loopMenuItem(children)
     }));
 
+export const headerHeight = "3rem";
+
 export default function BasicLayout({children, location}) {
     return (
         <ProLayout
@@ -48,7 +50,7 @@ export default function BasicLayout({children, location}) {
             }}
             fixSiderbar
             fixedHeader
-            headerHeight="3.5rem"
+            headerHeight={headerHeight}
             menuDataRender={() => loopMenuItem(asideMenuConfig)}
             menuItemRender={(item, defaultDom) => {
                 if (!item.path) {

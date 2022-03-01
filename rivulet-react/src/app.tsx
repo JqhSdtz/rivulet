@@ -1,5 +1,5 @@
 import {IAppConfig, runApp} from 'ice';
-import remHelper from '@/lib/rem-helper';
+import remHelper from '@/utils/rem-helper';
 import {PageLoading} from '@/layouts/BasicLayout';
 
 const appConfig: IAppConfig = {
