@@ -1,10 +1,12 @@
-package org.laputa.rivulet.entity.base;
+package org.laputa.rivulet.module.datamodel.entity;
 
 import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
+import org.laputa.rivulet.common.entity.RvEntity;
+import org.springframework.data.jpa.domain.AbstractPersistable;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -22,9 +24,7 @@ import java.util.Objects;
 @DynamicInsert
 @DynamicUpdate
 @Table(name = "rv_table")
-public class RvTable implements Serializable {
-    private static final long serialVersionUID = 1L;
-
+public class RvTable extends RvEntity {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")
@@ -33,21 +33,4 @@ public class RvTable implements Serializable {
 
     @Column(name = "name", nullable = false)
     private String name;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
-            return false;
-        }
-        RvTable rvTable = (RvTable) o;
-        return id != null && Objects.equals(id, rvTable.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }

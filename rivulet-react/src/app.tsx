@@ -1,14 +1,32 @@
-import {IAppConfig, runApp} from 'ice';
+import {IAppConfig, runApp, request} from 'ice';
 import remHelper from '@/utils/rem-helper';
 import {PageLoading} from '@/layouts/BasicLayout';
 
 const appConfig: IAppConfig = {
+    request: {
+        baseURL: '/api'
+    },
     app: {
-        rootId: 'ice-container'
+        rootId: 'ice-container',
+        getInitialData: async (ctx) => {
+            const appInitialData = await request.get('/app/initialData');
+            const currentUser = appInitialData.currentUser;
+            const initialStates = {
+                app: appInitialData.appState,
+                user: appInitialData.currentUser
+            };
+            const auth = {
+                hasLoggedIn: !!currentUser
+            };
+            return {
+                initialStates: initialStates,
+                auth: auth
+            }
+        }
     },
     router: {
         type: 'browser',
-        fallback: <PageLoading />
+        fallback: <PageLoading/>
     }
 };
 

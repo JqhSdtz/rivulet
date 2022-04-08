@@ -1,4 +1,4 @@
-import {FormGrid, FormItem, FormTab, Input} from '@formily/antd';
+import {FormGrid, FormItem, FormLayout, FormTab, Input} from '@formily/antd';
 import {createSchemaField, FormProvider} from '@formily/react';
 import {createForm} from '@formily/core';
 import {KeepAlive} from 'react-activation';
@@ -14,65 +14,66 @@ const propertiesTabSchema = {
         tab: '属性'
     },
     properties: {
-        grid: {
+        layout: {
             type: 'void',
-            'x-component': 'FormGrid',
+            'x-component': 'FormLayout',
             'x-component-props': {
-                maxColumns: 3
+                labelCol: 6,
+                wrapperCol: 18,
+                labelWrap: true
             },
             properties: {
-                name: {
-                    type: 'string',
-                    title: '名称',
-                    required: true,
-                    'x-decorator': 'FormItem',
-                    'x-component': 'Input'
-                },
-                title: {
-                    type: 'string',
-                    title: '标题',
-                    required: true,
-                    'x-decorator': 'FormItem',
-                    'x-component': 'Input'
-                },
-                field3: {
-                    type: 'string',
-                    title: '字段3',
-                    'x-decorator': 'FormItem',
-                    'x-component': 'Input'
-                },
-                field4: {
-                    type: 'string',
-                    title: '字段4',
-                    'x-decorator': 'FormItem',
-                    'x-component': 'Input'
-                },
-                field5: {
-                    type: 'string',
-                    title: '字段5',
-                    'x-decorator': 'FormItem',
-                    'x-component': 'Input'
-                },
-                field6: {
-                    type: 'string',
-                    title: '字段6',
-                    'x-decorator': 'FormItem',
-                    'x-component': 'Input'
+                grid: {
+                    type: 'void',
+                    'x-component': 'FormGrid',
+                    'x-component-props': {
+                        maxColumns: 3
+                    },
+                    properties: {
+                        name: {
+                            type: 'string',
+                            title: '名称',
+                            required: true,
+                            'x-decorator': 'FormItem',
+                            'x-component': 'Input'
+                        },
+                        title: {
+                            type: 'string',
+                            title: '标题',
+                            required: true,
+                            'x-decorator': 'FormItem',
+                            'x-component': 'Input'
+                        },
+                        field3: {
+                            type: 'string',
+                            title: '字段3',
+                            'x-decorator': 'FormItem',
+                            'x-component': 'Input'
+                        },
+                        field4: {
+                            type: 'string',
+                            title: '字段4',
+                            'x-decorator': 'FormItem',
+                            'x-component': 'Input'
+                        },
+                        field5: {
+                            type: 'string',
+                            title: '字段5',
+                            'x-decorator': 'FormItem',
+                            'x-component': 'Input'
+                        },
+                        field6: {
+                            type: 'string',
+                            title: '字段6',
+                            'x-decorator': 'FormItem',
+                            'x-component': 'Input'
+                        }
+                    }
                 }
             }
         }
     }
 };
-
-const tmp = propertiesTabSchema.properties.grid.properties;
-for (let i = 7; i < 50; ++i) {
-    tmp['field' + i] = {
-        type: 'string',
-        title: '字段' + i,
-        'x-decorator': 'FormItem',
-        'x-component': 'Input'
-    };
-}
 
 const schema = {
     type: 'object',
@@ -95,6 +96,13 @@ const schema = {
                         bbb: {
                             type: 'string',
                             title: 'BBB',
+                            'x-decorator': 'FormItem',
+                            required: true,
+                            'x-component': 'Input'
+                        },
+                        ccc: {
+                            type: 'string',
+                            title: 'CCC',
                             'x-decorator': 'FormItem',
                             required: true,
                             'x-component': 'Input'
@@ -127,7 +135,8 @@ const SchemaField = createSchemaField({
         FormItem,
         FormTab,
         Input,
-        FormGrid
+        FormGrid,
+        FormLayout
     }
 });
 
@@ -136,7 +145,7 @@ function DataModel() {
     const formTab = useCreation(() => FormTab?.createFormTab?.(), []);
     return (
         <FormProvider form={form}>
-            <SchemaField schema={schema} scope={{formTab}} />
+            <SchemaField schema={schema} scope={{formTab}}/>
         </FormProvider>
     );
 }
@@ -151,7 +160,7 @@ export default () => {
             matchMenus={matchMenus}
             saveScrollPosition="screen"
         >
-            <DataModel />
+            <DataModel/>
         </KeepAlive>
     );
 };

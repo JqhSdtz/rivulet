@@ -1,6 +1,6 @@
 import {SmileOutlined} from '@ant-design/icons';
 
-const asideMenuConfig = [
+const config = [
     {
         name: '首页',
         path: '/',
@@ -17,5 +17,9 @@ const asideMenuConfig = [
         icon: SmileOutlined
     }
 ];
+
+const asideMenuConfig = () => new Promise(resolve => {
+   setTimeout(() => resolve(config), 500);
+});
 
 export {asideMenuConfig};

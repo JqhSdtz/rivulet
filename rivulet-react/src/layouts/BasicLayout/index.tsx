@@ -8,17 +8,11 @@ import type {HeaderViewProps as HeaderProps} from './Header';
 import DefaultHeader from './Header';
 import type {TopNavHeaderProps} from './components/TopNavHeader';
 import TopNavHeader from './components/TopNavHeader';
-import type {
-    SettingDrawerProps,
-    SettingDrawerState
-} from './components/SettingDrawer';
+import type {SettingDrawerProps, SettingDrawerState} from './components/SettingDrawer';
 import SettingDrawer from './components/SettingDrawer';
 import GridContent from './components/GridContent';
 import type {PageContainerProps} from './components/PageContainer';
-import PageContainer, {
-    ProBreadcrumb,
-    ProPageHeader
-} from './components/PageContainer';
+import PageContainer, {ProBreadcrumb, ProPageHeader} from './components/PageContainer';
 import type {RouteContextType} from './RouteContext';
 import RouteContext from './RouteContext';
 import getMenuData from './utils/getMenuData';
@@ -36,7 +30,16 @@ const loopMenuItem = menus =>
         children: children && loopMenuItem(children)
     }));
 
-export const headerHeight = "3rem";
+const menuDataRender = async () => {
+    const config: Function | any = asideMenuConfig;
+    let menuItems = config;
+    if (typeof asideMenuConfig === 'function') {
+        menuItems = await config();
+    }
+    return loopMenuItem(menuItems);
+}
+
+export const headerHeight = '3rem';
 
 export default function BasicLayout({children, location}) {
     return (
@@ -45,13 +48,16 @@ export default function BasicLayout({children, location}) {
             style={{
                 minHeight: '100vh'
             }}
+            contentStyle={{
+                margin: '0.5rem 1rem'
+            }}
             location={{
                 pathname: location.pathname
             }}
             fixSiderbar
             fixedHeader
             headerHeight={headerHeight}
-            menuDataRender={() => loopMenuItem(asideMenuConfig)}
+            menu={{request: menuDataRender}}
             menuItemRender={(item, defaultDom) => {
                 if (!item.path) {
                     return defaultDom;
@@ -82,8 +88,6 @@ export default function BasicLayout({children, location}) {
     );
 }
 
-const PageHeaderWrapper = PageContainer;
-
 export type {ProSettings} from './configs/defaultSettings';
 
 export type {MenuDataItem} from './typings';
@@ -98,7 +102,6 @@ export {
     DefaultFooter,
     SettingDrawer,
     getPageTitle,
-    PageHeaderWrapper,
     getMenuData,
     PageContainer,
     FooterToolbar,
