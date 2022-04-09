@@ -1,9 +1,9 @@
 import React, {createContext} from 'react';
 import type {BreadcrumbProps} from 'antd';
-import type {BreadcrumbListReturn} from './utils/getBreadcrumbProps';
-import type {PureSettings} from './configs/defaultSettings';
-import type {MenuDataItem} from './typings';
-import type {WaterMarkProps} from './components/WaterMark';
+import type {BreadcrumbListReturn} from '../utils/getBreadcrumbProps';
+import type {PureSettings} from '../configs/defaultSettings';
+import type {MenuDataItem} from '../typings';
+import type {WaterMarkProps} from '../components/WaterMark';
 
 export type RouteContextType = {
     breadcrumb?: BreadcrumbListReturn;

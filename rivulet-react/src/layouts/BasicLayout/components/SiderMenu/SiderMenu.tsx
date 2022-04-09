@@ -15,7 +15,7 @@ const {Sider} = Layout;
 
 export const defaultRenderLogo = (logo: React.ReactNode): React.ReactNode => {
     if (typeof logo === 'string') {
-        return <img src={logo} alt="logo" />;
+        return <img src={logo} alt="logo"/>;
     }
     if (typeof logo === 'function') {
         return logo();
@@ -59,17 +59,13 @@ export const defaultRenderLogoAndTitle = (
 export type SiderMenuProps = {
     logo?: React.ReactNode;
     siderWidth?: number;
-    menuHeaderRender?: WithFalse<
-        (
-            logo: React.ReactNode,
-            title: React.ReactNode,
-            props?: SiderMenuProps
-        ) => React.ReactNode
-    >;
+    menuHeaderRender?: WithFalse<(
+        logo: React.ReactNode,
+        title: React.ReactNode,
+        props?: SiderMenuProps
+    ) => React.ReactNode>;
     menuFooterRender?: WithFalse<(props?: SiderMenuProps) => React.ReactNode>;
-    menuContentRender?: WithFalse<
-        (props: SiderMenuProps, defaultDom: React.ReactNode) => React.ReactNode
-    >;
+    menuContentRender?: WithFalse<(props: SiderMenuProps, defaultDom: React.ReactNode) => React.ReactNode>;
     menuExtraRender?: WithFalse<(props: SiderMenuProps) => React.ReactNode>;
     collapsedButtonRender?: WithFalse<(collapsed?: boolean) => React.ReactNode>;
     breakpoint?: SiderProps['breakpoint'] | false;
@@ -77,6 +73,7 @@ export type SiderMenuProps = {
     hide?: boolean;
     className?: string;
     style?: CSSProperties;
+    bottomButtonsRender?: WithFalse<(props?: SiderMenuProps) => React.ReactNode>;
     links?: React.ReactNode[];
     onOpenChange?: (openKeys: WithFalse<string[]>) => void;
     getContainer?: false;
@@ -84,7 +81,7 @@ export type SiderMenuProps = {
 } & Pick<BaseMenuProps, Exclude<keyof BaseMenuProps, ['onCollapse']>>;
 
 export const defaultRenderCollapsedButton = (collapsed?: boolean) =>
-    collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />;
+    collapsed ? <MenuUnfoldOutlined/> : <MenuFoldOutlined/>;
 
 export type PrivateSiderMenuProps = {
     matchMenuKeys: string[];
@@ -95,6 +92,7 @@ const SiderMenu: React.FC<SiderMenuProps & PrivateSiderMenuProps> = props => {
         collapsed,
         fixSiderbar,
         menuFooterRender,
+        bottomButtonsRender,
         onCollapse,
         theme,
         siderWidth,
@@ -209,13 +207,14 @@ const SiderMenu: React.FC<SiderMenuProps & PrivateSiderMenuProps> = props => {
                     {menuRenderDom}
                 </div>
                 <div className={`${baseClassName}-links`}>
+                    {bottomButtonsRender && (bottomButtonsRender(props))}
                     <Menu
                         theme={theme}
                         inlineIndent={16}
                         className={`${baseClassName}-link-menu`}
                         selectedKeys={[]}
                         openKeys={[]}
-                        mode="inline"
+                        mode="vertical"
                     >
                         {(links || []).map((node, index) => (
                             // eslint-disable-next-line react/no-array-index-key

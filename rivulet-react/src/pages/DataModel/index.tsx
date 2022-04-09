@@ -4,7 +4,7 @@ import {createForm} from '@formily/core';
 import {KeepAlive} from 'react-activation';
 import {useLocation} from 'ice';
 import {useContext} from 'react';
-import RouteContext from '@/layouts/BasicLayout/RouteContext';
+import RouteContext from '@/layouts/BasicLayout/contexts/RouteContext';
 import {useCreation} from 'ahooks';
 
 const propertiesTabSchema = {

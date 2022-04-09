@@ -1,7 +1,7 @@
 import {KeepAlive} from 'react-activation';
 import {useLocation} from 'ice';
 import {useContext, useState} from 'react';
-import RouteContext from '@/layouts/BasicLayout/RouteContext';
+import RouteContext from '@/layouts/BasicLayout/contexts/RouteContext';
 
 function Dashboard() {
     const [counter, setCounter] = useState(0);

@@ -1,7 +1,7 @@
 import {useAliveController} from 'react-activation';
 
 import React, {useContext} from 'react';
-import {HeaderViewProps} from '@/layouts/BasicLayout/Header';
+import {HeaderViewProps} from '@/layouts/BasicLayout/components/Header';
 import {headerHeight, MenuDataItem, RouteContext} from '@/layouts/BasicLayout';
 import {Tabs} from 'antd';
 import {useHistory} from 'ice';

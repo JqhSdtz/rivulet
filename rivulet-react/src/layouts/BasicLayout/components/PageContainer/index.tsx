@@ -11,7 +11,7 @@ import type {ReactNode} from 'react';
 import React, {useContext, useMemo} from 'react';
 import classNames from 'classnames';
 
-import RouteContext from '../../RouteContext';
+import RouteContext from '../../contexts/RouteContext';
 import GridContent from '../GridContent';
 import FooterToolbar from '../FooterToolbar';
 import './index.less';

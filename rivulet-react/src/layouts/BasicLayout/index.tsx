@@ -1,11 +1,11 @@
 import {createElement} from 'react';
 import type {BasicLayoutProps} from './BasicLayout';
 import ProLayout from './BasicLayout';
-import type {FooterProps} from './Footer';
-import DefaultFooter from './Footer';
+import type {FooterProps} from './components/Footer';
+import DefaultFooter from './components/Footer';
 import {Link} from 'ice';
-import type {HeaderViewProps as HeaderProps} from './Header';
-import DefaultHeader from './Header';
+import type {HeaderViewProps as HeaderProps} from './components/Header';
+import DefaultHeader from './components/Header';
 import type {TopNavHeaderProps} from './components/TopNavHeader';
 import TopNavHeader from './components/TopNavHeader';
 import type {SettingDrawerProps, SettingDrawerState} from './components/SettingDrawer';
@@ -13,15 +13,18 @@ import SettingDrawer from './components/SettingDrawer';
 import GridContent from './components/GridContent';
 import type {PageContainerProps} from './components/PageContainer';
 import PageContainer, {ProBreadcrumb, ProPageHeader} from './components/PageContainer';
-import type {RouteContextType} from './RouteContext';
-import RouteContext from './RouteContext';
+import type {RouteContextType} from './contexts/RouteContext';
+import RouteContext from './contexts/RouteContext';
 import getMenuData from './utils/getMenuData';
-import getPageTitle from './getPageTitle';
+import getPageTitle from './components/getPageTitle';
 import PageLoading from './components/PageLoading';
 import FooterToolbar from './components/FooterToolbar';
 import WaterMark from './components/WaterMark';
 import {asideMenuConfig} from './configs/menuConfig';
 import KeepAliveTabs from '@/layouts/BasicLayout/components/KeepAliveTabs';
+import {SiderMenuProps} from '@/layouts/BasicLayout/components/SiderMenu/SiderMenu';
+import UserCenterMenu from '@/layouts/BasicLayout/customs/UserCenterMenu';
+import {Menu} from 'antd';
 
 const loopMenuItem = menus =>
     menus.map(({icon, children, ...item}) => ({
@@ -64,6 +67,11 @@ export default function BasicLayout({children, location}) {
                 }
                 return <Link to={item.path}>{defaultDom}</Link>;
             }}
+            bottomButtonsRender={(props: SiderMenuProps) => (
+                <Menu theme={props.theme} mode="vertical" selectable={false}>
+                    <UserCenterMenu {...props} />
+                </Menu>
+            )}
             headerRender={props => <KeepAliveTabs {...props} />}
             footerRender={() => (
                 <DefaultFooter

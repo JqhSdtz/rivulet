@@ -3,8 +3,8 @@ import {Layout} from 'antd';
 import type {CSSProperties} from 'react';
 import React, {Fragment} from 'react';
 
-import GlobalFooter from './components/GlobalFooter';
-import type {WithFalse} from './typings';
+import GlobalFooter from './GlobalFooter';
+import type {WithFalse} from '../typings';
 
 const {Footer} = Layout;
 

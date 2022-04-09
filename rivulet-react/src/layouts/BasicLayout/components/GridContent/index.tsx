@@ -5,7 +5,7 @@ import React, {useContext} from 'react';
 import classNames from 'classnames';
 import {ConfigProvider} from 'antd';
 
-import RouteContext from '../../RouteContext';
+import RouteContext from '../../contexts/RouteContext';
 import type {PureSettings} from '../../configs/defaultSettings';
 
 type GridContentProps = {

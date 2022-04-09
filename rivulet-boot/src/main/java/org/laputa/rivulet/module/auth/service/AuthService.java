@@ -35,4 +35,8 @@ public class AuthService {
         return Result.succeed(rvUser);
     }
 
+    public void logout() {
+        authSessionAccessor.invalidate();
+    }
+
 }

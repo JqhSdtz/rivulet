@@ -22,8 +22,8 @@ import Omit from 'omit.js';
 import useSWR from 'swr';
 import {getMatchMenu} from '@umijs/route-utils';
 
-import type {HeaderViewProps} from './Header';
-import Header from './Header';
+import type {HeaderViewProps} from './components/Header';
+import Header from './components/Header';
 import type {
     MenuDataItem,
     MessageDescriptor,
@@ -31,22 +31,22 @@ import type {
     RouterTypes,
     WithFalse
 } from './typings';
-import type {GetPageTitleProps} from './getPageTitle';
-import {getPageTitleInfo} from './getPageTitle';
+import type {GetPageTitleProps} from './components/getPageTitle';
+import {getPageTitleInfo} from './components/getPageTitle';
 import type {ProSettings} from './configs/defaultSettings';
 import defaultSettings from './configs/defaultSettings';
 import type {LocaleType} from './locales';
 import {gLocaleObject} from './locales';
 import type {BaseMenuProps} from './components/SiderMenu/BaseMenu';
-import Footer from './Footer';
-import RouteContext from './RouteContext';
+import Footer from './components/Footer';
+import RouteContext from './contexts/RouteContext';
 import SiderMenu from './components/SiderMenu';
 import type {SiderMenuProps} from './components/SiderMenu/SiderMenu';
 import {getBreadcrumbProps} from './utils/getBreadcrumbProps';
 import getMenuData from './utils/getMenuData';
 import PageLoading from './components/PageLoading';
 import MenuCounter from './components/SiderMenu/Counter';
-import WrapContent from './WrapContent';
+import WrapContent from './wrappers/WrapContent';
 import compatibleLayout from './utils/compatibleLayout';
 import useCurrentMenuLayoutProps from './utils/useCurrentMenuLayoutProps';
 import {clearMenuItem} from './utils/utils';

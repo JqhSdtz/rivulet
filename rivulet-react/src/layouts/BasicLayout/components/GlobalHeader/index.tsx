@@ -2,7 +2,7 @@ import './index.less';
 import React from 'react';
 import classNames from 'classnames';
 
-import type {HeaderViewProps} from '../../Header';
+import type {HeaderViewProps} from '../Header';
 import type {
     PrivateSiderMenuProps,
     SiderMenuProps

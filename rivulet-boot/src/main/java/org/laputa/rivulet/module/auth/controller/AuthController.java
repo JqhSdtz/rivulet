@@ -25,4 +25,10 @@ public class AuthController {
     public Result<RvUser> login(@RequestBody @Validated(RvUser.Login.class) RvUser rvUser) {
         return authService.login(rvUser);
     }
+
+    @PostMapping("/logout")
+    public Result<Void> logout() {
+        authService.logout();
+        return Result.succeed();
+    }
 }

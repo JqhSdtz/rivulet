@@ -4,7 +4,7 @@ import styles from './index.module.css';
 import {KeepAlive} from 'react-activation';
 import {useMount} from 'ahooks';
 import {useContext} from 'react';
-import RouteContext from '@/layouts/BasicLayout/RouteContext';
+import RouteContext from '@/layouts/BasicLayout/contexts/RouteContext';
 
 function Home() {
     const {
