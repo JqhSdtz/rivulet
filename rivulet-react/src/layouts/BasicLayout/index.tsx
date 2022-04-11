@@ -43,6 +43,17 @@ const menuDataRender = async () => {
     return loopMenuItem(menuItems);
 }
 
+const menuItemRender = (item, defaultDom) => {
+    if (!item.path) {
+        return defaultDom;
+    }
+    const separator = item.path.indexOf('?') > -1 ? '&' : '?';
+    // 加时间戳以实现每次点击菜单都生成一个新的页面，同时还能防止点击过快
+    // 比如时间出除以500，就可以保证两次打开页面的间隔大于500毫秒
+    const path = item.path + separator + '_timestamp=' + Math.floor(Date.now() / 500);
+    return <Link to={path}>{defaultDom}</Link>;
+};
+
 export default function BasicLayout({children, location}) {
     return (
         <ProLayout
@@ -60,12 +71,7 @@ export default function BasicLayout({children, location}) {
             fixSiderbar
             fixedHeader
             menu={{request: menuDataRender}}
-            menuItemRender={(item, defaultDom) => {
-                if (!item.path) {
-                    return defaultDom;
-                }
-                return <Link to={item.path}>{defaultDom}</Link>;
-            }}
+            menuItemRender={menuItemRender}
             bottomButtonsRender={(props: SiderMenuProps) => (
                 <Menu theme={props.theme} mode="vertical" selectable={false}>
                     <UserCenterMenu {...props} />

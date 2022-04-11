@@ -35,6 +35,10 @@ const routerConfig: IRouterConfig[] = [
                 component: DataModel
             },
             {
+                path: '/test',
+                component: DataModel
+            },
+            {
                 path: '/',
                 exact: true,
                 component: Home

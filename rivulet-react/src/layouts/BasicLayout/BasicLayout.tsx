@@ -343,7 +343,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
     const matchMenus = useMemo(() => {
         const menuKey = location.pathname + location.search;
         // return getMatchMenu(menuKey || '/', menuData || [], true);
-        const matchMenu = menuData.find(menu => menu.key === menuKey);
+        const matchMenu = menuData.find(menu => menu.testPath(menuKey));
         return matchMenu ? [matchMenu] : [];
     }, [location.pathname, location.search, menuData]);
 
