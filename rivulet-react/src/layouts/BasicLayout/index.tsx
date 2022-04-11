@@ -22,6 +22,7 @@ import FooterToolbar from './components/FooterToolbar';
 import WaterMark from './components/WaterMark';
 import {asideMenuConfig} from './configs/menuConfig';
 import KeepAliveTabs from '@/layouts/BasicLayout/components/KeepAliveTabs';
+import KeepAliveTab from '@/layouts/BasicLayout/components/KeepAliveTabs/KeepAliveTab';
 import {SiderMenuProps} from '@/layouts/BasicLayout/components/SiderMenu/SiderMenu';
 import UserCenterMenu from '@/layouts/BasicLayout/customs/UserCenterMenu';
 import {Menu} from 'antd';
@@ -42,8 +43,6 @@ const menuDataRender = async () => {
     return loopMenuItem(menuItems);
 }
 
-export const headerHeight = '3rem';
-
 export default function BasicLayout({children, location}) {
     return (
         <ProLayout
@@ -54,12 +53,12 @@ export default function BasicLayout({children, location}) {
             contentStyle={{
                 margin: '0.5rem 1rem'
             }}
+            headerHeight=""
             location={{
                 pathname: location.pathname
             }}
             fixSiderbar
             fixedHeader
-            headerHeight={headerHeight}
             menu={{request: menuDataRender}}
             menuItemRender={(item, defaultDom) => {
                 if (!item.path) {
@@ -115,7 +114,8 @@ export {
     FooterToolbar,
     WaterMark,
     ProPageHeader,
-    ProBreadcrumb
+    ProBreadcrumb,
+    KeepAliveTab
 };
 
 export type {

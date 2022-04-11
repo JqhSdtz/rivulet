@@ -8,30 +8,29 @@ import {urlToList} from './pathTools';
 import type {BasicLayoutProps} from '../BasicLayout';
 
 export type BreadcrumbProps = {
-    breadcrumbList?: {title: string; href: string}[];
+    breadcrumbList?: { title: string; href: string }[];
     home?: string;
     location?:
         | H.Location
         | {
-              pathname?: string;
-          };
+        pathname?: string;
+        search?: string;
+    };
     menu?: ProSettings['menu'];
     breadcrumbMap?: Map<string, MenuDataItem>;
     formatMessage?: (message: MessageDescriptor) => string;
-    breadcrumbRender?: WithFalse<
-        (
-            routers: AntdBreadcrumbProps['routes']
-        ) => AntdBreadcrumbProps['routes']
-    >;
+    breadcrumbRender?: WithFalse<(
+        routers: AntdBreadcrumbProps['routes']
+    ) => AntdBreadcrumbProps['routes']>;
     itemRender?: AntdBreadcrumbProps['itemRender'];
 };
 
 // 渲染Breadcrumb 子节点
 // Render the Breadcrumb child node
 const defaultItemRender: AntdBreadcrumbProps['itemRender'] = ({
-    breadcrumbName,
-    path
-}) => <a href={path}>{breadcrumbName}</a>;
+                                                                  breadcrumbName,
+                                                                  path
+                                                              }) => <a href={path}>{breadcrumbName}</a>;
 
 const renderItemLocal = (
     item: MenuDataItem,
@@ -81,7 +80,7 @@ const conversionFromLocation = (
     props: BreadcrumbProps
 ): AntdBreadcrumbProps['routes'] => {
     // Convertor the url to an array
-    const pathSnippets = urlToList(routerLocation?.pathname);
+    const pathSnippets = urlToList((routerLocation?.pathname ?? '') + routerLocation?.search);
     // Loop data mosaic routing
     const extraBreadcrumbItems: AntdBreadcrumbProps['routes'] = pathSnippets
         .map(url => {
@@ -90,10 +89,10 @@ const conversionFromLocation = (
             const {hideInBreadcrumb} = currentBreadcrumb;
             return name && !hideInBreadcrumb
                 ? {
-                      path: url,
-                      breadcrumbName: name,
-                      component: currentBreadcrumb.component
-                  }
+                    path: url,
+                    breadcrumbName: name,
+                    component: currentBreadcrumb.component
+                }
                 : {path: '', breadcrumbName: ''};
         })
         .filter(item => item && item.path);
@@ -101,10 +100,8 @@ const conversionFromLocation = (
     return extraBreadcrumbItems;
 };
 
-export type BreadcrumbListReturn = Pick<
-    AntdBreadcrumbProps,
-    Extract<keyof AntdBreadcrumbProps, 'routes' | 'itemRender'>
->;
+export type BreadcrumbListReturn = Pick<AntdBreadcrumbProps,
+    Extract<keyof AntdBreadcrumbProps, 'routes' | 'itemRender'>>;
 
 /** 将参数转化为面包屑 Convert parameters into breadcrumbs */
 export const genBreadcrumbProps = (

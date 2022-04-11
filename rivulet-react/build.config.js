@@ -13,8 +13,8 @@ module.exports = {
                 disableModularImport: true,
                 themeConfig: {
                     // 'tabs-card-height': '40px',
-                    'layout-body-background': '#fafafa',
-                    'tabs-card-head-background': '#fafafa'
+                    'layout-body-background': '#ffffff',
+                    'tabs-card-head-background': '#f0f0f5'
                 }
             }
         ]

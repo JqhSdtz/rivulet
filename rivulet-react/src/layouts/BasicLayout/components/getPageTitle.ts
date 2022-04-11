@@ -1,33 +1,23 @@
-import pathToRegexp from 'path-to-regexp';
 import type {MenuDataItem} from '../typings';
 import type {ProSettings} from '../configs/defaultSettings';
 
 export const matchParamsPath = (
     pathname: string,
+    search: string,
     breadcrumb?: Record<string, MenuDataItem>,
     breadcrumbMap?: Map<string, MenuDataItem>
 ): MenuDataItem => {
     // Internal logic use breadcrumbMap to ensure the order
     // 内部逻辑使用 breadcrumbMap 来确保查询顺序
+    const path = pathname + search;
     if (breadcrumbMap) {
-        const pathKey = [...breadcrumbMap.keys()].find(key =>
-            pathToRegexp(key).test(pathname)
-        );
-        if (pathKey) {
-            return breadcrumbMap.get(pathKey) as MenuDataItem;
-        }
+        return [...breadcrumbMap.values()].find(value => value.testPath(path)) as MenuDataItem;
     }
 
     // External uses use breadcrumb
     // 外部用户使用 breadcrumb 参数
     if (breadcrumb) {
-        const pathKey = Object.keys(breadcrumb).find(key =>
-            pathToRegexp(key).test(pathname)
-        );
-
-        if (pathKey) {
-            return breadcrumb[pathKey];
-        }
+        return Object.values(breadcrumb).find(value => value.testPath(path)) as MenuDataItem;
     }
 
     return {
@@ -37,12 +27,13 @@ export const matchParamsPath = (
 
 export type GetPageTitleProps = {
     pathname?: string;
+    search?: string,
     breadcrumb?: Record<string, MenuDataItem>;
     breadcrumbMap?: Map<string, MenuDataItem>;
     menu?: ProSettings['menu'];
     title?: ProSettings['title'];
     pageName?: string;
-    formatMessage?: (data: {id: any; defaultMessage?: string}) => string;
+    formatMessage?: (data: { id: any; defaultMessage?: string }) => string;
 };
 
 /**
@@ -64,6 +55,7 @@ const getPageTitleInfo = (
 } => {
     const {
         pathname = '/',
+        search = '',
         breadcrumb,
         breadcrumbMap,
         formatMessage,
@@ -73,7 +65,7 @@ const getPageTitleInfo = (
         }
     } = props;
     const pageTitle = ignoreTitle ? '' : title || '';
-    const currRouterData = matchParamsPath(pathname, breadcrumb, breadcrumbMap);
+    const currRouterData = matchParamsPath(pathname, search, breadcrumb, breadcrumbMap);
     if (!currRouterData) {
         return {
             title: pageTitle,
