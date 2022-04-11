@@ -7,6 +7,8 @@ import {useAliveController} from 'react-activation';
 import './index.less';
 import RvUtil from '@/utils/rvUtil';
 import {MenuConfigItem} from '@/layouts/BasicLayout/configs/menuConfig';
+import MouseOver from '@/components/Common/MouseOver';
+import {CloseCircleFilled, CloseOutlined} from '@ant-design/icons';
 
 const {TabPane} = Tabs;
 
@@ -113,6 +115,15 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
         props.children = tabRenderWrapper;
         return <TabNavList {...props} />;
     }
+    const closeIcon = (
+        <MouseOver
+            className="close-icon"
+            onMouseOverClassName="close-icon-mouse-over"
+            normal={<CloseOutlined/>}
+            onMouseOver={<CloseCircleFilled style={{fontSize: 15}}/>}
+        />
+    );
+    // const closeIcon = <CloseCircleOutlined/>;
     return (
         <Tabs
             type="editable-card"
@@ -129,7 +140,7 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
                 const tabTitle = menu?.name || defaultTabTitle;
                 const tabKey = node.name || index.toString();
                 return (
-                    <TabPane tab={tabTitle} key={tabKey} closable={tabClosable}/>
+                    <TabPane tab={tabTitle} key={tabKey} closable={tabClosable} closeIcon={closeIcon}/>
                 )
             })}
         </Tabs>
