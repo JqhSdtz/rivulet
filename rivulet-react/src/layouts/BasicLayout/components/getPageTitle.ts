@@ -4,6 +4,7 @@ import type {ProSettings} from '../configs/defaultSettings';
 
 export const matchParamsPath = (
     pathname: string,
+    search: string,
     breadcrumb?: Record<string, MenuDataItem>,
     breadcrumbMap?: Map<string, MenuDataItem>
 ): MenuDataItem => {
@@ -11,7 +12,7 @@ export const matchParamsPath = (
     // 内部逻辑使用 breadcrumbMap 来确保查询顺序
     if (breadcrumbMap) {
         const pathKey = [...breadcrumbMap.keys()].find(key =>
-            pathToRegexp(key).test(pathname)
+            pathToRegexp(key).test(pathname + search)
         );
         if (pathKey) {
             return breadcrumbMap.get(pathKey) as MenuDataItem;
@@ -37,6 +38,7 @@ export const matchParamsPath = (
 
 export type GetPageTitleProps = {
     pathname?: string;
+    search?: string,
     breadcrumb?: Record<string, MenuDataItem>;
     breadcrumbMap?: Map<string, MenuDataItem>;
     menu?: ProSettings['menu'];
@@ -64,6 +66,7 @@ const getPageTitleInfo = (
 } => {
     const {
         pathname = '/',
+        search = '',
         breadcrumb,
         breadcrumbMap,
         formatMessage,
@@ -73,7 +76,7 @@ const getPageTitleInfo = (
         }
     } = props;
     const pageTitle = ignoreTitle ? '' : title || '';
-    const currRouterData = matchParamsPath(pathname, breadcrumb, breadcrumbMap);
+    const currRouterData = matchParamsPath(pathname, search, breadcrumb, breadcrumbMap);
     if (!currRouterData) {
         return {
             title: pageTitle,

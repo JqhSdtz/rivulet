@@ -1,6 +1,13 @@
 import {SmileOutlined} from '@ant-design/icons';
 
-const config = [
+export interface MenuConfigItem {
+    name: string,
+    path: string,
+    icon?: any,
+    testPath?: (path: string | undefined) => boolean
+}
+
+const config: MenuConfigItem[] = [
     {
         name: '首页',
         path: '/',
@@ -18,8 +25,28 @@ const config = [
     }
 ];
 
+for (let i = 0; i < 5; ++i) {
+    config.push({
+        name: '测试' + i,
+        path: '/test?v=' + i,
+        // path: '/test' + i,
+        icon: SmileOutlined
+    });
+}
+
+function processConfig(targetConfig) {
+    targetConfig.forEach(configItem => {
+        configItem.key = configItem.path
+        configItem.testPath = function (path) {
+            // return (path ?? '').startWith(this.path);
+            return path === this.path;
+        }
+    });
+    return targetConfig;
+}
+
 const asideMenuConfig = () => new Promise(resolve => {
-   setTimeout(() => resolve(config), 500);
+    setTimeout(() => resolve(processConfig(config)), 500);
 });
 
 export {asideMenuConfig};

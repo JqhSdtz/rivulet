@@ -1,0 +1,104 @@
+@root-entry-name: 'default';
+@import (reference) '~antd/es/style/themes/index.less';
+
+@divider-color: rgb(175, 175, 175);
+@header-height: 2.35rem;
+
+.@{ant-prefix}-layout-header {
+    background-color: @tabs-card-head-background;
+    height: @header-height;
+    line-height: @header-height;
+}
+
+.@{ant-prefix}-tabs-card .@{ant-prefix}-tabs-nav {
+    .@{ant-prefix}-tabs-tab, .@{ant-prefix}-tabs-tab-active {
+        background-color: @tabs-card-head-background;
+    }
+}
+
+.@{ant-prefix}-tabs-tab {
+    padding: 0.5rem 0;
+}
+
+// 重复两遍class可以提升权重，以覆盖默认样式
+.keep-alive-tabs.keep-alive-tabs {
+    .@{ant-prefix}-tabs-nav {
+        margin: 0;
+        height: @header-height;
+    }
+
+    .@{ant-prefix}-tabs-nav-list {
+        background-color: @tabs-card-head-background;
+    }
+
+    .@{ant-prefix}-tabs-nav-operations {
+        height: @header-height;
+    }
+
+    .keep-alive-tab {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+
+        .@{ant-prefix}-tabs-tab {
+            height: @header-height;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+            transition: background-color 0.3s cubic-bezier(0.645, 0.045, 0.355, 1),
+            border-radius 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+
+            &:hover {
+                color: inherit;
+                &:not(.@{ant-prefix}-tabs-tab-active) {
+                    background-color: #fafafd;
+                }
+            }
+        }
+
+        // 重设active标签的样式
+        .@{ant-prefix}-tabs-tab-active {
+            color: inherit;
+            background-color: white;
+            border-radius: 0.5rem 0.5rem 0 0;
+
+            .@{ant-prefix}-tabs-tab-btn {
+                color: inherit;
+                text-shadow: inherit;
+            }
+        }
+
+        .@{ant-prefix}-tabs-tab-btn {
+            &:focus, &:active {
+                color: inherit;
+            }
+        }
+
+        .@{ant-prefix}-tabs-tab-remove {
+            &:focus, &:active {
+                color: inherit;
+            }
+        }
+
+        &:not(.keep-alive-loading-tab) {
+            .keep-alive-tab-divider {
+                // 从网上找的，用于解决chrome浏览器中1px的细线显示不稳定的问题
+                background-image: linear-gradient(180deg, @divider-color, @divider-color 50%, transparent 50%),
+                linear-gradient(270deg, @divider-color, @divider-color 50%, transparent 50%),
+                linear-gradient(0deg, @divider-color, @divider-color 50%, transparent 50%),
+                linear-gradient(90deg, @divider-color, @divider-color 50%, transparent 50%);
+                background-size: 100% 1px, 1px 100%, 100% 1px, 1px 100%;
+                background-repeat: no-repeat;
+                background-position: top, right top, bottom, left top;
+                width: 1px;
+                top: 15%;
+                height: 70%;
+                transition: height 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+
+                &.keep-alive-tab-divider-hidden {
+                    height: 0;
+                }
+            }
+        }
+    }
+}

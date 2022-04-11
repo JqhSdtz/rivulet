@@ -1,7 +1,5 @@
-import {KeepAlive} from 'react-activation';
-import {useLocation} from 'ice';
-import {useContext, useState} from 'react';
-import RouteContext from '@/layouts/BasicLayout/contexts/RouteContext';
+import {useState} from 'react';
+import {KeepAliveTab} from '@/layouts/BasicLayout';
 
 function Dashboard() {
     const [counter, setCounter] = useState(0);
@@ -16,16 +14,9 @@ function Dashboard() {
 }
 
 export default () => {
-    const location = useLocation();
-    const {matchMenus} = useContext(RouteContext);
     return (
-        <KeepAlive
-            name={location.pathname}
-            id={location.pathname}
-            matchMenus={matchMenus}
-            saveScrollPosition="screen"
-        >
-            <Dashboard />
-        </KeepAlive>
+        <KeepAliveTab>
+            <Dashboard/>
+        </KeepAliveTab>
     );
 };

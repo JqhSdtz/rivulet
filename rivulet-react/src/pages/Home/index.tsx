@@ -1,10 +1,8 @@
-import {useLocation, useRequest} from 'ice';
+import {useRequest} from 'ice';
 import {Table} from 'antd';
 import styles from './index.module.css';
-import {KeepAlive} from 'react-activation';
 import {useMount} from 'ahooks';
-import {useContext} from 'react';
-import RouteContext from '@/layouts/BasicLayout/contexts/RouteContext';
+import {KeepAliveTab} from '@/layouts/BasicLayout';
 
 function Home() {
     const {
@@ -28,8 +26,8 @@ function Home() {
                 <div>request error: {error.message}</div>
             ) : (
                 <Table loading={loading} dataSource={dataSource} rowKey="id">
-                    <Table.Column title="ID" dataIndex="id" key="id" />
-                    <Table.Column title="名称" dataIndex="name" key="name" />
+                    <Table.Column title="ID" dataIndex="id" key="id"/>
+                    <Table.Column title="名称" dataIndex="name" key="name"/>
                     <Table.Column
                         title="描述"
                         dataIndex="description"
@@ -42,16 +40,9 @@ function Home() {
 }
 
 export default () => {
-    const location = useLocation();
-    const {matchMenus} = useContext(RouteContext);
     return (
-        <KeepAlive
-            name={location.pathname}
-            id={location.pathname}
-            matchMenus={matchMenus}
-            saveScrollPosition="screen"
-        >
-            <Home />
-        </KeepAlive>
+        <KeepAliveTab>
+            <Home/>
+        </KeepAliveTab>
     );
 };

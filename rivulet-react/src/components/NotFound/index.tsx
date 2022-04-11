@@ -1,10 +1,7 @@
 import {Link} from 'ice';
+import {KeepAliveTab} from '@/layouts/BasicLayout';
 
-export interface Props {
-    name: string;
-}
-
-const Greeting = ({name}: Props) => {
+const NotFound = () => {
     return (
         <div>
             <h2>404</h2>
@@ -18,4 +15,10 @@ const Greeting = ({name}: Props) => {
     );
 };
 
-export default Greeting;
+export default () => {
+    return (
+        <KeepAliveTab>
+            <NotFound/>
+        </KeepAliveTab>
+    )
+};

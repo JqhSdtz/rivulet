@@ -4682,7 +4682,7 @@ memoize-one@^5.1.1:
 
 memoize-one@^6.0.0:
   version "6.0.0"
-  resolved "https://registry.npmmirror.com/memoize-one/-/memoize-one-6.0.0.tgz"
+  resolved "https://registry.npmmirror.com/memoize-one/-/memoize-one-6.0.0.tgz#b2591b871ed82948aee4727dc6abceeeac8c1045"
   integrity sha512-rkpe71W0N0c0Xz6QD0eJETuWAJGnJ9afsl1srmwPrI+yBCkge5EycXXbYRyvL29zZVUWQCY7InPRCv3GDXuZNw==
 
 memory-fs@^0.5.0:
@@ -5881,10 +5881,10 @@ rc-virtual-list@^3.2.0, rc-virtual-list@^3.4.1:
     rc-resize-observer "^1.0.0"
     rc-util "^5.0.7"
 
-react-activation@^0.9.11:
-  version "0.9.11"
-  resolved "https://registry.npmmirror.com/react-activation/-/react-activation-0.9.11.tgz"
-  integrity sha512-92pMcpiw9n/ITfOz3TgW8BJRZwatV6UjheDfwjCTsKLRlUu7l9NfzWl1bgmdlpWnhPAkjWjidET9mbCsEEyQDg==
+react-activation@^0.10.0:
+  version "0.10.0"
+  resolved "https://registry.npmmirror.com/react-activation/-/react-activation-0.10.0.tgz#ab4f5935b6c6826b8b2dd1e67a534e1d40da5392"
+  integrity sha512-pg3YngbyIDFjh8iyRVXRUtLxHS2uN7seyPMtSWWgd7xqOlUuviILHLLoV0x4MND9m6UJgRKvFHR4w+JcI+jMpA==
   dependencies:
     create-react-context "^0.3.0"
     hoist-non-react-statics "^3.3.0"

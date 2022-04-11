@@ -1,11 +1,8 @@
 import {FormGrid, FormItem, FormLayout, FormTab, Input} from '@formily/antd';
 import {createSchemaField, FormProvider} from '@formily/react';
 import {createForm} from '@formily/core';
-import {KeepAlive} from 'react-activation';
-import {useLocation} from 'ice';
-import {useContext} from 'react';
-import RouteContext from '@/layouts/BasicLayout/contexts/RouteContext';
 import {useCreation} from 'ahooks';
+import {KeepAliveTab} from '@/layouts/BasicLayout';
 
 const propertiesTabSchema = {
     type: 'void',
@@ -151,16 +148,9 @@ function DataModel() {
 }
 
 export default () => {
-    const location = useLocation();
-    const {matchMenus} = useContext(RouteContext);
     return (
-        <KeepAlive
-            name={location.pathname}
-            id={location.pathname}
-            matchMenus={matchMenus}
-            saveScrollPosition="screen"
-        >
+        <KeepAliveTab>
             <DataModel/>
-        </KeepAlive>
+        </KeepAliveTab>
     );
 };

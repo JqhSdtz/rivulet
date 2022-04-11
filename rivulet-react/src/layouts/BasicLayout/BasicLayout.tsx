@@ -1,36 +1,18 @@
 import './BasicLayout.less';
 import type {CSSProperties} from 'react';
-import React, {
-    useCallback,
-    useContext,
-    useEffect,
-    useMemo,
-    useState
-} from 'react';
+import React, {useCallback, useContext, useEffect, useMemo, useState} from 'react';
 import type {BreadcrumbProps as AntdBreadcrumbProps} from 'antd/lib/breadcrumb';
 import {ConfigProvider, Layout} from 'antd';
 import classNames from 'classnames';
 import warning from 'warning';
 import useMergedState from 'rc-util/lib/hooks/useMergedState';
 import useAntdMediaQuery from 'use-media-antd-query';
-import {
-    isBrowser,
-    useDocumentTitle,
-    useMountMergeState
-} from '@ant-design/pro-utils';
+import {isBrowser, useDocumentTitle, useMountMergeState} from '@ant-design/pro-utils';
 import Omit from 'omit.js';
 import useSWR from 'swr';
-import {getMatchMenu} from '@umijs/route-utils';
-
 import type {HeaderViewProps} from './components/Header';
 import Header from './components/Header';
-import type {
-    MenuDataItem,
-    MessageDescriptor,
-    Route,
-    RouterTypes,
-    WithFalse
-} from './typings';
+import type {MenuDataItem, MessageDescriptor, Route, RouterTypes, WithFalse} from './typings';
 import type {GetPageTitleProps} from './components/getPageTitle';
 import {getPageTitleInfo} from './components/getPageTitle';
 import type {ProSettings} from './configs/defaultSettings';
@@ -53,6 +35,7 @@ import {clearMenuItem} from './utils/utils';
 import type {WaterMarkProps} from './components/WaterMark';
 import {ConfigProviderWrap} from '@ant-design/pro-provider';
 import {AliveScope} from 'react-activation';
+import {useLocation} from 'ice';
 
 let layoutIndex = 0;
 
@@ -63,79 +46,71 @@ export interface LayoutBreadcrumbProps {
 export type BasicLayoutProps = Partial<RouterTypes<Route>> &
     SiderMenuProps &
     HeaderViewProps & {
-        pure?: boolean;
-        /** @name logo url */
-        logo?: React.ReactNode | WithFalse<() => React.ReactNode>;
+    pure?: boolean;
+    /** @name logo url */
+    logo?: React.ReactNode | WithFalse<() => React.ReactNode>;
 
-        /** @location 页面切换的时候触发 */
-        onPageChange?: (location?: RouterTypes<Route>['location']) => void;
+    /** @location 页面切换的时候触发 */
+    onPageChange?: (location?: RouterTypes<Route>['location']) => void;
 
-        loading?: boolean;
+    loading?: boolean;
 
-        locale?: LocaleType;
+    locale?: LocaleType;
 
-        onCollapse?: (collapsed: boolean) => void;
+    onCollapse?: (collapsed: boolean) => void;
 
-        footerRender?: WithFalse<
-            (
-                props: HeaderViewProps,
-                defaultDom: React.ReactNode
-            ) => React.ReactNode
-        >;
+    footerRender?: WithFalse<(
+        props: HeaderViewProps,
+        defaultDom: React.ReactNode
+    ) => React.ReactNode>;
 
-        breadcrumbRender?: WithFalse<
-            (
-                routers: AntdBreadcrumbProps['routes']
-            ) => AntdBreadcrumbProps['routes']
-        >;
+    breadcrumbRender?: WithFalse<(
+        routers: AntdBreadcrumbProps['routes']
+    ) => AntdBreadcrumbProps['routes']>;
 
-        menuItemRender?: BaseMenuProps['menuItemRender'];
-        pageTitleRender?: WithFalse<
-            (
-                props: GetPageTitleProps,
-                defaultPageTitle?: string,
-                info?: {
-                    // 页面标题
-                    title: string;
-                    // locale 的 title
-                    id: string;
-                    // 页面标题不带默认的 title
-                    pageName: string;
-                }
-            ) => string
-        >;
-        menuDataRender?: (menuData: MenuDataItem[]) => MenuDataItem[];
-        itemRender?: AntdBreadcrumbProps['itemRender'];
+    menuItemRender?: BaseMenuProps['menuItemRender'];
+    pageTitleRender?: WithFalse<(
+        props: GetPageTitleProps,
+        defaultPageTitle?: string,
+        info?: {
+            // 页面标题
+            title: string;
+            // locale 的 title
+            id: string;
+            // 页面标题不带默认的 title
+            pageName: string;
+        }
+    ) => string>;
+    menuDataRender?: (menuData: MenuDataItem[]) => MenuDataItem[];
+    itemRender?: AntdBreadcrumbProps['itemRender'];
 
-        formatMessage?: (message: MessageDescriptor) => string;
-        /** 是否禁用移动端模式，有的管理系统不需要移动端模式，此属性设置为true即可 */
-        disableMobile?: boolean;
-        contentStyle?: CSSProperties;
-        isChildrenLayout?: boolean;
+    formatMessage?: (message: MessageDescriptor) => string;
+    /** 是否禁用移动端模式，有的管理系统不需要移动端模式，此属性设置为true即可 */
+    disableMobile?: boolean;
+    contentStyle?: CSSProperties;
+    isChildrenLayout?: boolean;
 
-        className?: string;
+    className?: string;
 
-        /** 兼用 content的 margin */
-        disableContentMargin?: boolean;
+    /** 兼用 content的 margin */
+    disableContentMargin?: boolean;
 
-        /** PageHeader 的 BreadcrumbProps 配置，会透传下去 */
-        breadcrumbProps?: AntdBreadcrumbProps & LayoutBreadcrumbProps;
-        /**
-         * 水印的相关配置
-         */
-        waterMarkProps?: WaterMarkProps;
+    /** PageHeader 的 BreadcrumbProps 配置，会透传下去 */
+    breadcrumbProps?: AntdBreadcrumbProps & LayoutBreadcrumbProps;
+    /**
+     * 水印的相关配置
+     */
+    waterMarkProps?: WaterMarkProps;
 
-        /**
-         * 操作菜单重新刷新
-         */
-        actionRef?: React.MutableRefObject<
-            | {
-                  reload: () => void;
-              }
-            | undefined
-        >;
-        ErrorBoundary?: any;
-    };
+    /**
+     * 操作菜单重新刷新
+     */
+    actionRef?: React.MutableRefObject<| {
+        reload: () => void;
+    }
+        | undefined>;
+    ErrorBoundary?: any;
+};
 
 const headerRender = (
     props: BasicLayoutProps & {
@@ -154,7 +129,7 @@ const footerRender = (props: BasicLayoutProps): React.ReactNode => {
         return null;
     }
     if (props.footerRender) {
-        return props.footerRender({...props}, <Footer />);
+        return props.footerRender({...props}, <Footer/>);
     }
     return null;
 };
@@ -186,7 +161,7 @@ const renderSiderMenu = (
         return null;
     }
     if (layout === 'top' && !isMobile) {
-        return <SiderMenu matchMenuKeys={matchMenuKeys} {...props} hide />;
+        return <SiderMenu matchMenuKeys={matchMenuKeys} {...props} hide/>;
     }
 
     const defaultDom = (
@@ -196,8 +171,8 @@ const renderSiderMenu = (
             style={
                 navTheme === 'realDark'
                     ? {
-                          boxShadow: '0 2px 8px 0 rgba(0, 0, 0, 65%)'
-                      }
+                        boxShadow: '0 2px 8px 0 rgba(0, 0, 0, 65%)'
+                    }
                     : {}
             }
             // 这里走了可以少一次循环
@@ -248,7 +223,7 @@ const defaultPageTitleRender = (
     return pageTitleInfo;
 };
 
-export type BasicLayoutContext = {[K in 'location']: BasicLayoutProps[K]} & {
+export type BasicLayoutContext = { [K in 'location']: BasicLayoutProps[K] } & {
     breadcrumb: Record<string, MenuDataItem>;
 };
 
@@ -271,8 +246,8 @@ const getPaddingLeft = (
 const BasicLayout: React.FC<BasicLayoutProps> = props => {
     const {
         children,
+        // location, // antd-pro原来是从props里取的location，不包含search，所以不响应参数的变化
         onCollapse: propsOnCollapse,
-        location = {pathname: '/'},
         contentStyle,
         route,
         defaultCollapsed,
@@ -286,6 +261,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
         formatMessage: propsFormatMessage,
         loading
     } = props || {};
+    const location = useLocation();
     const context = useContext(ConfigProvider.ConfigContext);
     const prefixCls = props.prefixCls ?? context.getPrefixCls('pro');
 
@@ -302,10 +278,10 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
 
     const formatMessage = useCallback(
         ({
-            id,
-            defaultMessage,
-            ...restParams
-        }: {
+             id,
+             defaultMessage,
+             ...restParams
+         }: {
             id: string;
             defaultMessage?: string;
         }): string => {
@@ -365,8 +341,11 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
         };
     }
     const matchMenus = useMemo(() => {
-        return getMatchMenu(location.pathname || '/', menuData || [], true);
-    }, [location.pathname, menuData]);
+        const menuKey = location.pathname + location.search;
+        // return getMatchMenu(menuKey || '/', menuData || [], true);
+        const matchMenu = menuData.find(menu => menu.key === menuKey);
+        return matchMenu ? [matchMenu] : [];
+    }, [location.pathname, location.search, menuData]);
 
     const matchMenuKeys = useMemo(
         () =>
@@ -430,6 +409,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
     const pageTitleInfo = defaultPageTitleRender(
         {
             pathname: location.pathname,
+            search: location.search,
             ...defaultProps,
             breadcrumbMap
         },
@@ -530,7 +510,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
     useEffect(() => {
         props.onPageChange?.(props.location);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [location.pathname, location.pathname?.search]);
+    }, [location.pathname, location.search]);
 
     const [hasFooterToolbar, setHasFooterToolbar] = useState(false);
     useDocumentTitle(pageTitleInfo, props.title || false);
@@ -578,7 +558,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
                                         className={contentClassName}
                                         style={contentStyle}
                                     >
-                                        {loading ? <PageLoading /> : children}
+                                        {loading ? <PageLoading/> : children}
                                     </WrapContent>
                                     {footerDom}
                                 </div>
@@ -601,8 +581,8 @@ const Logo = () => (
                 y2="37.8635764%"
                 id="linearGradient-1"
             >
-                <stop stopColor="#4285EB" offset="0%" />
-                <stop stopColor="#2EC7FF" offset="100%" />
+                <stop stopColor="#4285EB" offset="0%"/>
+                <stop stopColor="#2EC7FF" offset="100%"/>
             </linearGradient>
             <linearGradient
                 x1="69.644116%"
@@ -611,9 +591,9 @@ const Logo = () => (
                 y2="108.456714%"
                 id="linearGradient-2"
             >
-                <stop stopColor="#29CDFF" offset="0%" />
-                <stop stopColor="#148EFF" offset="37.8600687%" />
-                <stop stopColor="#0A60FF" offset="100%" />
+                <stop stopColor="#29CDFF" offset="0%"/>
+                <stop stopColor="#148EFF" offset="37.8600687%"/>
+                <stop stopColor="#0A60FF" offset="100%"/>
             </linearGradient>
             <linearGradient
                 x1="69.6908165%"
@@ -622,9 +602,9 @@ const Logo = () => (
                 y2="117.391248%"
                 id="linearGradient-3"
             >
-                <stop stopColor="#FA816E" offset="0%" />
-                <stop stopColor="#F74A5C" offset="41.472606%" />
-                <stop stopColor="#F51D2C" offset="100%" />
+                <stop stopColor="#FA816E" offset="0%"/>
+                <stop stopColor="#F74A5C" offset="41.472606%"/>
+                <stop stopColor="#F51D2C" offset="100%"/>
             </linearGradient>
             <linearGradient
                 x1="68.1279872%"
@@ -633,9 +613,9 @@ const Logo = () => (
                 y2="114.942679%"
                 id="linearGradient-4"
             >
-                <stop stopColor="#FA8E7D" offset="0%" />
-                <stop stopColor="#F74A5C" offset="51.2635191%" />
-                <stop stopColor="#F51D2C" offset="100%" />
+                <stop stopColor="#FA8E7D" offset="0%"/>
+                <stop stopColor="#F74A5C" offset="51.2635191%"/>
+                <stop stopColor="#F51D2C" offset="100%"/>
             </linearGradient>
         </defs>
         <g stroke="none" strokeWidth={1} fill="none" fillRule="evenodd">
@@ -673,7 +653,7 @@ const Logo = () => (
 );
 
 BasicLayout.defaultProps = {
-    logo: <Logo />,
+    logo: <Logo/>,
     ...defaultSettings,
     location: isBrowser() ? window.location : undefined
 };
