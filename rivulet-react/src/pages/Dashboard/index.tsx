@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {KeepAliveTab} from '@/layouts/BasicLayout';
+import {CachingNode} from '@/layouts/BasicLayout';
 
 function Dashboard() {
     const [counter, setCounter] = useState(0);
@@ -15,8 +15,8 @@ function Dashboard() {
 
 export default () => {
     return (
-        <KeepAliveTab>
+        <CachingNode>
             <Dashboard/>
-        </KeepAliveTab>
+        </CachingNode>
     );
 };

@@ -45,6 +45,8 @@
             border-top: none;
             border-left: none;
             border-right: none;
+            // 禁止选中文字，便于拖动页签
+            user-select: none;
             transition: background-color 0.3s cubic-bezier(0.645, 0.045, 0.355, 1),
             border-radius 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
 
@@ -62,11 +64,11 @@
 
                 .close-icon {
                     position: absolute;
-                    top: 0;
+                    top: -0.5px;
                     right: 0;
 
                     &.close-icon-mouse-over {
-                        top: 1px;
+                        top: 0.5px;
                         right: -1px;
                     }
                 }
@@ -115,6 +117,19 @@
                 &.keep-alive-tab-divider-hidden {
                     height: 0;
                 }
+            }
+        }
+    }
+
+    // 页签被拖动时，会隐藏原本的页签，然后复制一个放到如下的容器中
+    .sortable-tab-bar-helper {
+        .@{ant-prefix}-tabs-tab {
+            background-color: white;
+            border-radius: 1rem;
+            height: 2rem;
+            border: 1px @divider-color solid;
+            .keep-alive-tab-divider, .@{ant-prefix}-tabs-tab-remove {
+                display: none;
             }
         }
     }

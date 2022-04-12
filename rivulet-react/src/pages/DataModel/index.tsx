@@ -2,7 +2,7 @@ import {FormGrid, FormItem, FormLayout, FormTab, Input} from '@formily/antd';
 import {createSchemaField, FormProvider} from '@formily/react';
 import {createForm} from '@formily/core';
 import {useCreation} from 'ahooks';
-import {KeepAliveTab} from '@/layouts/BasicLayout';
+import {CachingNode} from '@/layouts/BasicLayout';
 
 const propertiesTabSchema = {
     type: 'void',
@@ -149,8 +149,8 @@ function DataModel() {
 
 export default () => {
     return (
-        <KeepAliveTab>
+        <CachingNode>
             <DataModel/>
-        </KeepAliveTab>
+        </CachingNode>
     );
 };

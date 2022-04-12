@@ -21,8 +21,7 @@ import PageLoading from './components/PageLoading';
 import FooterToolbar from './components/FooterToolbar';
 import WaterMark from './components/WaterMark';
 import {asideMenuConfig} from './configs/menuConfig';
-import KeepAliveTabs from '@/layouts/BasicLayout/components/KeepAliveTabs';
-import KeepAliveTab from '@/layouts/BasicLayout/components/KeepAliveTabs/KeepAliveTab';
+import KeepAliveTabs, {CachingNode} from '@/layouts/BasicLayout/components/KeepAliveTabs';
 import {SiderMenuProps} from '@/layouts/BasicLayout/components/SiderMenu/SiderMenu';
 import UserCenterMenu from '@/layouts/BasicLayout/customs/UserCenterMenu';
 import {Menu} from 'antd';
@@ -121,7 +120,7 @@ export {
     WaterMark,
     ProPageHeader,
     ProBreadcrumb,
-    KeepAliveTab
+    CachingNode
 };
 
 export type {

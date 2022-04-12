@@ -310,4 +310,4 @@ const transformRoute = (routes, locale, formatMessage, ignoreFilter) => {
     return {breadcrumb, menuData};
 };
 export default transformRoute;
-//# sourceMappingURL=transformRoute.js.map
+

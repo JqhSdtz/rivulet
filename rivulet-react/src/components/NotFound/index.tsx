@@ -1,5 +1,5 @@
 import {Link} from 'ice';
-import {KeepAliveTab} from '@/layouts/BasicLayout';
+import {CachingNode} from '@/layouts/BasicLayout';
 
 const NotFound = () => {
     return (
@@ -17,8 +17,8 @@ const NotFound = () => {
 
 export default () => {
     return (
-        <KeepAliveTab>
+        <CachingNode>
             <NotFound/>
-        </KeepAliveTab>
+        </CachingNode>
     )
 };

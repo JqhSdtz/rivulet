@@ -1,5 +1,6 @@
 module.exports = {
     vite: true,
+    sourceMap: true,
     plugins: [
         [
             'build-plugin-ignore-style',
