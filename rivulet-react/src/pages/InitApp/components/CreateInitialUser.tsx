@@ -6,7 +6,7 @@ import {Card, Modal} from 'antd';
 import * as ICONS from '@ant-design/icons';
 import {FormProps} from '@formily/antd/esm/form';
 import md5 from 'md5';
-import {request} from 'ice';
+import {request, useAuth} from 'ice';
 
 const form = createForm({
     validateFirst: true
@@ -73,6 +73,7 @@ interface ICreateIntialUserProps {
 }
 
 export default (props: ICreateIntialUserProps) => {
+    const [, setAuth] = useAuth();
     async function onSubmit(data) {
         data.password = md5(data.password);
         const result: Result = await request.post('/app/initialUser', data);
@@ -80,6 +81,9 @@ export default (props: ICreateIntialUserProps) => {
             Modal.success({
                 content: '创建初始用户成功！',
                 onOk() {
+                    setAuth({
+                        hasLoggedIn: true
+                    });
                     props.onPass?.();
                 }
             });

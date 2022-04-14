@@ -1,7 +1,11 @@
 import RvUtil from '@/utils/rvUtil';
-import {CachingNodeType} from '@/layouts/BasicLayout/components/KeepAliveTabs/CachingNode';
-import {Dispatch, SetStateAction} from 'react';
+import {CachingNodeType} from './CachingNode';
+import {Dispatch, ReactElement, SetStateAction} from 'react';
 import {SortableElement} from 'react-sortable-hoc';
+import {useContextMenu} from 'react-contexify';
+import {CachingNodeHandler} from './cachingNodeHandler';
+
+import 'react-contexify/dist/ReactContexify.css';
 
 interface TabDividerProps {
     isShow: boolean
@@ -15,33 +19,60 @@ const TabDivider = (props: TabDividerProps) => {
     return <div className={tmpClassName}/>;
 };
 
-const SortableTabNode = SortableElement((props) => (
-    <div className={props.className} onMouseEnter={props.onMouseEnter} onMouseLeave={props.onMouseLeave}>
-        <TabDivider isShow={props.showBeforeDivider}/>
-        {props.tabNode}
-        <TabDivider isShow={props.showAfterDivider}/>
-    </div>
-));
+const SortableTabNode = SortableElement((props: {
+    className: string,
+    onMouseEnter: () => void,
+    onMouseLeave: () => void,
+    showBeforeDivider: boolean,
+    showAfterDivider: boolean,
+    tabContextMenuId: string,
+    tabNode: ReactElement,
+    cachingNode: CachingNodeType
+}) => {
+    const {show, hideAll} = useContextMenu({
+        id: props.tabContextMenuId,
+        props: {
+            cachingNode: props.cachingNode
+        }
+    });
+    return (
+        <div className={props.className}
+             onMouseEnter={props.onMouseEnter}
+             onMouseLeave={props.onMouseLeave}
+             onContextMenu={show}
+             onClickCapture={hideAll}
+        >
+            <TabDivider isShow={props.showBeforeDivider}/>
+            {props.tabNode}
+            <TabDivider isShow={props.showAfterDivider}/>
+        </div>
+    );
+});
 
 interface TabNodeWrapperProps {
-    sortedCachingNodes: CachingNodeType[],
-    currentPath: string,
-    prevTabNode: WithCurrent,
+    cachingNodeHandler: CachingNodeHandler,
+    prevTabNode: WithCurrent<ReactElement>,
     currentMouseOverNodeState: [any, Dispatch<SetStateAction<any>>],
+    tabContextMenuId: string,
 }
 
 const isSameTab = (tabNode1, tabNode2) => RvUtil.equalAndNotEmpty(tabNode1?.key, tabNode2?.key);
 const isTabActive = (tabNode, currentPath) => RvUtil.equalAndNotEmpty(tabNode?.key, currentPath);
 
 export default ({
-                    sortedCachingNodes,
-                    currentPath,
+                    cachingNodeHandler,
                     prevTabNode,
-                    currentMouseOverNodeState
+                    currentMouseOverNodeState,
+                    tabContextMenuId
                 }: TabNodeWrapperProps) => {
+    const {
+        sortedCachingNodes,
+        currentPath
+    } = cachingNodeHandler;
     return (tabNode) => {
         const [currentMouseOverNode, setCurrentMouseOverNode] = currentMouseOverNodeState;
         const index = sortedCachingNodes.findIndex(cachingNode => cachingNode.name === tabNode.key);
+        const cachingNode = sortedCachingNodes[index];
         let className = 'keep-alive-tab';
         const isFirst = index === 0;
         const isLast = index === sortedCachingNodes.length - 1;
@@ -75,6 +106,7 @@ export default ({
         const onMouseLeave = () => {
             setCurrentMouseOverNode(null);
         }
+        // SortableTabNode的index属性是SortableElement的属性，不能删
         return (
             <SortableTabNode
                 className={className}
@@ -82,7 +114,9 @@ export default ({
                 onMouseLeave={onMouseLeave}
                 showBeforeDivider={showBeforeDivider}
                 showAfterDivider={showAfterDivider}
+                tabContextMenuId={tabContextMenuId}
                 tabNode={tabNode}
+                cachingNode={cachingNode}
                 index={index}
             />
         )

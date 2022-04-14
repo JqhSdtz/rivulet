@@ -1,17 +1,15 @@
-import React, {useContext, useRef, useState} from 'react';
-import {HeaderViewProps} from '@/layouts/BasicLayout/components/Header';
-import {MenuDataItem, RouteContext} from '@/layouts/BasicLayout';
+import React, {useRef, useState} from 'react';
+import {HeaderViewProps} from '../Header';
+import {MenuDataItem} from '../..';
 import {Tabs} from 'antd';
-import {useHistory, useLocation} from 'ice';
-import {useAliveController} from 'react-activation';
 import './index.less';
-import {MenuConfigItem} from '@/layouts/BasicLayout/configs/menuConfig';
 import MouseOver from '@/components/Common/MouseOver';
 import {CloseCircleFilled, CloseOutlined} from '@ant-design/icons';
-import TabNodeWrapper from '@/layouts/BasicLayout/components/KeepAliveTabs/TabNodeWrapper';
+import TabNodeWrapper from './TabNodeWrapper';
 import {SortableContainer} from 'react-sortable-hoc';
-import {CachingNodeType} from '@/layouts/BasicLayout/components/KeepAliveTabs/CachingNode';
 import {useCreation, useUpdate} from 'ahooks';
+import TabContextMenu from './TabContextMenu';
+import {useCachingNodeHandler} from '@/layouts/BasicLayout/components/KeepAliveTabs/cachingNodeHandler';
 
 const {TabPane} = Tabs;
 
@@ -23,91 +21,48 @@ const SortableTabs = SortableContainer((props) => {
     );
 });
 
-function sortCachingNodes(tabKeySequence, cachingNodes): CachingNodeType[] {
-    const sortedCachingNodes: CachingNodeType[] = [];
-    tabKeySequence.forEach(tabKey => {
-        const cachingNode = cachingNodes.find(node => node.name === tabKey);
-        if (cachingNode) {
-            sortedCachingNodes.push(cachingNode);
-        }
-    });
-    return sortedCachingNodes;
-}
-
-function fillCachingNodeWithMenuData(sortedCachingNodes, menuData) {
-    sortedCachingNodes.forEach(node => {
-        menuData?.forEach((menu: MenuConfigItem) => {
-            if (menu.testPath(node?.name)) {
-                node.targetMenu = menu;
-            }
-        });
-    });
-}
-
-function synchronizeTabKeySequence(prevTabKeySequence, cachingNodes): string[] {
-    let curTabKeySequence = prevTabKeySequence.filter(tabKey => cachingNodes.findIndex(node => node.name === tabKey) !== -1);
-    if (cachingNodes.length > prevTabKeySequence.length) {
-        const addedTabKey: [] = cachingNodes.slice(prevTabKeySequence.length).map(node => node.name);
-        curTabKeySequence = curTabKeySequence.concat(addedTabKey);
-    }
-    return curTabKeySequence;
-}
-
-function getTargetCachingNode(targetKey, sortedCachingNodes) {
-    return sortedCachingNodes.find(node => node.name === targetKey);
-}
-
 // 提示：cachingNodes里的node的name是location的pathname+search
 // 同时，TabNode的key和cachingNodes里的node的name相同
 const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
-    const {getCachingNodes, drop} = useAliveController();
-    const cachingNodes = getCachingNodes();
-    const {menuData} = useContext(RouteContext);
-    const {pathname, search} = useLocation();
-    const history = useHistory();
     const forceUpdate = useUpdate();
     const defaultTabTitle = '加载中...';
-    const currentPath = pathname + search;
-    const tabKeySequence = useCreation(() => ({current: [] as string[]}), []);
-    // 将cachingNodes中的增加和删除反映到tabKeySequence中
-    tabKeySequence.current = synchronizeTabKeySequence(tabKeySequence.current, cachingNodes);
-    // 对cachingNodes进行排序
-    const sortedCachingNodes = sortCachingNodes(tabKeySequence.current, cachingNodes);
-    // 设置cachingNode对应的MenuItem
-    fillCachingNodeWithMenuData(sortedCachingNodes, menuData);
+    const tabContextMenuId = useCreation(() => 'context-menu-' + Date.now(), []);
+    const cachingNodeHandler = useCachingNodeHandler();
+    const {
+        sortedCachingNodes,
+        tabKeySequence,
+        currentPath,
+        activeCachingNode,
+        removeCachingNode
+    } = cachingNodeHandler;
     const onChange = (targetKey) => {
-        history.push(targetKey || '');
+        activeCachingNode(targetKey);
     }
     const onEdit = (targetKey, action) => {
-        const targetNode = getTargetCachingNode(targetKey, sortedCachingNodes);
-        const isActive = targetKey === currentPath;
         if (action === 'remove') {
-            const currentName = targetNode?.name || '';
-            if (isActive) {
-                drop(currentName).then(() => {
-                });
-                const curIdx = sortedCachingNodes.findIndex(
-                    routeNode => routeNode.name === currentName
-                );
-                history.push(curIdx > 0 ? sortedCachingNodes[curIdx - 1].name || '' : '');
-            } else {
-                drop(currentName).then(() => {
-                });
-            }
+            removeCachingNode(targetKey);
         }
     }
-
-    const prevTabNode = useCreation(() => ({current: null}), []);
+    const prevTabNode = useCreation(() => ({current: null as any}), []);
     const currentMouseOverNodeState = useState(null as any);
     const renderWrapper = TabNodeWrapper({
-        sortedCachingNodes,
-        currentPath,
+        cachingNodeHandler,
         currentMouseOverNodeState,
-        prevTabNode
+        prevTabNode,
+        tabContextMenuId
     });
     const renderTabBar = (props, TabNavList) => {
         props.children = renderWrapper;
-        return <TabNavList {...props} />;
+        return (
+            <div
+                onContextMenu={event => {
+                    event.preventDefault();
+                }}
+            >
+                <TabNavList {...props} />
+                <TabContextMenu menuId={tabContextMenuId} cachingNodeHandler={cachingNodeHandler}/>
+            </div>
+        );
     };
     const closeIcon = (
         <MouseOver

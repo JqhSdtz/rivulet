@@ -13,6 +13,6 @@ declare module '*.module.scss' {
     export default classes;
 }
 
-interface WithCurrent {
-    current: any
+interface WithCurrent<T> {
+    current: T
 }
