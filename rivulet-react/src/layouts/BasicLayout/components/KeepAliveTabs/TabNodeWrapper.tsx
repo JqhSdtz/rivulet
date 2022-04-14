@@ -2,10 +2,10 @@ import RvUtil from '@/utils/rvUtil';
 import {CachingNodeType} from './CachingNode';
 import {Dispatch, ReactElement, SetStateAction} from 'react';
 import {SortableElement} from 'react-sortable-hoc';
-import {useContextMenu} from 'react-contexify';
 import {CachingNodeHandler} from './cachingNodeHandler';
 
-import 'react-contexify/dist/ReactContexify.css';
+import {Dropdown} from 'antd';
+import TabContextMenu from '@/layouts/BasicLayout/components/KeepAliveTabs/TabContextMenu';
 
 interface TabDividerProps {
     isShow: boolean
@@ -25,35 +25,41 @@ const SortableTabNode = SortableElement((props: {
     onMouseLeave: () => void,
     showBeforeDivider: boolean,
     showAfterDivider: boolean,
-    tabContextMenuId: string,
+    cachingNodeHandler: CachingNodeHandler,
     tabNode: ReactElement,
     cachingNode: CachingNodeType
 }) => {
-    const {show, hideAll} = useContextMenu({
-        id: props.tabContextMenuId,
-        props: {
-            cachingNode: props.cachingNode
-        }
-    });
+    const tabContextMenu = (
+        <TabContextMenu
+            cachingNodeHandler={props.cachingNodeHandler}
+            cachingNode={props.cachingNode}
+        />
+    );
     return (
-        <div className={props.className}
-             onMouseEnter={props.onMouseEnter}
-             onMouseLeave={props.onMouseLeave}
-             onContextMenu={show}
-             onClickCapture={hideAll}
+        <Dropdown
+            overlay={tabContextMenu}
+            trigger={['contextMenu']}
+            overlayStyle={{
+                border: 'rgb(175, 175, 175) 1px solid'
+            }}
+            destroyPopupOnHide
         >
-            <TabDivider isShow={props.showBeforeDivider}/>
-            {props.tabNode}
-            <TabDivider isShow={props.showAfterDivider}/>
-        </div>
+            <div className={props.className}
+                 onMouseEnter={props.onMouseEnter}
+                 onMouseLeave={props.onMouseLeave}
+            >
+                <TabDivider isShow={props.showBeforeDivider}/>
+                {props.tabNode}
+                <TabDivider isShow={props.showAfterDivider}/>
+            </div>
+        </Dropdown>
     );
 });
 
 interface TabNodeWrapperProps {
     cachingNodeHandler: CachingNodeHandler,
     prevTabNode: WithCurrent<ReactElement>,
-    currentMouseOverNodeState: [any, Dispatch<SetStateAction<any>>],
-    tabContextMenuId: string,
+    currentMouseOverNodeState: [any, Dispatch<SetStateAction<any>>]
 }
 
 const isSameTab = (tabNode1, tabNode2) => RvUtil.equalAndNotEmpty(tabNode1?.key, tabNode2?.key);
@@ -62,8 +68,7 @@ const isTabActive = (tabNode, currentPath) => RvUtil.equalAndNotEmpty(tabNode?.k
 export default ({
                     cachingNodeHandler,
                     prevTabNode,
-                    currentMouseOverNodeState,
-                    tabContextMenuId
+                    currentMouseOverNodeState
                 }: TabNodeWrapperProps) => {
     const {
         sortedCachingNodes,
@@ -114,7 +119,7 @@ export default ({
                 onMouseLeave={onMouseLeave}
                 showBeforeDivider={showBeforeDivider}
                 showAfterDivider={showAfterDivider}
-                tabContextMenuId={tabContextMenuId}
+                cachingNodeHandler={cachingNodeHandler}
                 tabNode={tabNode}
                 cachingNode={cachingNode}
                 index={index}

@@ -2085,11 +2085,6 @@ clone-regexp@^2.1.0:
   dependencies:
     is-regexp "^2.0.0"
 
-clsx@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.npmmirror.com/clsx/-/clsx-1.1.1.tgz#98b3134f9abbdf23b2663491ace13c5c03a73188"
-  integrity sha512-6/bPho624p3S2pMyvP5kKBPXnI3ufHLObBFCfgx+LkeR5lg2XYy2hqZqUf45ypD8COn2bhgGJSUE+l5dhNBieA==
-
 code-point-at@^1.0.0:
   version "1.1.0"
   resolved "https://registry.npmmirror.com/code-point-at/-/code-point-at-1.1.0.tgz"
@@ -5905,13 +5900,6 @@ react-app-renderer@^3.1.0:
     "@loadable/server" "^5.14.0"
     create-app-container "^0.1.2"
     query-string "^6.13.7"
-
-react-contexify@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.npmmirror.com/react-contexify/-/react-contexify-5.0.0.tgz#11b477550a0ee5a9a144399bc17c7c56bbc60057"
-  integrity sha512-2FIp7lxJ6dtfGr8EZ4uVV5p5TQjd0n2h/JU7PrejNIMiCeZWvSVPFh4lj1ZvjXosglBvP7q5JQQ8yUCdSaMSaw==
-  dependencies:
-    clsx "^1.1.1"
 
 react-dom@^16.12.0:
   version "16.14.0"

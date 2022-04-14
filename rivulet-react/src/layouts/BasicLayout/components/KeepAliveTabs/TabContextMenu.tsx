@@ -1,22 +1,41 @@
-import {Item, ItemParams, Menu} from 'react-contexify';
-import {createPortal} from 'react-dom';
+import {Menu} from 'antd';
 import {CachingNodeHandler} from './cachingNodeHandler';
+import {CachingNodeType} from './CachingNode';
+import {ReactElement} from 'react';
 
-export default (props: { menuId: string, cachingNodeHandler: CachingNodeHandler }) => {
-    const handler = props.cachingNodeHandler;
-    const closeTab = ({props}: ItemParams<typeof props>) => {
-        const {cachingNode} = props;
-        handler.removeCachingNode(cachingNode.name);
+export default (props: {cachingNodeHandler: CachingNodeHandler, cachingNode: CachingNodeType}) => {
+    const {
+        cachingNodeHandler,
+        cachingNode
+    } = props;
+    const {
+        sortedCachingNodes,
+        removeCachingNode
+    } = cachingNodeHandler;
+    const closeTab = () => {
+        removeCachingNode(cachingNode.name);
     }
-    return createPortal((
-        <Menu id={props.menuId}>
-            <Item onClick={closeTab} hidden={handler.sortedCachingNodes.length <= 1}>
+    const menuItems = [] as ReactElement[];
+    if (sortedCachingNodes.length > 1) {
+        menuItems.push(
+            <Menu.Item key="close" onClick={closeTab}>
                 关闭
-            </Item>
-            <Item>
-                Item 2
-            </Item>
-            <Item disabled>Disabled</Item>
+            </Menu.Item>
+        );
+    }
+    menuItems.push(
+        <Menu.Item key="item2">
+            Item 2
+        </Menu.Item>
+    );
+    menuItems.push(
+        <Menu.Item key="item3">
+            Item 3
+        </Menu.Item>
+    );
+    return (
+        <Menu onContextMenu={(event) => event.preventDefault()}>
+            {menuItems}
         </Menu>
-    ), document.body);
+    );
 }

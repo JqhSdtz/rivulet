@@ -8,8 +8,7 @@ import {CloseCircleFilled, CloseOutlined} from '@ant-design/icons';
 import TabNodeWrapper from './TabNodeWrapper';
 import {SortableContainer} from 'react-sortable-hoc';
 import {useCreation, useUpdate} from 'ahooks';
-import TabContextMenu from './TabContextMenu';
-import {useCachingNodeHandler} from '@/layouts/BasicLayout/components/KeepAliveTabs/cachingNodeHandler';
+import {useCachingNodeHandler} from './cachingNodeHandler';
 
 const {TabPane} = Tabs;
 
@@ -26,7 +25,6 @@ const SortableTabs = SortableContainer((props) => {
 const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
     const forceUpdate = useUpdate();
     const defaultTabTitle = '加载中...';
-    const tabContextMenuId = useCreation(() => 'context-menu-' + Date.now(), []);
     const cachingNodeHandler = useCachingNodeHandler();
     const {
         sortedCachingNodes,
@@ -48,21 +46,11 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
     const renderWrapper = TabNodeWrapper({
         cachingNodeHandler,
         currentMouseOverNodeState,
-        prevTabNode,
-        tabContextMenuId
+        prevTabNode
     });
     const renderTabBar = (props, TabNavList) => {
         props.children = renderWrapper;
-        return (
-            <div
-                onContextMenu={event => {
-                    event.preventDefault();
-                }}
-            >
-                <TabNavList {...props} />
-                <TabContextMenu menuId={tabContextMenuId} cachingNodeHandler={cachingNodeHandler}/>
-            </div>
-        );
+        return <TabNavList {...props} />;
     };
     const closeIcon = (
         <MouseOver
