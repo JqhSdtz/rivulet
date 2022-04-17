@@ -37,20 +37,28 @@ function synchronizeTabKeySequence(prevTabKeySequence, cachingNodes): string[] {
     return curTabKeySequence;
 }
 
-function getTargetCachingNode(targetKey, sortedCachingNodes) {
-    return sortedCachingNodes.find(node => node.name === targetKey);
+// function getTargetCachingNode(targetKey, sortedCachingNodes) {
+//     return sortedCachingNodes.find(node => node.name === targetKey);
+// }
+
+export interface CachingNodeController {
+    sortedCachingNodes: CachingNodeType[]
+    tabKeySequence: WithCurrent<string[]>
+    currentPath: string
+    activeNode: (targetKey: string | undefined) => void
+    removeNode: (targetKey: string | undefined) => void
+    refreshNode: (targetKey: string | undefined) => void
+    removeOtherNodes: (targetKey) => void
+    removeLeftSideNodes: (targetKey) => void
+    removeRightSideNodes: (targetKey) => void
 }
 
-export interface CachingNodeHandler {
-    sortedCachingNodes: CachingNodeType[],
-    tabKeySequence: WithCurrent<string[]>,
-    currentPath: string,
-    activeCachingNode: (targetKey: string | undefined) => void,
-    removeCachingNode: (targetKey: string | undefined) => void
+export interface CachingNodeStatus {
+    isLoading: boolean
 }
 
-export function useCachingNodeHandler(): CachingNodeHandler {
-    const {getCachingNodes, drop} = useAliveController();
+export function useCachingNodeController(): CachingNodeController {
+    const {getCachingNodes, drop, refresh} = useAliveController();
     const cachingNodes = getCachingNodes();
     const {menuData} = useContext(RouteContext);
     const {pathname, search} = useLocation();
@@ -63,24 +71,62 @@ export function useCachingNodeHandler(): CachingNodeHandler {
     const sortedCachingNodes = sortCachingNodes(tabKeySequence.current, cachingNodes);
     // 设置cachingNode对应的MenuItem
     fillCachingNodeWithMenuData(sortedCachingNodes, menuData);
-    const activeCachingNode = (targetKey) => {
+    const activeNode = (targetKey) => {
         if (!targetKey) return;
         history.push(targetKey || '');
     }
-    const removeCachingNode = (targetKey) => {
+    const removeNode = (targetKey) => {
         if (!targetKey) return;
-        const targetNode = getTargetCachingNode(targetKey, sortedCachingNodes);
         const isActive = targetKey === currentPath;
-        const currentName = targetNode?.name || '';
         if (isActive) {
-            drop(currentName).then(() => {
+            drop(targetKey).then(() => {
             });
             const curIdx = sortedCachingNodes.findIndex(
-                routeNode => routeNode.name === currentName
+                routeNode => routeNode.name === targetKey
             );
-            history.push(curIdx > 0 ? sortedCachingNodes[curIdx - 1].name || '' : '');
+            activeNode(curIdx > 0 ? sortedCachingNodes[curIdx - 1].name || '' : '');
         } else {
-            drop(currentName).then(() => {
+            drop(targetKey).then(() => {
+            });
+        }
+    }
+    const refreshNode = (targetKey) => {
+        if (!targetKey) return;
+        refresh(targetKey).then(() => {
+        });
+    };
+    const removeOtherNodes = (targetKey) => {
+        activeNode(targetKey);
+        sortedCachingNodes.forEach(node => {
+            if (node.name !== targetKey) {
+                drop(node.name || '').then((success) => {
+                });
+            }
+        });
+    };
+    const removeLeftSideNodes = (targetKey) => {
+        for (let i = 0; i < sortedCachingNodes.length; ++i) {
+            const node = sortedCachingNodes[i];
+            if (node.name === targetKey) {
+                return;
+            }
+            if (node.name === currentPath) {
+                activeNode(targetKey);
+            }
+            drop(node.name || '').then(() => {
+            });
+        }
+    }
+    const removeRightSideNodes = (targetKey) => {
+        for (let i = sortedCachingNodes.length - 1; i >= 0; --i) {
+            const node = sortedCachingNodes[i];
+            if (node.name === targetKey) {
+                return;
+            }
+            if (node.name === currentPath) {
+                activeNode(targetKey);
+            }
+            drop(node.name || '').then(() => {
             });
         }
     }
@@ -88,7 +134,11 @@ export function useCachingNodeHandler(): CachingNodeHandler {
         sortedCachingNodes,
         tabKeySequence,
         currentPath,
-        activeCachingNode,
-        removeCachingNode
+        activeNode,
+        removeNode,
+        refreshNode,
+        removeOtherNodes,
+        removeLeftSideNodes,
+        removeRightSideNodes
     }
 }

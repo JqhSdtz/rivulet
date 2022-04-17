@@ -8,7 +8,7 @@ import {CloseCircleFilled, CloseOutlined} from '@ant-design/icons';
 import TabNodeWrapper from './TabNodeWrapper';
 import {SortableContainer} from 'react-sortable-hoc';
 import {useCreation, useUpdate} from 'ahooks';
-import {useCachingNodeHandler} from './cachingNodeHandler';
+import {useCachingNodeController} from './cachingNodeController';
 
 const {TabPane} = Tabs;
 
@@ -25,31 +25,41 @@ const SortableTabs = SortableContainer((props) => {
 const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
     const forceUpdate = useUpdate();
     const defaultTabTitle = '加载中...';
-    const cachingNodeHandler = useCachingNodeHandler();
+    const cachingNodeHandler = useCachingNodeController();
     const {
         sortedCachingNodes,
         tabKeySequence,
         currentPath,
-        activeCachingNode,
-        removeCachingNode
+        activeNode,
+        removeNode
     } = cachingNodeHandler;
-    const onChange = (targetKey) => {
-        activeCachingNode(targetKey);
-    }
     const onEdit = (targetKey, action) => {
         if (action === 'remove') {
-            removeCachingNode(targetKey);
+            removeNode(targetKey);
         }
     }
     const prevTabNode = useCreation(() => ({current: null as any}), []);
     const currentMouseOverNodeState = useState(null as any);
     const renderWrapper = TabNodeWrapper({
-        cachingNodeHandler,
+        cachingNodeController: cachingNodeHandler,
         currentMouseOverNodeState,
         prevTabNode
     });
     const renderTabBar = (props, TabNavList) => {
         props.children = renderWrapper;
+        props.onTabClick = (targetKey, event) => {
+            // 补丁，解决antd的tabs组件直接阻断点击事件冒泡的问题，重新发放一个tabClick事件
+            const eventInitDict: CustomEventInit = {
+                bubbles: true,
+                cancelable: true,
+                detail: {
+                    tabKey: targetKey
+                }
+            };
+            const customEvent = new CustomEvent('tabClick', eventInitDict);
+            event.target.dispatchEvent(customEvent);
+            activeNode(targetKey);
+        }
         return <TabNavList {...props} />;
     };
     const closeIcon = (
@@ -96,7 +106,6 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
             className="keep-alive-tabs"
             tabBarGutter={0}
             activeKey={currentPath}
-            onChange={onChange}
             onEdit={onEdit}
             animated={{inkBar: true, tabPane: false}}
             axis="x"
@@ -110,8 +119,14 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
                 const menu: MenuDataItem = node.targetMenu;
                 const tabTitle = menu?.name || defaultTabTitle;
                 const tabKey = node.name || index.toString();
+                const tabElem = (
+                    <span>
+                        {menu?.icon}
+                        {tabTitle}
+                    </span>
+                );
                 return (
-                    <TabPane tab={tabTitle} key={tabKey} closable={tabClosable} closeIcon={closeIcon}/>
+                    <TabPane tab={tabElem} key={tabKey} closable={tabClosable} closeIcon={closeIcon}/>
                 )
             })}
         </SortableTabs>
@@ -121,3 +136,4 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
 export default KeepAliveTabs;
 
 export {default as CachingNode} from './CachingNode';
+export {useCachingNodeController} from './cachingNodeController';

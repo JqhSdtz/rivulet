@@ -1,11 +1,10 @@
 import RvUtil from '@/utils/rvUtil';
 import {CachingNodeType} from './CachingNode';
-import {Dispatch, ReactElement, SetStateAction} from 'react';
+import {Dispatch, MouseEvent, ReactElement, SetStateAction, useRef, useState} from 'react';
 import {SortableElement} from 'react-sortable-hoc';
-import {CachingNodeHandler} from './cachingNodeHandler';
-
+import {CachingNodeController} from './cachingNodeController';
+import TabContextMenu from './TabContextMenu';
 import {Dropdown} from 'antd';
-import TabContextMenu from '@/layouts/BasicLayout/components/KeepAliveTabs/TabContextMenu';
 
 interface TabDividerProps {
     isShow: boolean
@@ -25,28 +24,41 @@ const SortableTabNode = SortableElement((props: {
     onMouseLeave: () => void,
     showBeforeDivider: boolean,
     showAfterDivider: boolean,
-    cachingNodeHandler: CachingNodeHandler,
+    cachingNodeHandler: CachingNodeController,
     tabNode: ReactElement,
     cachingNode: CachingNodeType
 }) => {
+    const [contextMenuVisible, setContextMenuVisible] = useState(false);
+    const onContextMenu = (event: MouseEvent) => {
+        event.preventDefault();
+        setContextMenuVisible(true);
+    }
+    const tabElemRef = useRef<HTMLDivElement>(null);
     const tabContextMenu = (
         <TabContextMenu
-            cachingNodeHandler={props.cachingNodeHandler}
+            cachingNodeController={props.cachingNodeHandler}
             cachingNode={props.cachingNode}
+            tabElemRef={tabElemRef}
+            setContextMenuVisible={setContextMenuVisible}
         />
     );
+    // 没有找到antd的dropdown组件禁用关闭时的过渡效果的方法，应该是通过js控制的，
+    // 所以采用直接添加class，直接设置display为none的方式实现立即关闭右键菜单
+    let overlayClassName = 'keep-alive-tab-context-menu';
+    if (!contextMenuVisible) overlayClassName += ' tab-context-menu-hidden';
     return (
         <Dropdown
             overlay={tabContextMenu}
             trigger={['contextMenu']}
-            overlayStyle={{
-                border: 'rgb(175, 175, 175) 1px solid'
-            }}
+            overlayClassName={overlayClassName}
+            visible={contextMenuVisible}
             destroyPopupOnHide
         >
             <div className={props.className}
+                 ref={tabElemRef}
                  onMouseEnter={props.onMouseEnter}
                  onMouseLeave={props.onMouseLeave}
+                 onContextMenu={onContextMenu}
             >
                 <TabDivider isShow={props.showBeforeDivider}/>
                 {props.tabNode}
@@ -57,8 +69,8 @@ const SortableTabNode = SortableElement((props: {
 });
 
 interface TabNodeWrapperProps {
-    cachingNodeHandler: CachingNodeHandler,
-    prevTabNode: WithCurrent<ReactElement>,
+    cachingNodeController: CachingNodeController
+    prevTabNode: WithCurrent<ReactElement>
     currentMouseOverNodeState: [any, Dispatch<SetStateAction<any>>]
 }
 
@@ -66,14 +78,14 @@ const isSameTab = (tabNode1, tabNode2) => RvUtil.equalAndNotEmpty(tabNode1?.key,
 const isTabActive = (tabNode, currentPath) => RvUtil.equalAndNotEmpty(tabNode?.key, currentPath);
 
 export default ({
-                    cachingNodeHandler,
+                    cachingNodeController,
                     prevTabNode,
                     currentMouseOverNodeState
                 }: TabNodeWrapperProps) => {
     const {
         sortedCachingNodes,
         currentPath
-    } = cachingNodeHandler;
+    } = cachingNodeController;
     return (tabNode) => {
         const [currentMouseOverNode, setCurrentMouseOverNode] = currentMouseOverNodeState;
         const index = sortedCachingNodes.findIndex(cachingNode => cachingNode.name === tabNode.key);
@@ -119,7 +131,7 @@ export default ({
                 onMouseLeave={onMouseLeave}
                 showBeforeDivider={showBeforeDivider}
                 showAfterDivider={showAfterDivider}
-                cachingNodeHandler={cachingNodeHandler}
+                cachingNodeHandler={cachingNodeController}
                 tabNode={tabNode}
                 cachingNode={cachingNode}
                 index={index}

@@ -1,41 +1,68 @@
 import {Menu} from 'antd';
-import {CachingNodeHandler} from './cachingNodeHandler';
+import {CachingNodeController} from './cachingNodeController';
 import {CachingNodeType} from './CachingNode';
-import {ReactElement} from 'react';
+import {ReactElement, RefObject, useRef} from 'react';
+import {useClickAway} from 'ahooks';
 
-export default (props: {cachingNodeHandler: CachingNodeHandler, cachingNode: CachingNodeType}) => {
+export default (props: {
+    cachingNodeController: CachingNodeController,
+    cachingNode: CachingNodeType,
+    tabElemRef: RefObject<HTMLDivElement>,
+    setContextMenuVisible: (visible: boolean) => void
+}) => {
     const {
-        cachingNodeHandler,
-        cachingNode
+        cachingNodeController,
+        cachingNode,
+        tabElemRef,
+        setContextMenuVisible
     } = props;
     const {
         sortedCachingNodes,
-        removeCachingNode
-    } = cachingNodeHandler;
-    const closeTab = () => {
-        removeCachingNode(cachingNode.name);
-    }
+        removeNode,
+        refreshNode,
+        removeOtherNodes,
+        removeLeftSideNodes,
+        removeRightSideNodes
+    } = cachingNodeController;
     const menuItems = [] as ReactElement[];
     if (sortedCachingNodes.length > 1) {
         menuItems.push(
-            <Menu.Item key="close" onClick={closeTab}>
+            <Menu.Item key="closeTab" onClick={() => removeNode(cachingNode.name)}>
                 关闭
             </Menu.Item>
         );
     }
     menuItems.push(
-        <Menu.Item key="item2">
-            Item 2
+        <Menu.Item key="refreshTab" onClick={() => refreshNode(cachingNode.name)}>
+            刷新
         </Menu.Item>
     );
     menuItems.push(
-        <Menu.Item key="item3">
-            Item 3
-        </Menu.Item>
+        <Menu.SubMenu key="batchCloseTabs" title="批量关闭">
+            <Menu.Item key="closeOtherTabs" onClick={() => removeOtherNodes(cachingNode.name)}>
+                关闭其他
+            </Menu.Item>
+            <Menu.Item key="closeLeftSideTabs" onClick={() => removeLeftSideNodes(cachingNode.name)}>
+                关闭左侧
+            </Menu.Item>
+            <Menu.Item key="closeRightSideTabs" onClick={() => removeRightSideNodes(cachingNode.name)}>
+                关闭右侧
+            </Menu.Item>
+        </Menu.SubMenu>
     );
+    const ref = useRef<HTMLDivElement>(null);
+    useClickAway((event) => {
+        // 页签元素也在右键菜单之外，但不能在右键点页签元素时隐藏右键菜单
+        if (event.type === 'contextmenu' && tabElemRef.current?.contains(event.target as any)) {
+            return;
+        }
+        setContextMenuVisible(false);
+    }, ref, ['tabClick', 'click', 'contextmenu']);
     return (
-        <Menu onContextMenu={(event) => event.preventDefault()}>
-            {menuItems}
-        </Menu>
+        <div ref={ref} onContextMenu={(event) => event.preventDefault()}>
+            <Menu onClick={() => setContextMenuVisible(false)}>
+                {menuItems}
+            </Menu>
+        </div>
     );
 }
