@@ -1,16 +1,17 @@
 import {SiderMenuProps} from '@/layouts/BasicLayout/components/SiderMenu/SiderMenu';
-import {Menu, Modal} from 'antd';
+import {Menu} from 'antd';
 import {PoweroffOutlined as PowerOffOutlined} from '@ant-design/icons/lib/icons';
 import {request, useAuth} from 'ice';
 import {UserOutlined} from '@ant-design/icons';
 import './index.less';
+import RvModal from '@/components/Common/RvModal';
 
 export default (props: SiderMenuProps) => {
     const {prefixCls} = props;
     const [, setAuth] = useAuth();
 
     function logout() {
-        Modal.confirm({
+        RvModal.confirm({
             title: '确认退出登录？',
             onOk: async () => {
                 const result: Result = await request.post('/auth/logout');
@@ -19,7 +20,7 @@ export default (props: SiderMenuProps) => {
                         hasLoggedIn: false
                     });
                 } else {
-                    Modal.error({
+                    RvModal.error({
                         content: '退出登录失败！' + result.errorMessage
                     });
                 }

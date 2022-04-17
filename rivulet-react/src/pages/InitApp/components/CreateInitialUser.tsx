@@ -2,11 +2,12 @@ import React from 'react';
 import {createForm} from '@formily/core';
 import {createSchemaField} from '@formily/react';
 import {Form, FormItem, Input, Password, Submit} from '@formily/antd';
-import {Card, Modal} from 'antd';
+import {Card} from 'antd';
 import * as ICONS from '@ant-design/icons';
 import {FormProps} from '@formily/antd/esm/form';
 import md5 from 'md5';
 import {request, useAuth} from 'ice';
+import RvModal from '@/components/Common/RvModal';
 
 const form = createForm({
     validateFirst: true
@@ -78,7 +79,7 @@ export default (props: ICreateIntialUserProps) => {
         data.password = md5(data.password);
         const result: Result = await request.post('/app/initialUser', data);
         if (result.successful) {
-            Modal.success({
+            RvModal.success({
                 content: '创建初始用户成功！',
                 onOk() {
                     setAuth({
@@ -88,7 +89,7 @@ export default (props: ICreateIntialUserProps) => {
                 }
             });
         } else {
-            Modal.error({
+            RvModal.error({
                 content: '创建初始用户失败！',
                 onOk() {
                     props.onReject?.();

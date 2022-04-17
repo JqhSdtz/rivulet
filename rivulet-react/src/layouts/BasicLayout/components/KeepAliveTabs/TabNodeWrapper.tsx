@@ -1,6 +1,6 @@
 import RvUtil from '@/utils/rvUtil';
 import {CachingNodeType} from './CachingNode';
-import {Dispatch, MouseEvent, ReactElement, SetStateAction, useRef, useState} from 'react';
+import {Dispatch, MouseEvent, MutableRefObject, ReactElement, SetStateAction, useRef, useState} from 'react';
 import {SortableElement} from 'react-sortable-hoc';
 import {CachingNodeController} from './cachingNodeController';
 import TabContextMenu from './TabContextMenu';
@@ -70,7 +70,7 @@ const SortableTabNode = SortableElement((props: {
 
 interface TabNodeWrapperProps {
     cachingNodeController: CachingNodeController
-    prevTabNode: WithCurrent<ReactElement>
+    prevTabNode: MutableRefObject<ReactElement>
     currentMouseOverNodeState: [any, Dispatch<SetStateAction<any>>]
 }
 

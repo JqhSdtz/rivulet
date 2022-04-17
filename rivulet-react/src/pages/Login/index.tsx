@@ -2,12 +2,13 @@ import React from 'react';
 import {createForm} from '@formily/core';
 import {createSchemaField} from '@formily/react';
 import {Form, FormItem, Input, Password, Submit} from '@formily/antd';
-import {Card, Modal} from 'antd';
+import {Card} from 'antd';
 import * as ICONS from '@ant-design/icons';
 import {FormProps} from '@formily/antd/esm/form';
 import {request, useAuth} from 'ice';
 import store from '@/store';
 import md5 from 'md5';
+import RvModal from '@/components/Common/RvModal';
 
 const form = createForm({
     validateFirst: true
@@ -66,7 +67,7 @@ export default () => {
         const result: Result = await request.post('/auth/login', data);
         if (result.successful) {
             userDispatchers.setState(result.payload);
-            Modal.success({
+            RvModal.success({
                 content: '登录成功！',
                 onOk() {
                     setAuth({
@@ -75,7 +76,7 @@ export default () => {
                 }
             });
         } else {
-            Modal.error({
+            RvModal.error({
                 content: '登录失败！' + result.errorMessage
             });
         }

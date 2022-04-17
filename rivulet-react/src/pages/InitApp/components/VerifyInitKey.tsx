@@ -2,10 +2,11 @@ import React from 'react';
 import {createForm} from '@formily/core';
 import {createSchemaField} from '@formily/react';
 import {Form, FormItem, Input, Password, Submit} from '@formily/antd';
-import {Card, Modal} from 'antd';
+import {Card} from 'antd';
 import * as ICONS from '@ant-design/icons';
 import {FormProps} from '@formily/antd/esm/form';
 import {request} from 'ice';
+import RvModal from '@/components/Common/RvModal';
 
 const form = createForm();
 
@@ -74,14 +75,14 @@ export default (props: IVerifyInitKeyProps) => {
                     onAutoSubmit={async (data) => {
                         const result: Result = await request.post('/app/verifyInitKey', data);
                         if (result.successful) {
-                            Modal.success({
+                            RvModal.success({
                                 content: '密钥验证成功！',
                                 onOk() {
                                     props.onPass?.();
                                 }
                             });
                         } else {
-                            Modal.error({
+                            RvModal.error({
                                 content: '密钥验证失败！请检查密钥是否已过期。',
                                 onOk() {
                                     props.onReject?.();

@@ -1,11 +1,10 @@
 import {CachingNodeType} from './CachingNode';
 import {useHistory} from 'ice';
 import {useAliveController} from 'react-activation';
-import {useContext} from 'react';
+import {MutableRefObject, useContext, useRef} from 'react';
 import {RouteContext} from '@/layouts/BasicLayout';
 import {useLocation} from '../../../../../.ice/index';
 import {MenuConfigItem} from '@/layouts/BasicLayout/configs/menuConfig';
-import {useCreation} from 'ahooks';
 
 function sortCachingNodes(tabKeySequence, cachingNodes): CachingNodeType[] {
     const sortedCachingNodes: CachingNodeType[] = [];
@@ -43,7 +42,7 @@ function synchronizeTabKeySequence(prevTabKeySequence, cachingNodes): string[] {
 
 export interface CachingNodeController {
     sortedCachingNodes: CachingNodeType[]
-    tabKeySequence: WithCurrent<string[]>
+    tabKeySequence: MutableRefObject<string[]>
     currentPath: string
     activeNode: (targetKey: string | undefined) => void
     removeNode: (targetKey: string | undefined) => void
@@ -64,7 +63,7 @@ export function useCachingNodeController(): CachingNodeController {
     const {pathname, search} = useLocation();
     const history = useHistory();
     const currentPath = pathname + search;
-    const tabKeySequence = useCreation(() => ({current: [] as string[]}), []);
+    const tabKeySequence = useRef<string[]>([]);
     // 将cachingNodes中的增加和删除反映到tabKeySequence中
     tabKeySequence.current = synchronizeTabKeySequence(tabKeySequence.current, cachingNodes);
     // 对cachingNodes进行排序

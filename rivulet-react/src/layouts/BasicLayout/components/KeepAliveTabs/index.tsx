@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {ReactElement, useRef, useState} from 'react';
 import {HeaderViewProps} from '../Header';
 import {MenuDataItem} from '../..';
 import {Tabs} from 'antd';
@@ -7,7 +7,7 @@ import MouseOver from '@/components/Common/MouseOver';
 import {CloseCircleFilled, CloseOutlined} from '@ant-design/icons';
 import TabNodeWrapper from './TabNodeWrapper';
 import {SortableContainer} from 'react-sortable-hoc';
-import {useCreation, useUpdate} from 'ahooks';
+import {useUpdate} from 'ahooks';
 import {useCachingNodeController} from './cachingNodeController';
 
 const {TabPane} = Tabs;
@@ -38,7 +38,7 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
             removeNode(targetKey);
         }
     }
-    const prevTabNode = useCreation(() => ({current: null as any}), []);
+    const prevTabNode = useRef<ReactElement>(null as any);
     const currentMouseOverNodeState = useState(null as any);
     const renderWrapper = TabNodeWrapper({
         cachingNodeController: cachingNodeHandler,
