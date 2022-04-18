@@ -24,7 +24,7 @@ export default () => {
         {
             title: '初始化完成',
             content: <SuccessResult/>,
-        }
+        },
     ];
     return (
         <div style={{width: '80%', marginLeft: '10%', marginTop: '1.5rem'}}>

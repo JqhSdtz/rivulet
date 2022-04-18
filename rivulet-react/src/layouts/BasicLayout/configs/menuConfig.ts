@@ -27,20 +27,20 @@ const config: MenuConfigItem[] = [
         name: '首页',
         path: '/',
         icon: SmileOutlined,
-        testPath
+        testPath,
     },
     {
         name: '仪表盘',
         path: '/dashboard',
         icon: SmileOutlined,
-        testPath
+        testPath,
     },
     {
         name: '数据模型',
         path: '/data_model',
         icon: SmileOutlined,
-        testPath
-    }
+        testPath,
+    },
 ];
 
 for (let i = 0; i < 5; ++i) {
@@ -49,7 +49,7 @@ for (let i = 0; i < 5; ++i) {
         path: '/test?v=' + i,
         // path: '/test' + i,
         icon: SmileOutlined,
-        testPath
+        testPath,
     });
 }
 

@@ -3,6 +3,6 @@ export default {
         id: null,
         username: null,
         password: null,
-        userType: null
-    }
+        userType: null,
+    },
 }

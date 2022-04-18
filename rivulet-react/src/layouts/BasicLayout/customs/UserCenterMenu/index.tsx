@@ -5,10 +5,12 @@ import {request, useAuth} from 'ice';
 import {UserOutlined} from '@ant-design/icons';
 import './index.less';
 import RvModal from '@/components/Common/RvModal';
+import store from '@/store';
 
 export default (props: SiderMenuProps) => {
     const {prefixCls} = props;
     const [, setAuth] = useAuth();
+    const userState = store.useModelState('user');
 
     function logout() {
         RvModal.confirm({
@@ -17,19 +19,19 @@ export default (props: SiderMenuProps) => {
                 const result: Result = await request.post('/auth/logout');
                 if (result.successful) {
                     setAuth({
-                        hasLoggedIn: false
+                        hasLoggedIn: false,
                     });
                 } else {
                     RvModal.error({
-                        content: '退出登录失败！' + result.errorMessage
+                        content: '退出登录失败！' + result.errorMessage,
                     });
                 }
-            }
+            },
         });
     }
 
     return (
-        <Menu.SubMenu key="userCenterMenu" icon={<UserOutlined/>}>
+        <Menu.SubMenu key="userCenterMenu" icon={<UserOutlined/>} title={userState.username}>
             <Menu.Item key="logout" onClick={logout}>
                 <span
                     title="退出登录"

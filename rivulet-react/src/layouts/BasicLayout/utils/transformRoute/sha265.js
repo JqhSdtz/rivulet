@@ -50,34 +50,43 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 /* SHA256 logical functions */
 function rotateRight(n, x) {
     return (x >>> n) | (x << (32 - n));
 }
+
 function choice(x, y, z) {
     return (x & y) ^ (~x & z);
 }
+
 function majority(x, y, z) {
     return (x & y) ^ (x & z) ^ (y & z);
 }
+
 function sha256_Sigma0(x) {
     return rotateRight(2, x) ^ rotateRight(13, x) ^ rotateRight(22, x);
 }
+
 function sha256_Sigma1(x) {
     return rotateRight(6, x) ^ rotateRight(11, x) ^ rotateRight(25, x);
 }
+
 function sha256_sigma0(x) {
     return rotateRight(7, x) ^ rotateRight(18, x) ^ (x >>> 3);
 }
+
 function sha256_sigma1(x) {
     return rotateRight(17, x) ^ rotateRight(19, x) ^ (x >>> 10);
 }
+
 function sha256_expand(W, j) {
     return (W[j & 0x0f] +=
         sha256_sigma1(W[(j + 14) & 0x0f]) +
-            W[(j + 9) & 0x0f] +
-            sha256_sigma0(W[(j + 1) & 0x0f]));
+        W[(j + 9) & 0x0f] +
+        sha256_sigma0(W[(j + 1) & 0x0f]));
 }
+
 /* Hash constant words K: */
 const K256 = [
     0x428a2f98,
@@ -150,6 +159,7 @@ let ihash;
 let count;
 let buffer;
 const sha256_hex_digits = '0123456789abcdef';
+
 /* Add 32-bit integers with 16-bit operations (bug in some JS-interpreters:
 overflow) */
 function safe_add(x, y) {
@@ -157,6 +167,7 @@ function safe_add(x, y) {
     const msw = (x >> 16) + (y >> 16) + (lsw >> 16);
     return (msw << 16) | (lsw & 0xffff);
 }
+
 /* Initialise the SHA256 computation */
 function sha256_init() {
     ihash = new Array(8);
@@ -172,6 +183,7 @@ function sha256_init() {
     ihash[6] = 0x1f83d9ab;
     ihash[7] = 0x5be0cd19;
 }
+
 /* Transform a 512-bit message block */
 function sha256_transform() {
     let a;
@@ -198,9 +210,9 @@ function sha256_transform() {
     for (let i = 0; i < 16; i++)
         W[i] =
             buffer[(i << 2) + 3] |
-                (buffer[(i << 2) + 2] << 8) |
-                (buffer[(i << 2) + 1] << 16) |
-                (buffer[i << 2] << 24);
+            (buffer[(i << 2) + 2] << 8) |
+            (buffer[(i << 2) + 1] << 16) |
+            (buffer[i << 2] << 24);
     for (let j = 0; j < 64; j++) {
         T1 = h + sha256_Sigma1(e) + choice(e, f, g) + K256[j];
         if (j < 16)
@@ -227,6 +239,7 @@ function sha256_transform() {
     ihash[6] += g;
     ihash[7] += h;
 }
+
 /* Read the next chunk of data and update the SHA256 computation */
 function sha256_update(data, inputLen) {
     let i;
@@ -250,6 +263,7 @@ function sha256_update(data, inputLen) {
     for (let j = 0; j < remainder; j++)
         buffer[j] = data.charCodeAt(curpos++);
 }
+
 /* Finish the computation by operations such as padding */
 function sha256_final() {
     let index = (count[0] >> 3) & 0x3f;
@@ -257,8 +271,7 @@ function sha256_final() {
     if (index <= 56) {
         for (let i = index; i < 56; i++)
             buffer[i] = 0;
-    }
-    else {
+    } else {
         for (let i = index; i < 64; i++)
             buffer[i] = 0;
         sha256_transform();
@@ -275,6 +288,7 @@ function sha256_final() {
     buffer[63] = count[0] & 0xff;
     sha256_transform();
 }
+
 /* Split the internal hash values into an array of bytes */
 function sha256_encode_bytes() {
     let j = 0;
@@ -287,6 +301,7 @@ function sha256_encode_bytes() {
     }
     return output;
 }
+
 /* Get the internal hash as a hex string */
 function sha256_encode_hex() {
     let output = new String();
@@ -296,6 +311,7 @@ function sha256_encode_hex() {
     }
     return output;
 }
+
 /* Main function: returns a hex string representing the SHA256 value of the
 given data */
 function digest(data) {
@@ -304,4 +320,5 @@ function digest(data) {
     sha256_final();
     return sha256_encode_hex();
 }
+
 export default digest;

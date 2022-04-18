@@ -1,4 +1,4 @@
-import React, {ReactElement, useRef, useState} from 'react';
+import React, {ReactElement, useContext, useRef, useState} from 'react';
 import {HeaderViewProps} from '../Header';
 import {MenuDataItem} from '../..';
 import {Tabs} from 'antd';
@@ -7,8 +7,7 @@ import MouseOver from '@/components/Common/MouseOver';
 import {CloseCircleFilled, CloseOutlined} from '@ant-design/icons';
 import TabNodeWrapper from './TabNodeWrapper';
 import {SortableContainer} from 'react-sortable-hoc';
-import {useUpdate} from 'ahooks';
-import {useCachingNodeController} from './cachingNodeController';
+import {TabsContext, TabsContextType} from './TabsContextProvider';
 
 const {TabPane} = Tabs;
 
@@ -23,16 +22,16 @@ const SortableTabs = SortableContainer((props) => {
 // 提示：cachingNodes里的node的name是location的pathname+search
 // 同时，TabNode的key和cachingNodes里的node的name相同
 const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
-    const forceUpdate = useUpdate();
     const defaultTabTitle = '加载中...';
-    const cachingNodeHandler = useCachingNodeController();
+    const tabsContext = useContext<TabsContextType>(TabsContext);
     const {
         sortedCachingNodes,
         tabKeySequence,
+        setTabKeySequence,
         currentPath,
         activeNode,
-        removeNode
-    } = cachingNodeHandler;
+        removeNode,
+    } = tabsContext;
     const onEdit = (targetKey, action) => {
         if (action === 'remove') {
             removeNode(targetKey);
@@ -41,9 +40,8 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
     const prevTabNode = useRef<ReactElement>(null as any);
     const currentMouseOverNodeState = useState(null as any);
     const renderWrapper = TabNodeWrapper({
-        cachingNodeController: cachingNodeHandler,
         currentMouseOverNodeState,
-        prevTabNode
+        prevTabNode,
     });
     const renderTabBar = (props, TabNavList) => {
         props.children = renderWrapper;
@@ -53,8 +51,8 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
                 bubbles: true,
                 cancelable: true,
                 detail: {
-                    tabKey: targetKey
-                }
+                    tabKey: targetKey,
+                },
             };
             const customEvent = new CustomEvent('tabClick', eventInitDict);
             event.target.dispatchEvent(customEvent);
@@ -77,7 +75,7 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
         if (oldIndex === newIndex) {
             return;
         }
-        const prevTabKeySequence = tabKeySequence.current;
+        const prevTabKeySequence = tabKeySequence;
         const curTabKeySequence = [] as string[];
         prevTabKeySequence.forEach((tabKey, index) => {
             if (newIndex < oldIndex) {
@@ -96,8 +94,8 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
                 }
             }
         });
-        tabKeySequence.current = curTabKeySequence;
-        forceUpdate();
+        setTabKeySequence(curTabKeySequence);
+        console.log(curTabKeySequence)
     }
     return (
         <SortableTabs
@@ -136,4 +134,4 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
 export default KeepAliveTabs;
 
 export {default as CachingNode} from './CachingNode';
-export {useCachingNodeController} from './cachingNodeController';
+export * from './TabsContextProvider';

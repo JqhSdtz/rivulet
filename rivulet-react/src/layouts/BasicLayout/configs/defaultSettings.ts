@@ -35,7 +35,7 @@ export type PureSettings = {
         params?: Record<string, any>;
         request?: (
             params: Record<string, any>,
-            defaultMenuData: MenuDataItem[]
+            defaultMenuData: MenuDataItem[],
         ) => Promise<MenuDataItem[]>;
         type?: 'sub' | 'group';
         autoClose?: false;
@@ -74,6 +74,6 @@ const defaultSettings: ProSettings = {
     headerHeight: '48px',
     iconfontUrl: '',
     primaryColor: '#1890ff',
-    splitMenus: false
+    splitMenus: false,
 };
 export default defaultSettings;

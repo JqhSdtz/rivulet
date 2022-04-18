@@ -1,5 +1,7 @@
-import { MenuDataItem, Route, MessageDescriptor } from '../types';
+import {MenuDataItem, MessageDescriptor, Route} from '../types';
+
 export declare function stripQueryStringAndHashFromPath(url: string): string;
+
 export declare const isUrl: (path: string) => boolean;
 export declare const getKeyByPath: (item: MenuDataItem) => string | undefined;
 /**

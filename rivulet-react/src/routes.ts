@@ -14,12 +14,12 @@ const routerConfig: IRouterConfig[] = [
     {
         path: '/login',
         component: Login,
-        wrappers: [LoginRouteWrapper]
+        wrappers: [LoginRouteWrapper],
     },
     {
         path: '/initApp',
         component: InitApp,
-        wrappers: [InitAppRouteWrapper]
+        wrappers: [InitAppRouteWrapper],
     },
     {
         path: '/',
@@ -28,26 +28,26 @@ const routerConfig: IRouterConfig[] = [
         children: [
             {
                 path: '/dashboard',
-                component: Dashboard
+                component: Dashboard,
             },
             {
                 path: '/data_model',
-                component: DataModel
+                component: DataModel,
             },
             {
                 path: '/test',
-                component: DataModel
+                component: DataModel,
             },
             {
                 path: '/',
                 exact: true,
-                component: Home
+                component: Home,
             },
             {
-                component: NotFound
-            }
-        ]
-    }
+                component: NotFound,
+            },
+        ],
+    },
 ];
 
 export default routerConfig;

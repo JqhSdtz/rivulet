@@ -6,6 +6,7 @@ export interface CachingNodeType {
     updateTime: number
     name?: string
     id: string
+
     [key: string]: any
 }
 
@@ -20,5 +21,5 @@ export default (props) => {
         >
             {props.children}
         </KeepAlive>
-    )
+    );
 }

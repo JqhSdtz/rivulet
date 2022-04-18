@@ -6,14 +6,12 @@ import type {WithFalse} from '../../typings';
 import {ConfigProvider} from 'antd';
 
 export type GlobalFooterProps = {
-    links?: WithFalse<
-        {
-            key?: string;
-            title: React.ReactNode;
-            href: string;
-            blankTarget?: boolean;
-        }[]
-    >;
+    links?: WithFalse<{
+        key?: string;
+        title: React.ReactNode;
+        href: string;
+        blankTarget?: boolean;
+    }[]>;
     copyright?: React.ReactNode;
     style?: React.CSSProperties;
     prefixCls?: string;
@@ -21,15 +19,15 @@ export type GlobalFooterProps = {
 };
 
 export default ({
-    className,
-    prefixCls,
-    links,
-    copyright,
-    style
-}: GlobalFooterProps) => {
+                    className,
+                    prefixCls,
+                    links,
+                    copyright,
+                    style,
+                }: GlobalFooterProps) => {
     const context = useContext(ConfigProvider.ConfigContext);
     const baseClassName = context.getPrefixCls(
-        prefixCls || 'pro-global-footer'
+        prefixCls || 'pro-global-footer',
     );
 
     if (

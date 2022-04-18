@@ -1,8 +1,17 @@
 import RvUtil from '@/utils/rvUtil';
 import {CachingNodeType} from './CachingNode';
-import {Dispatch, MouseEvent, MutableRefObject, ReactElement, SetStateAction, useRef, useState} from 'react';
+import {
+    Dispatch,
+    MouseEvent,
+    MutableRefObject,
+    ReactElement,
+    SetStateAction,
+    useContext,
+    useRef,
+    useState,
+} from 'react';
 import {SortableElement} from 'react-sortable-hoc';
-import {CachingNodeController} from './cachingNodeController';
+import {TabsContext, TabsContextType} from './TabsContextProvider';
 import TabContextMenu from './TabContextMenu';
 import {Dropdown} from 'antd';
 
@@ -24,7 +33,6 @@ const SortableTabNode = SortableElement((props: {
     onMouseLeave: () => void,
     showBeforeDivider: boolean,
     showAfterDivider: boolean,
-    cachingNodeHandler: CachingNodeController,
     tabNode: ReactElement,
     cachingNode: CachingNodeType
 }) => {
@@ -36,7 +44,6 @@ const SortableTabNode = SortableElement((props: {
     const tabElemRef = useRef<HTMLDivElement>(null);
     const tabContextMenu = (
         <TabContextMenu
-            cachingNodeController={props.cachingNodeHandler}
             cachingNode={props.cachingNode}
             tabElemRef={tabElemRef}
             setContextMenuVisible={setContextMenuVisible}
@@ -69,7 +76,6 @@ const SortableTabNode = SortableElement((props: {
 });
 
 interface TabNodeWrapperProps {
-    cachingNodeController: CachingNodeController
     prevTabNode: MutableRefObject<ReactElement>
     currentMouseOverNodeState: [any, Dispatch<SetStateAction<any>>]
 }
@@ -78,14 +84,13 @@ const isSameTab = (tabNode1, tabNode2) => RvUtil.equalAndNotEmpty(tabNode1?.key,
 const isTabActive = (tabNode, currentPath) => RvUtil.equalAndNotEmpty(tabNode?.key, currentPath);
 
 export default ({
-                    cachingNodeController,
                     prevTabNode,
-                    currentMouseOverNodeState
+                    currentMouseOverNodeState,
                 }: TabNodeWrapperProps) => {
     const {
         sortedCachingNodes,
-        currentPath
-    } = cachingNodeController;
+        currentPath,
+    } = useContext<TabsContextType>(TabsContext);
     return (tabNode) => {
         const [currentMouseOverNode, setCurrentMouseOverNode] = currentMouseOverNodeState;
         const index = sortedCachingNodes.findIndex(cachingNode => cachingNode.name === tabNode.key);
@@ -131,7 +136,6 @@ export default ({
                 onMouseLeave={onMouseLeave}
                 showBeforeDivider={showBeforeDivider}
                 showAfterDivider={showAfterDivider}
-                cachingNodeHandler={cachingNodeController}
                 tabNode={tabNode}
                 cachingNode={cachingNode}
                 index={index}

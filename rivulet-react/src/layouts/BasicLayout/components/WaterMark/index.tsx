@@ -88,7 +88,7 @@ const WaterMark: React.FC<WaterMarkProps> = props => {
         fontColor = 'rgba(0,0,0,.15)',
         fontSize = 16,
         fontFamily = 'sans-serif',
-        prefixCls: customizePrefixCls
+        prefixCls: customizePrefixCls,
     } = props;
 
     const {getPrefixCls} = useContext(ConfigProvider.ConfigContext);
@@ -151,14 +151,14 @@ const WaterMark: React.FC<WaterMarkProps> = props => {
         fontColor,
         image,
         content,
-        fontSize
+        fontSize,
     ]);
 
     return (
         <div
             style={{
                 position: 'relative',
-                ...style
+                ...style,
             }}
             className={wrapperCls}
         >
@@ -176,7 +176,7 @@ const WaterMark: React.FC<WaterMarkProps> = props => {
                     pointerEvents: 'none',
                     backgroundRepeat: 'repeat',
                     backgroundImage: `url('${base64Url}')`,
-                    ...markStyle
+                    ...markStyle,
                 }}
             />
         </div>

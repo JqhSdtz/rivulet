@@ -12,7 +12,7 @@ const option = {
     maxFontSize: 20,
     pcOnly: false,
     mobOnly: false,
-    responsive: false
+    responsive: false,
 };
 
 function getDesignWidth(oriWidth) {
@@ -60,5 +60,5 @@ export default {
     initRem,
     getRem,
     remToPx,
-    isMobile
+    isMobile,
 };

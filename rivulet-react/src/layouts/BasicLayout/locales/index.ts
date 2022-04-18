@@ -10,7 +10,7 @@ const locales = {
     'zh-TW': zhTWLocal,
     'en-US': enUSLocal,
     'it-IT': itITLocal,
-    'ko-KR': koKRLocal
+    'ko-KR': koKRLocal,
 };
 
 type GLocaleWindow = {

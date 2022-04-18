@@ -28,7 +28,7 @@ const GridContent: React.FC<GridContentProps> = props => {
         children,
         contentWidth: propsContentWidth,
         className: propsClassName,
-        style
+        style,
     } = props;
 
     const {getPrefixCls} = useContext(ConfigProvider.ConfigContext);
@@ -39,7 +39,7 @@ const GridContent: React.FC<GridContentProps> = props => {
     return (
         <div
             className={classNames(className, propsClassName, {
-                wide: contentWidth === 'Fixed'
+                wide: contentWidth === 'Fixed',
             })}
             style={style}
         >

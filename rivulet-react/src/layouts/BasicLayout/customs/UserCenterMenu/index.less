@@ -2,7 +2,7 @@
 @import (reference) '~antd/es/style/themes/index.less';
 
 .@{ant-prefix}-pro-sider-links {
-    .@{ant-prefix}-menu-vertical.@{ant-prefix}-menu-root {
+    .@{ant-prefix}-menu.@{ant-prefix}-menu-vertical.@{ant-prefix}-menu-root {
         .@{ant-prefix}-menu-submenu-title {
             transition: padding 0s;
             text-overflow: clip;
@@ -14,6 +14,11 @@
             right 0.2s,
             top 0.3s cubic-bezier(0.645, 0.045, 0.355, 1),
             color 0.3s cubic-bezier(0.645, 0.045, 0.355, 1) !important;
+        }
+
+        // menu会有一个默认的选中项，不加这一条，默认选中项的字体和图标都会变成#fff
+        .@{ant-prefix}-menu-submenu-active {
+            color: inherit;
         }
     }
 

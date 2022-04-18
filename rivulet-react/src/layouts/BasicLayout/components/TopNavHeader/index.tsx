@@ -1,10 +1,7 @@
 import React, {useRef, useState} from 'react';
 import classNames from 'classnames';
 import ResizeObserver from 'rc-resize-observer';
-import type {
-    PrivateSiderMenuProps,
-    SiderMenuProps
-} from '../SiderMenu/SiderMenu';
+import type {PrivateSiderMenuProps, SiderMenuProps} from '../SiderMenu/SiderMenu';
 import {defaultRenderLogoAndTitle} from '../SiderMenu/SiderMenu';
 import './index.less';
 
@@ -22,10 +19,10 @@ export type TopNavHeaderProps = SiderMenuProps &
  * @param param0
  */
 export const RightContent: React.FC<TopNavHeaderProps> = ({
-    rightContentRender,
-    prefixCls,
-    ...props
-}) => {
+                                                              rightContentRender,
+                                                              prefixCls,
+                                                              ...props
+                                                          }) => {
     const [rightSize, setRightSize] = useState<number | string>('auto');
 
     /** 减少一下渲染的次数 */
@@ -37,16 +34,16 @@ export const RightContent: React.FC<TopNavHeaderProps> = ({
         <div
             className={`${prefixCls}-right-content`}
             style={{
-                minWidth: rightSize
+                minWidth: rightSize,
             }}
         >
             <div
                 style={{
-                    paddingRight: 8
+                    paddingRight: 8,
                 }}
             >
                 <ResizeObserver
-                    onResize={({width}: {width: number}) => {
+                    onResize={({width}: { width: number }) => {
                         setRightSizeDebounceFn.run(width);
                     }}
                 >
@@ -56,7 +53,7 @@ export const RightContent: React.FC<TopNavHeaderProps> = ({
                                 ...props,
                                 // 测试专用
                                 //@ts-ignore
-                                rightContentSize: rightSize
+                                rightContentSize: rightSize,
                             })}
                         </div>
                     )}
@@ -75,16 +72,16 @@ const TopNavHeader: React.FC<TopNavHeaderProps> = props => {
         rightContentRender,
         className: propsClassName,
         style,
-        layout
+        layout,
     } = props;
     const prefixCls = `${props.prefixCls || 'ant-pro'}-top-nav-header`;
     const headerDom = defaultRenderLogoAndTitle(
         {...props, collapsed: false},
-        layout === 'mix' ? 'headerTitleRender' : undefined
+        layout === 'mix' ? 'headerTitleRender' : undefined,
     );
 
     const className = classNames(prefixCls, propsClassName, {
-        light: theme === 'light'
+        light: theme === 'light',
     });
 
     return (

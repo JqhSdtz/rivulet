@@ -1,9 +1,6 @@
 import type * as H from 'history';
 
-import type {
-    match,
-    RouteComponentProps as BasicRouteProps
-} from 'react-router-dom';
+import type {match, RouteComponentProps as BasicRouteProps} from 'react-router-dom';
 
 import type React from 'react';
 
@@ -54,7 +51,7 @@ export type WithFalse<T> = T | false;
 export type RouterTypes<P> = {
     computedMatch?: match<P>;
     route?: Route;
-    location: BasicRouteProps['location'] | {pathname?: string};
+    location: BasicRouteProps['location'] | { pathname?: string };
 } & Omit<BasicRouteProps, 'location'>;
 
 export type MessageDescriptor = {

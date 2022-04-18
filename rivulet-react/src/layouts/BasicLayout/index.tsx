@@ -30,7 +30,7 @@ const loopMenuItem = menus =>
     menus.map(({icon, children, ...item}) => ({
         ...item,
         icon: createElement(icon),
-        children: children && loopMenuItem(children)
+        children: children && loopMenuItem(children),
     }));
 
 const menuDataRender = async () => {
@@ -58,14 +58,14 @@ export default function BasicLayout({children, location}) {
         <ProLayout
             title="icejs & antd"
             style={{
-                minHeight: '100vh'
+                minHeight: '100vh',
             }}
             contentStyle={{
-                margin: '0.5rem 1rem'
+                margin: '0.5rem 1rem',
             }}
             headerHeight=""
             location={{
-                pathname: location.pathname
+                pathname: location.pathname,
             }}
             fixSiderbar
             fixedHeader
@@ -83,13 +83,13 @@ export default function BasicLayout({children, location}) {
                         {
                             key: 'icejs',
                             title: 'icejs',
-                            href: 'https://github.com/ice-lab/icejs'
+                            href: 'https://github.com/ice-lab/icejs',
                         },
                         {
                             key: 'antd',
                             title: 'antd',
-                            href: 'https://github.com/ant-design/ant-design'
-                        }
+                            href: 'https://github.com/ant-design/ant-design',
+                        },
                     ]}
                     copyright="by icejs & antd"
                 />
@@ -120,7 +120,7 @@ export {
     WaterMark,
     ProPageHeader,
     ProBreadcrumb,
-    CachingNode
+    CachingNode,
 };
 
 export type {
@@ -131,5 +131,5 @@ export type {
     RouteContextType,
     HeaderProps,
     SettingDrawerProps,
-    SettingDrawerState
+    SettingDrawerState,
 };

@@ -14,5 +14,5 @@ export default {
     },
     error(props: ModalFuncProps) {
         return Modal.error(presetProps(props));
-    }
+    },
 }

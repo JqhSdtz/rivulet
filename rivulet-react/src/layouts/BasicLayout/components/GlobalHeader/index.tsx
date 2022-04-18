@@ -3,15 +3,8 @@ import React from 'react';
 import classNames from 'classnames';
 
 import type {HeaderViewProps} from '../Header';
-import type {
-    PrivateSiderMenuProps,
-    SiderMenuProps
-} from '../SiderMenu/SiderMenu';
-import {
-    defaultRenderCollapsedButton,
-    defaultRenderLogo,
-    defaultRenderLogoAndTitle
-} from '../SiderMenu/SiderMenu';
+import type {PrivateSiderMenuProps, SiderMenuProps} from '../SiderMenu/SiderMenu';
+import {defaultRenderCollapsedButton, defaultRenderLogo, defaultRenderLogoAndTitle} from '../SiderMenu/SiderMenu';
 import type {PureSettings} from '../../configs/defaultSettings';
 import TopNavHeader from '../TopNavHeader';
 import type {MenuDataItem} from '../../index';
@@ -23,9 +16,7 @@ export type GlobalHeaderProps = {
     onCollapse?: (collapsed: boolean) => void;
     isMobile?: boolean;
     logo?: React.ReactNode;
-    menuRender?: WithFalse<
-        (props: HeaderViewProps, defaultDom: React.ReactNode) => React.ReactNode
-    >;
+    menuRender?: WithFalse<(props: HeaderViewProps, defaultDom: React.ReactNode) => React.ReactNode>;
     rightContentRender?: WithFalse<(props: HeaderViewProps) => React.ReactNode>;
     className?: string;
     prefixCls?: string;
@@ -39,7 +30,7 @@ export type GlobalHeaderProps = {
 
 const renderLogo = (
     menuHeaderRender: SiderMenuProps['menuHeaderRender'],
-    logoDom: React.ReactNode
+    logoDom: React.ReactNode,
 ) => {
     if (menuHeaderRender === false) {
         return null;
@@ -50,9 +41,7 @@ const renderLogo = (
     return logoDom;
 };
 
-const GlobalHeader: React.FC<
-    GlobalHeaderProps & PrivateSiderMenuProps
-> = props => {
+const GlobalHeader: React.FC<GlobalHeaderProps & PrivateSiderMenuProps> = props => {
     const {
         isMobile,
         logo,
@@ -69,18 +58,18 @@ const GlobalHeader: React.FC<
         headerTheme = 'dark',
         splitMenus,
         menuData,
-        prefixCls
+        prefixCls,
     } = props;
     const baseClassName = `${prefixCls}-global-header`;
     const className = classNames(propClassName, baseClassName, {
-        [`${baseClassName}-layout-${layout}`]: layout && headerTheme === 'dark'
+        [`${baseClassName}-layout-${layout}`]: layout && headerTheme === 'dark',
     });
 
     if (layout === 'mix' && !isMobile && splitMenus) {
         const noChildrenMenuData = (menuData || []).map(item => ({
             ...item,
             children: undefined,
-            routes: undefined
+            routes: undefined,
         }));
         const clearMenuData = clearMenuItem(noChildrenMenuData);
         return (
@@ -123,7 +112,7 @@ const GlobalHeader: React.FC<
                     >
                         {defaultRenderLogoAndTitle(
                             {...props, collapsed: false},
-                            'headerTitleRender'
+                            'headerTitleRender',
                         )}
                     </div>
                 </>

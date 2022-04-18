@@ -9,14 +9,12 @@ import type {WithFalse} from '../typings';
 const {Footer} = Layout;
 
 export type FooterProps = {
-    links?: WithFalse<
-        {
-            key?: string;
-            title: React.ReactNode;
-            href: string;
-            blankTarget?: boolean;
-        }[]
-    >;
+    links?: WithFalse<{
+        key?: string;
+        title: React.ReactNode;
+        href: string;
+        blankTarget?: boolean;
+    }[]>;
     copyright?: WithFalse<string>;
     style?: CSSProperties;
     className?: string;
@@ -24,12 +22,12 @@ export type FooterProps = {
 };
 
 const FooterView: React.FC<FooterProps> = ({
-    links,
-    copyright,
-    style,
-    className,
-    prefixCls
-}: FooterProps) => (
+                                               links,
+                                               copyright,
+                                               style,
+                                               className,
+                                               prefixCls,
+                                           }: FooterProps) => (
     <Footer className={className} style={{padding: 0, ...style}}>
         <GlobalFooter
             links={links}
@@ -37,7 +35,7 @@ const FooterView: React.FC<FooterProps> = ({
             copyright={
                 copyright === false ? null : (
                     <Fragment>
-                        <CopyrightOutlined /> {copyright}
+                        <CopyrightOutlined/> {copyright}
                     </Fragment>
                 )
             }

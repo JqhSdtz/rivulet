@@ -1,9 +1,8 @@
 import {CachingNodeType} from './CachingNode';
-import {useHistory} from 'ice';
+import {useHistory, useLocation} from 'ice';
 import {useAliveController} from 'react-activation';
-import {MutableRefObject, useContext, useRef} from 'react';
+import React, {useContext, useState} from 'react';
 import {RouteContext} from '@/layouts/BasicLayout';
-import {useLocation} from '../../../../../.ice/index';
 import {MenuConfigItem} from '@/layouts/BasicLayout/configs/menuConfig';
 
 function sortCachingNodes(tabKeySequence, cachingNodes): CachingNodeType[] {
@@ -36,13 +35,10 @@ function synchronizeTabKeySequence(prevTabKeySequence, cachingNodes): string[] {
     return curTabKeySequence;
 }
 
-// function getTargetCachingNode(targetKey, sortedCachingNodes) {
-//     return sortedCachingNodes.find(node => node.name === targetKey);
-// }
-
-export interface CachingNodeController {
+export interface TabsContextType {
     sortedCachingNodes: CachingNodeType[]
-    tabKeySequence: MutableRefObject<string[]>
+    tabKeySequence: string[]
+    setTabKeySequence: (tabKeySequence: string[]) => void
     currentPath: string
     activeNode: (targetKey: string | undefined) => void
     removeNode: (targetKey: string | undefined) => void
@@ -52,22 +48,20 @@ export interface CachingNodeController {
     removeRightSideNodes: (targetKey) => void
 }
 
-export interface CachingNodeStatus {
-    isLoading: boolean
-}
+export const TabsContext = React.createContext({} as TabsContextType);
 
-export function useCachingNodeController(): CachingNodeController {
+export default (props) => {
     const {getCachingNodes, drop, refresh} = useAliveController();
     const cachingNodes = getCachingNodes();
     const {menuData} = useContext(RouteContext);
     const {pathname, search} = useLocation();
     const history = useHistory();
     const currentPath = pathname + search;
-    const tabKeySequence = useRef<string[]>([]);
+    let [tabKeySequence, setTabKeySequence] = useState([] as string[]);
     // 将cachingNodes中的增加和删除反映到tabKeySequence中
-    tabKeySequence.current = synchronizeTabKeySequence(tabKeySequence.current, cachingNodes);
+    tabKeySequence = synchronizeTabKeySequence(tabKeySequence, cachingNodes);
     // 对cachingNodes进行排序
-    const sortedCachingNodes = sortCachingNodes(tabKeySequence.current, cachingNodes);
+    const sortedCachingNodes = sortCachingNodes(tabKeySequence, cachingNodes);
     // 设置cachingNode对应的MenuItem
     fillCachingNodeWithMenuData(sortedCachingNodes, menuData);
     const activeNode = (targetKey) => {
@@ -81,7 +75,7 @@ export function useCachingNodeController(): CachingNodeController {
             drop(targetKey).then(() => {
             });
             const curIdx = sortedCachingNodes.findIndex(
-                routeNode => routeNode.name === targetKey
+                routeNode => routeNode.name === targetKey,
             );
             activeNode(curIdx > 0 ? sortedCachingNodes[curIdx - 1].name || '' : '');
         } else {
@@ -98,7 +92,7 @@ export function useCachingNodeController(): CachingNodeController {
         activeNode(targetKey);
         sortedCachingNodes.forEach(node => {
             if (node.name !== targetKey) {
-                drop(node.name || '').then((success) => {
+                drop(node.name || '').then(() => {
                 });
             }
         });
@@ -129,15 +123,22 @@ export function useCachingNodeController(): CachingNodeController {
             });
         }
     }
-    return {
+
+    const value: TabsContextType = {
         sortedCachingNodes,
         tabKeySequence,
+        setTabKeySequence,
         currentPath,
         activeNode,
         removeNode,
         refreshNode,
         removeOtherNodes,
         removeLeftSideNodes,
-        removeRightSideNodes
-    }
+        removeRightSideNodes,
+    };
+    return (
+        <TabsContext.Provider value={value}>
+            {props.children}
+        </TabsContext.Provider>
+    )
 }

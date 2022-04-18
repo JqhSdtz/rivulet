@@ -36,6 +36,7 @@ import type {WaterMarkProps} from './components/WaterMark';
 import {ConfigProviderWrap} from '@ant-design/pro-provider';
 import {AliveScope} from 'react-activation';
 import {useLocation} from 'ice';
+import TabContextProvider from '@/layouts/BasicLayout/components/KeepAliveTabs/TabsContextProvider';
 
 let layoutIndex = 0;
 
@@ -61,11 +62,11 @@ export type BasicLayoutProps = Partial<RouterTypes<Route>> &
 
     footerRender?: WithFalse<(
         props: HeaderViewProps,
-        defaultDom: React.ReactNode
+        defaultDom: React.ReactNode,
     ) => React.ReactNode>;
 
     breadcrumbRender?: WithFalse<(
-        routers: AntdBreadcrumbProps['routes']
+        routers: AntdBreadcrumbProps['routes'],
     ) => AntdBreadcrumbProps['routes']>;
 
     menuItemRender?: BaseMenuProps['menuItemRender'];
@@ -79,7 +80,7 @@ export type BasicLayoutProps = Partial<RouterTypes<Route>> &
             id: string;
             // 页面标题不带默认的 title
             pageName: string;
-        }
+        },
     ) => string>;
     menuDataRender?: (menuData: MenuDataItem[]) => MenuDataItem[];
     itemRender?: AntdBreadcrumbProps['itemRender'];
@@ -116,7 +117,7 @@ const headerRender = (
     props: BasicLayoutProps & {
         hasSiderMenu: boolean;
     },
-    matchMenuKeys: string[]
+    matchMenuKeys: string[],
 ): React.ReactNode => {
     if (props.headerRender === false || props.pure) {
         return null;
@@ -136,7 +137,7 @@ const footerRender = (props: BasicLayoutProps): React.ReactNode => {
 
 const renderSiderMenu = (
     props: BasicLayoutProps,
-    matchMenuKeys: string[]
+    matchMenuKeys: string[],
 ): React.ReactNode => {
     const {layout, navTheme, isMobile, openKeys, splitMenus, menuRender} =
         props;
@@ -171,7 +172,7 @@ const renderSiderMenu = (
             style={
                 navTheme === 'realDark'
                     ? {
-                        boxShadow: '0 2px 8px 0 rgba(0, 0, 0, 65%)'
+                        boxShadow: '0 2px 8px 0 rgba(0, 0, 0, 65%)',
                     }
                     : {}
             }
@@ -188,7 +189,7 @@ const renderSiderMenu = (
 
 const defaultPageTitleRender = (
     pageProps: GetPageTitleProps,
-    props: BasicLayoutProps
+    props: BasicLayoutProps,
 ): {
     title: string;
     id: string;
@@ -200,24 +201,24 @@ const defaultPageTitleRender = (
         return {
             title: props.title || '',
             id: '',
-            pageName: ''
+            pageName: '',
         };
     }
     if (pageTitleRender) {
         const title = pageTitleRender(
             pageProps,
             pageTitleInfo.title,
-            pageTitleInfo
+            pageTitleInfo,
         );
         if (typeof title === 'string') {
             return {
                 ...pageTitleInfo,
-                title
+                title,
             };
         }
         warning(
             typeof title === 'string',
-            'pro-layout: renderPageTitle return value should be a string'
+            'pro-layout: renderPageTitle return value should be a string',
         );
     }
     return pageTitleInfo;
@@ -230,7 +231,7 @@ export type BasicLayoutContext = { [K in 'location']: BasicLayoutProps[K] } & {
 const getPaddingLeft = (
     hasLeftPadding: boolean,
     collapsed: boolean | undefined,
-    siderWidth: number
+    siderWidth: number,
 ): number | undefined => {
     if (hasLeftPadding) {
         return collapsed ? 48 : siderWidth;
@@ -259,7 +260,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
         menuDataRender,
         actionRef,
         formatMessage: propsFormatMessage,
-        loading
+        loading,
     } = props || {};
     const location = useLocation();
     const context = useContext(ConfigProvider.ConfigContext);
@@ -267,7 +268,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
 
     const [menuLoading, setMenuLoading] = useMountMergeState(false, {
         value: menu?.loading,
-        onChange: menu?.onLoadingChange
+        onChange: menu?.onLoadingChange,
     });
 
     // give a default key for swr
@@ -289,13 +290,13 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
                 return propsFormatMessage({
                     id,
                     defaultMessage,
-                    ...restParams
+                    ...restParams,
                 });
             }
             const locales = gLocaleObject();
             return locales[id] ? locales[id] : (defaultMessage as string);
         },
-        [propsFormatMessage]
+        [propsFormatMessage],
     );
 
     const {data, mutate} = useSWR(
@@ -312,8 +313,8 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
         {
             revalidateOnFocus: false,
             shouldRetryOnError: false,
-            revalidateOnReconnect: false
-        }
+            revalidateOnReconnect: false,
+        },
     );
 
     const menuInfoData = useMemo<{
@@ -326,9 +327,9 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
                 data || route?.routes || [],
                 menu,
                 formatMessage,
-                menuDataRender
+                menuDataRender,
             ),
-        [formatMessage, menu, menuDataRender, data, route?.routes]
+        [formatMessage, menu, menuDataRender, data, route?.routes],
     );
 
     const {breadcrumb = {}, breadcrumbMap, menuData = []} = menuInfoData || {};
@@ -337,7 +338,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
         actionRef.current = {
             reload: () => {
                 mutate();
-            }
+            },
         };
     }
     const matchMenus = useMemo(() => {
@@ -350,9 +351,9 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
     const matchMenuKeys = useMemo(
         () =>
             Array.from(
-                new Set(matchMenus.map(item => item.key || item.path || ''))
+                new Set(matchMenus.map(item => item.key || item.path || '')),
             ),
-        [matchMenus]
+        [matchMenus],
     );
 
     // 当前选中的menu，一般不会为空
@@ -368,7 +369,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
         ...rest
     } = {
         ...props,
-        ...currentMenuLayoutProps
+        ...currentMenuLayoutProps,
     };
 
     const propsLayout = compatibleLayout(defaultPropsLayout);
@@ -386,8 +387,8 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
         () => defaultCollapsed || false,
         {
             value: props.collapsed,
-            onChange: propsOnCollapse
-        }
+            onChange: propsOnCollapse,
+        },
     );
 
     // Splicing parameters, adding menuData and formatMessage in props
@@ -401,9 +402,9 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
             formatMessage,
             breadcrumb,
             menu: {...menu, loading: menuLoading},
-            layout: propsLayout as 'side'
+            layout: propsLayout as 'side',
         },
-        ['className', 'style', 'breadcrumbRender']
+        ['className', 'style', 'breadcrumbRender'],
     );
 
     // gen page title
@@ -412,9 +413,9 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
             pathname: location.pathname,
             search: location.search,
             ...defaultProps,
-            breadcrumbMap
+            breadcrumbMap,
         },
-        props
+        props,
     );
 
     // gen breadcrumbProps, parameter for pageHeader
@@ -422,9 +423,9 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
         {
             ...defaultProps,
             breadcrumbRender: props.breadcrumbRender,
-            breadcrumbMap
+            breadcrumbMap,
         },
-        props
+        props,
     );
 
     // render sider dom
@@ -435,9 +436,9 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
             onCollapse,
             isMobile,
             theme: navTheme === 'dark' ? 'dark' : 'light',
-            collapsed
+            collapsed,
         },
-        matchMenuKeys
+        matchMenuKeys,
     );
 
     // render header dom
@@ -449,16 +450,16 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
             isMobile,
             collapsed,
             onCollapse,
-            theme: navTheme === 'dark' ? 'dark' : 'light'
+            theme: navTheme === 'dark' ? 'dark' : 'light',
         },
-        matchMenuKeys
+        matchMenuKeys,
     );
 
     // render footer dom
     const footerDom = footerRender({
         isMobile,
         collapsed,
-        ...defaultProps
+        ...defaultProps,
     });
 
     const {isChildrenLayout: contextIsChildrenLayout} =
@@ -481,20 +482,20 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
             [`${baseClassName}-top-menu`]: propsLayout === 'top',
             [`${baseClassName}-is-children`]: isChildrenLayout,
             [`${baseClassName}-fix-siderbar`]: fixSiderbar,
-            [`${baseClassName}-${propsLayout}`]: propsLayout
-        }
+            [`${baseClassName}-${propsLayout}`]: propsLayout,
+        },
     );
 
     /** 计算 slider 的宽度 */
     const leftSiderWidth = getPaddingLeft(
         !!hasLeftPadding,
         collapsed,
-        siderWidth
+        siderWidth,
     );
 
     // siderMenuDom 为空的时候，不需要 padding
     const genLayoutStyle: CSSProperties = {
-        position: 'relative'
+        position: 'relative',
     };
 
     // if is some layout children, don't need min height
@@ -504,7 +505,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
 
     const contentClassName = classNames(`${baseClassName}-content`, {
         [`${baseClassName}-has-header`]: headerDom,
-        [`${baseClassName}-content-disable-margin`]: disableContentMargin
+        [`${baseClassName}-content-disable-margin`]: disableContentMargin,
     });
 
     /** 页面切换的时候触发 */
@@ -536,7 +537,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
                     pageTitleInfo,
                     matchMenus,
                     matchMenuKeys,
-                    currentMenu
+                    currentMenu,
                 }}
             >
                 {props.pure ? (
@@ -545,26 +546,28 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
                     </ConfigProviderWrap>
                 ) : (
                     <AliveScope>
-                        <div className={className}>
-                            <Layout style={style}>
-                                {siderMenuDom}
-                                <div
-                                    style={genLayoutStyle}
-                                    className={context.getPrefixCls('layout')}
-                                >
-                                    {headerDom}
-                                    <WrapContent
-                                        isChildrenLayout={isChildrenLayout}
-                                        {...rest}
-                                        className={contentClassName}
-                                        style={contentStyle}
+                        <TabContextProvider>
+                            <div className={className}>
+                                <Layout style={style}>
+                                    {siderMenuDom}
+                                    <div
+                                        style={genLayoutStyle}
+                                        className={context.getPrefixCls('layout')}
                                     >
-                                        {loading ? <PageLoading/> : children}
-                                    </WrapContent>
-                                    {footerDom}
-                                </div>
-                            </Layout>
-                        </div>
+                                        {headerDom}
+                                        <WrapContent
+                                            isChildrenLayout={isChildrenLayout}
+                                            {...rest}
+                                            className={contentClassName}
+                                            style={contentStyle}
+                                        >
+                                            {loading ? <PageLoading/> : children}
+                                        </WrapContent>
+                                        {footerDom}
+                                    </div>
+                                </Layout>
+                            </div>
+                        </TabContextProvider>
                     </AliveScope>
                 )}
             </RouteContext.Provider>
@@ -656,7 +659,7 @@ const Logo = () => (
 BasicLayout.defaultProps = {
     logo: <Logo/>,
     ...defaultSettings,
-    location: isBrowser() ? window.location : undefined
+    location: isBrowser() ? window.location : undefined,
 };
 
 export default BasicLayout;

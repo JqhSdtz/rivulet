@@ -13,8 +13,8 @@ export type FooterToolbarProps = {
     style?: React.CSSProperties;
     className?: string;
     renderContent?: (
-        props: FooterToolbarProps & RouteContextType & {leftWidth?: string},
-        dom: JSX.Element
+        props: FooterToolbarProps & RouteContextType & { leftWidth?: string },
+        dom: JSX.Element,
     ) => ReactNode;
     prefixCls?: string;
 };
@@ -49,7 +49,8 @@ const FooterToolbar: React.FC<FooterToolbarProps> = props => {
     /** 告诉 props 是否存在 footerBar */
     useEffect(() => {
         if (!value || !value?.setHasFooterToolbar) {
-            return () => {};
+            return () => {
+            };
         }
         value?.setHasFooterToolbar(true);
         return () => {
@@ -66,13 +67,13 @@ const FooterToolbar: React.FC<FooterToolbarProps> = props => {
         >
             {renderContent
                 ? renderContent(
-                      {
-                          ...props,
-                          ...value,
-                          leftWidth: width
-                      },
-                      dom
-                  )
+                    {
+                        ...props,
+                        ...value,
+                        leftWidth: width,
+                    },
+                    dom,
+                )
                 : dom}
         </div>
     );

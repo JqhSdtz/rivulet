@@ -16,19 +16,13 @@ export type HeaderViewProps = GlobalHeaderProps & {
     isMobile?: boolean;
     collapsed?: boolean;
     logo?: React.ReactNode;
-    headerRender?: WithFalse<
-        (props: HeaderViewProps, defaultDom: React.ReactNode) => React.ReactNode
-    >;
-    headerTitleRender?: WithFalse<
-        (
-            logo: React.ReactNode,
-            title: React.ReactNode,
-            props: HeaderViewProps
-        ) => React.ReactNode
-    >;
-    headerContentRender?: WithFalse<
-        (props: HeaderViewProps) => React.ReactNode
-    >;
+    headerRender?: WithFalse<(props: HeaderViewProps, defaultDom: React.ReactNode) => React.ReactNode>;
+    headerTitleRender?: WithFalse<(
+        logo: React.ReactNode,
+        title: React.ReactNode,
+        props: HeaderViewProps,
+    ) => React.ReactNode>;
+    headerContentRender?: WithFalse<(props: HeaderViewProps) => React.ReactNode>;
     siderWidth?: number;
     hasSiderMenu?: boolean;
 };
@@ -37,10 +31,8 @@ interface HeaderViewState {
     visible: boolean;
 }
 
-class HeaderView extends Component<
-    HeaderViewProps & PrivateSiderMenuProps,
-    HeaderViewState
-> {
+class HeaderView extends Component<HeaderViewProps & PrivateSiderMenuProps,
+    HeaderViewState> {
     renderContent = () => {
         const {
             isMobile,
@@ -48,7 +40,7 @@ class HeaderView extends Component<
             navTheme,
             layout,
             headerRender,
-            headerContentRender
+            headerContentRender,
         } = this.props;
         const isTop = layout === 'top';
         const clearMenuData = clearMenuItem(this.props.menuData || []);
@@ -90,7 +82,7 @@ class HeaderView extends Component<
             hasSiderMenu,
             isMobile,
             prefixCls,
-            headerHeight
+            headerHeight,
         } = this.props;
         const needFixedHeader = fixedHeader || layout === 'mix';
         const isTop = layout === 'top';
@@ -102,7 +94,7 @@ class HeaderView extends Component<
             [`${prefixCls}-fixed-header`]: needFixedHeader,
             [`${prefixCls}-fixed-header-action`]: !collapsed,
             [`${prefixCls}-top-menu`]: isTop,
-            [`${prefixCls}-header-${navTheme}`]: navTheme && layout !== 'mix'
+            [`${prefixCls}-header-${navTheme}`]: navTheme && layout !== 'mix',
         });
 
         /** 计算侧边栏的宽度，不然导致左边的样式会出问题 */
@@ -120,7 +112,7 @@ class HeaderView extends Component<
                         style={{
                             height: headerHeight,
                             lineHeight: headerHeight,
-                            background: 'transparent'
+                            background: 'transparent',
                         }}
                     />
                 )}
@@ -132,7 +124,7 @@ class HeaderView extends Component<
                         width,
                         zIndex: layout === 'mix' ? 100 : 19,
                         right,
-                        ...style
+                        ...style,
                     }}
                     className={className}
                 >

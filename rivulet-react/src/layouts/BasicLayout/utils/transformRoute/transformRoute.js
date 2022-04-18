@@ -61,7 +61,7 @@ const mergePath = (path = '', parentPath = '/') => {
 // bigfish 的兼容准话
 const bigfishCompatibleConversions = (route, props) => {
     const {menu = {}, indexRoute, path = '', routes} = route;
-    const {name = route.name, icon = route.icon, hideChildren = route.hideChildren, flatMenu = route.flatMenu,} = menu; // 兼容平铺式写法
+    const {name = route.name, icon = route.icon, hideChildren = route.hideChildren, flatMenu = route.flatMenu} = menu; // 兼容平铺式写法
     // 拼接 childrenRoutes, 处理存在 indexRoute 时的逻辑
     const childrenRoutes = indexRoute &&
     // 如果只有 redirect,不用处理的

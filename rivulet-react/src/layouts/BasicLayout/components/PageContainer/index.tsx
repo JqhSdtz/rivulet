@@ -1,11 +1,4 @@
-import type {
-    AffixProps,
-    BreadcrumbProps,
-    PageHeaderProps,
-    SpinProps,
-    TabPaneProps,
-    TabsProps
-} from 'antd';
+import type {AffixProps, BreadcrumbProps, PageHeaderProps, SpinProps, TabPaneProps, TabsProps} from 'antd';
 import {Affix, Breadcrumb, ConfigProvider, PageHeader, Tabs} from 'antd';
 import type {ReactNode} from 'react';
 import React, {useContext, useMemo} from 'react';
@@ -22,7 +15,7 @@ import WaterMark from '../WaterMark';
 
 export type PageHeaderTabConfig = {
     /** @name tabs 的列表 */
-    tabList?: (TabPaneProps & {key?: React.ReactText})[];
+    tabList?: (TabPaneProps & { key?: React.ReactText })[];
 
     /** @name 当前选中 tab 的 key */
     tabActiveKey?: TabsProps['activeKey'];
@@ -66,9 +59,7 @@ export type PageContainerProps = {
     };
 
     /** @name 自定义 pageHeader */
-    pageHeaderRender?: WithFalse<
-        (props: PageContainerProps) => React.ReactNode
-    >;
+    pageHeaderRender?: WithFalse<(props: PageContainerProps) => React.ReactNode>;
 
     /**
      * 与 antd 完全相同
@@ -93,10 +84,8 @@ export type PageContainerProps = {
     /** @name 配置面包屑 */
     breadcrumb?: BreadcrumbProps;
 } & PageHeaderTabConfig &
-    Omit<
-        PageHeaderProps,
-        'title' | 'footer' | 'breadcrumbRender' | 'breadcrumb'
-    >;
+    Omit<PageHeaderProps,
+        'title' | 'footer' | 'breadcrumbRender' | 'breadcrumb'>;
 
 function genLoading(spinProps: boolean | SpinProps) {
     if (typeof spinProps === 'object') {
@@ -109,21 +98,17 @@ function genLoading(spinProps: boolean | SpinProps) {
  * Render Footer tabList In order to be compatible with the old version of the PageHeader basically
  * all the functions are implemented.
  */
-const renderFooter: React.FC<
-    Omit<
-        PageContainerProps & {
-            prefixedClassName: string;
-        },
-        'title'
-    >
-> = ({
-    tabList,
-    tabActiveKey,
-    onTabChange,
-    tabBarExtraContent,
-    tabProps,
-    prefixedClassName
-}) => {
+const renderFooter: React.FC<Omit<PageContainerProps & {
+    prefixedClassName: string;
+},
+    'title'>> = ({
+                     tabList,
+                     tabActiveKey,
+                     onTabChange,
+                     tabBarExtraContent,
+                     tabProps,
+                     prefixedClassName,
+                 }) => {
     if (Array.isArray(tabList) || tabBarExtraContent) {
         return (
             <Tabs
@@ -154,7 +139,7 @@ const renderFooter: React.FC<
 const renderPageHeader = (
     content: React.ReactNode,
     extraContent: React.ReactNode,
-    prefixedClassName: string
+    prefixedClassName: string,
 ): React.ReactNode => {
     if (!content && !extraContent) {
         return null;
@@ -192,7 +177,7 @@ const ProBreadcrumb: React.FC<BreadcrumbProps> = props => {
             style={{
                 height: '100%',
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
             }}
         >
             <Breadcrumb
@@ -204,9 +189,7 @@ const ProBreadcrumb: React.FC<BreadcrumbProps> = props => {
     );
 };
 
-const ProPageHeader: React.FC<
-    PageContainerProps & {prefixedClassName: string}
-> = props => {
+const ProPageHeader: React.FC<PageContainerProps & { prefixedClassName: string }> = props => {
     const value = useContext(RouteContext);
     const {
         title,
@@ -245,9 +228,9 @@ const ProPageHeader: React.FC<
         footer: renderFooter({
             ...restProps,
             breadcrumbRender,
-            prefixedClassName
+            prefixedClassName,
         }),
-        ...header
+        ...header,
     };
 
     const {breadcrumb} = pageHeaderProps as {
@@ -266,7 +249,7 @@ const ProPageHeader: React.FC<
             'tags',
             'footer',
             'avatar',
-            'backIcon'
+            'backIcon',
         ].every(item => !pageHeaderProps[item]) &&
         noHasBreadCrumb &&
         !content &&
@@ -283,9 +266,9 @@ const ProPageHeader: React.FC<
                     breadcrumbRender === false
                         ? undefined
                         : {
-                              ...pageHeaderProps.breadcrumb,
-                              ...value.breadcrumbProps
-                          }
+                            ...pageHeaderProps.breadcrumb,
+                            ...value.breadcrumbProps,
+                        }
                 }
                 breadcrumbRender={getBreadcrumbRender}
                 prefixCls={prefixCls}
@@ -319,7 +302,7 @@ const PageContainer: React.FC<PageContainerProps> = props => {
 
     const containerClassName = classNames(prefixedClassName, className, {
         [`${prefixCls}-page-container-ghost`]: ghost,
-        [`${prefixCls}-page-container-with-footer`]: footer
+        [`${prefixCls}-page-container-with-footer`]: footer,
     });
 
     const content = useMemo(() => {
@@ -332,7 +315,7 @@ const PageContainer: React.FC<PageContainerProps> = props => {
                     <div
                         style={{
                             height: 48,
-                            marginTop: 24
+                            marginTop: 24,
                         }}
                     />
                 )}

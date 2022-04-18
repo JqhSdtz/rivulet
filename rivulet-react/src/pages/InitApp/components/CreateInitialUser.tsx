@@ -10,20 +10,20 @@ import {request, useAuth} from 'ice';
 import RvModal from '@/components/Common/RvModal';
 
 const form = createForm({
-    validateFirst: true
+    validateFirst: true,
 });
 
 const SchemaField = createSchemaField({
     components: {
         FormItem,
         Input,
-        Password
+        Password,
     },
     scope: {
         icon(name) {
             return React.createElement(ICONS[name])
-        }
-    }
+        },
+    },
 });
 
 const schema = {
@@ -41,8 +41,8 @@ const schema = {
             'x-validator': {
                 triggerType: 'onBlur',
                 minLength: 2,
-                maxLength: 32
-            }
+                maxLength: 32,
+            },
         },
         password: {
             type: 'string',
@@ -56,16 +56,16 @@ const schema = {
             'x-validator': [
                 {
                     triggerType: 'onBlur',
-                    minLength: 8
-                }
-            ]
-        }
-    }
+                    minLength: 8,
+                },
+            ],
+        },
+    },
 };
 
 const formLayout: FormProps = {
     layout: 'vertical',
-    size: 'large'
+    size: 'large',
 };
 
 interface ICreateIntialUserProps {
@@ -75,6 +75,7 @@ interface ICreateIntialUserProps {
 
 export default (props: ICreateIntialUserProps) => {
     const [, setAuth] = useAuth();
+
     async function onSubmit(data) {
         data.password = md5(data.password);
         const result: Result = await request.post('/app/initialUser', data);
@@ -83,17 +84,17 @@ export default (props: ICreateIntialUserProps) => {
                 content: '创建初始用户成功！',
                 onOk() {
                     setAuth({
-                        hasLoggedIn: true
+                        hasLoggedIn: true,
                     });
                     props.onPass?.();
-                }
+                },
             });
         } else {
             RvModal.error({
                 content: '创建初始用户失败！',
                 onOk() {
                     props.onReject?.();
-                }
+                },
             });
         }
     }
@@ -104,17 +105,17 @@ export default (props: ICreateIntialUserProps) => {
                 height: '100%',
                 display: 'flex',
                 justifyContent: 'center',
-                padding: 'auto'
+                padding: 'auto',
             }}
         >
             <Card
                 style={{
                     width: 400,
                     height: 340,
-                    marginTop: 90
+                    marginTop: 90,
                 }}
                 bodyStyle={{
-                    padding: 40
+                    padding: 40,
                 }}
             >
                 <Form

@@ -14,7 +14,7 @@ export default () => {
             extra={[
                 <Button type="primary" onClick={onEnter}>
                     进入应用
-                </Button>
+                </Button>,
             ]}
         />
     );

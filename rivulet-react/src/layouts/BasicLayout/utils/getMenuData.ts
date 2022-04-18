@@ -9,15 +9,15 @@ function fromEntries(iterable: any) {
             obj[key] = val;
             return obj;
         },
-        {}
+        {},
     );
 }
 
 const getMenuData = (
     routes: Readonly<Route[]>,
-    menu?: {locale?: boolean},
+    menu?: { locale?: boolean },
     formatMessage?: (message: MessageDescriptor) => string,
-    menuDataRender?: (menuData: MenuDataItem[]) => MenuDataItem[]
+    menuDataRender?: (menuData: MenuDataItem[]) => MenuDataItem[],
 ): {
     breadcrumb: Record<string, MenuDataItem>;
     breadcrumbMap: Map<string, MenuDataItem>;
@@ -27,20 +27,20 @@ const getMenuData = (
         routes as Route[],
         menu?.locale || false,
         formatMessage,
-        true
+        true,
     );
     if (!menuDataRender) {
         return {
             breadcrumb: fromEntries(breadcrumb),
             breadcrumbMap: breadcrumb,
-            menuData
+            menuData,
         };
     }
     return getMenuData(
         menuDataRender(menuData),
         menu,
         formatMessage,
-        undefined
+        undefined,
     );
 };
 

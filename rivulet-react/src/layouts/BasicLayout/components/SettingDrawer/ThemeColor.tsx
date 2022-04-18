@@ -16,9 +16,9 @@ export type TagProps = {
 const Tag: React.FC<TagProps> = React.forwardRef(
     ({color, check, ...rest}, ref) => (
         <div {...rest} style={{backgroundColor: color}} ref={ref as any}>
-            {check ? <CheckOutlined /> : ''}
+            {check ? <CheckOutlined/> : ''}
         </div>
-    )
+    ),
 );
 
 export type ThemeColorProps = {
@@ -28,13 +28,11 @@ export type ThemeColorProps = {
     }[];
     value: string;
     onChange: (color: string) => void;
-    formatMessage: (data: {id: any; defaultMessage?: string}) => string;
+    formatMessage: (data: { id: any; defaultMessage?: string }) => string;
 };
 
-const ThemeColor: React.ForwardRefRenderFunction<
-    HTMLDivElement,
-    ThemeColorProps
-> = ({value, colorList, onChange, formatMessage}, ref) => {
+const ThemeColor: React.ForwardRefRenderFunction<HTMLDivElement,
+    ThemeColorProps> = ({value, colorList, onChange, formatMessage}, ref) => {
     if (!colorList || colorList?.length < 1) {
         return null;
     }
@@ -47,7 +45,7 @@ const ThemeColor: React.ForwardRefRenderFunction<
                         <Tooltip
                             key={color}
                             title={formatMessage({
-                                id: `app.setting.themecolor.${key}`
+                                id: `app.setting.themecolor.${key}`,
                             })}
                         >
                             <Tag
