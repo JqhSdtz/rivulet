@@ -1,6 +1,6 @@
 import {Menu} from 'antd';
 import {TabsContext, TabsContextType} from './TabsContextProvider';
-import {CachingNodeType} from './CachingNode';
+import {CachingNodeType} from './TabNodeProvider';
 import {ReactElement, RefObject, useContext, useRef} from 'react';
 import {useClickAway} from 'ahooks';
 

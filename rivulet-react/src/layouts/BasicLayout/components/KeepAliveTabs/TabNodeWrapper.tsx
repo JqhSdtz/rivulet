@@ -1,5 +1,5 @@
 import RvUtil from '@/utils/rvUtil';
-import {CachingNodeType} from './CachingNode';
+import {CachingNodeType} from './TabNodeProvider';
 import {
     Dispatch,
     MouseEvent,
@@ -81,7 +81,7 @@ interface TabNodeWrapperProps {
 }
 
 const isSameTab = (tabNode1, tabNode2) => RvUtil.equalAndNotEmpty(tabNode1?.key, tabNode2?.key);
-const isTabActive = (tabNode, currentPath) => RvUtil.equalAndNotEmpty(tabNode?.key, currentPath);
+const isTabActive = (tabNode, currentTabKey) => RvUtil.equalAndNotEmpty(tabNode?.key, currentTabKey);
 
 export default ({
                     prevTabNode,
@@ -89,7 +89,7 @@ export default ({
                 }: TabNodeWrapperProps) => {
     const {
         sortedCachingNodes,
-        currentPath,
+        currentTabKey,
     } = useContext<TabsContextType>(TabsContext);
     return (tabNode) => {
         const [currentMouseOverNode, setCurrentMouseOverNode] = currentMouseOverNodeState;
@@ -98,7 +98,7 @@ export default ({
         let className = 'keep-alive-tab';
         const isFirst = index === 0;
         const isLast = index === sortedCachingNodes.length - 1;
-        const isActive = isTabActive(tabNode, currentPath);
+        const isActive = isTabActive(tabNode, currentTabKey);
         if (index === -1) {
             className += ' keep-alive-loading-tab';
         } else {
@@ -118,7 +118,7 @@ export default ({
             showBeforeDivider = false;
             showAfterDivider = false;
         }
-        if (isTabActive(prevTabNode.current, currentPath) || isSameTab(currentMouseOverNode, prevTabNode.current)) {
+        if (isTabActive(prevTabNode.current, currentTabKey) || isSameTab(currentMouseOverNode, prevTabNode.current)) {
             showBeforeDivider = false;
         }
         prevTabNode.current = tabNode;

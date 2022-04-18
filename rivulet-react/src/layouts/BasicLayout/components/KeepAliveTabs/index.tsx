@@ -28,7 +28,7 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
         sortedCachingNodes,
         tabKeySequence,
         setTabKeySequence,
-        currentPath,
+        currentTabKey,
         activeNode,
         removeNode,
     } = tabsContext;
@@ -95,7 +95,6 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
             }
         });
         setTabKeySequence(curTabKeySequence);
-        console.log(curTabKeySequence)
     }
     return (
         <SortableTabs
@@ -103,7 +102,7 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
             renderTabBar={renderTabBar}
             className="keep-alive-tabs"
             tabBarGutter={0}
-            activeKey={currentPath}
+            activeKey={currentTabKey}
             onEdit={onEdit}
             animated={{inkBar: true, tabPane: false}}
             axis="x"
@@ -133,5 +132,5 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
 
 export default KeepAliveTabs;
 
-export {default as CachingNode} from './CachingNode';
+export {default as CachingNode} from './TabNodeProvider';
 export * from './TabsContextProvider';

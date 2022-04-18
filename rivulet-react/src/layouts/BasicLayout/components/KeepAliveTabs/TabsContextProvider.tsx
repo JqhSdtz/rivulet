@@ -1,4 +1,4 @@
-import {CachingNodeType} from './CachingNode';
+import {CachingNodeType} from './TabNodeProvider';
 import {useHistory, useLocation} from 'ice';
 import {useAliveController} from 'react-activation';
 import React, {useContext, useState} from 'react';
@@ -39,7 +39,7 @@ export interface TabsContextType {
     sortedCachingNodes: CachingNodeType[]
     tabKeySequence: string[]
     setTabKeySequence: (tabKeySequence: string[]) => void
-    currentPath: string
+    currentTabKey: string
     activeNode: (targetKey: string | undefined) => void
     removeNode: (targetKey: string | undefined) => void
     refreshNode: (targetKey: string | undefined) => void
@@ -56,7 +56,7 @@ export default (props) => {
     const {menuData} = useContext(RouteContext);
     const {pathname, search} = useLocation();
     const history = useHistory();
-    const currentPath = pathname + search;
+    const currentTabKey = pathname + search;
     let [tabKeySequence, setTabKeySequence] = useState([] as string[]);
     // 将cachingNodes中的增加和删除反映到tabKeySequence中
     tabKeySequence = synchronizeTabKeySequence(tabKeySequence, cachingNodes);
@@ -66,18 +66,22 @@ export default (props) => {
     fillCachingNodeWithMenuData(sortedCachingNodes, menuData);
     const activeNode = (targetKey) => {
         if (!targetKey) return;
-        history.push(targetKey || '');
+        history.push(targetKey ?? '');
     }
     const removeNode = (targetKey) => {
-        if (!targetKey) return;
-        const isActive = targetKey === currentPath;
+        if (!targetKey || sortedCachingNodes.length <= 1) return;
+        const isActive = targetKey === currentTabKey;
         if (isActive) {
             drop(targetKey).then(() => {
             });
             const curIdx = sortedCachingNodes.findIndex(
                 routeNode => routeNode.name === targetKey,
             );
-            activeNode(curIdx > 0 ? sortedCachingNodes[curIdx - 1].name || '' : '');
+            if (curIdx === 0) {
+                activeNode(sortedCachingNodes[1].name ?? '');
+            } else if (curIdx > 0) {
+                activeNode(sortedCachingNodes[curIdx - 1].name ?? '');
+            }
         } else {
             drop(targetKey).then(() => {
             });
@@ -92,7 +96,7 @@ export default (props) => {
         activeNode(targetKey);
         sortedCachingNodes.forEach(node => {
             if (node.name !== targetKey) {
-                drop(node.name || '').then(() => {
+                drop(node.name ?? '').then(() => {
                 });
             }
         });
@@ -103,10 +107,10 @@ export default (props) => {
             if (node.name === targetKey) {
                 return;
             }
-            if (node.name === currentPath) {
+            if (node.name === currentTabKey) {
                 activeNode(targetKey);
             }
-            drop(node.name || '').then(() => {
+            drop(node.name ?? '').then(() => {
             });
         }
     }
@@ -116,10 +120,10 @@ export default (props) => {
             if (node.name === targetKey) {
                 return;
             }
-            if (node.name === currentPath) {
+            if (node.name === currentTabKey) {
                 activeNode(targetKey);
             }
-            drop(node.name || '').then(() => {
+            drop(node.name ?? '').then(() => {
             });
         }
     }
@@ -128,7 +132,7 @@ export default (props) => {
         sortedCachingNodes,
         tabKeySequence,
         setTabKeySequence,
-        currentPath,
+        currentTabKey,
         activeNode,
         removeNode,
         refreshNode,
