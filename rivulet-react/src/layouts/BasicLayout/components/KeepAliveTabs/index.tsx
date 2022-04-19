@@ -8,6 +8,7 @@ import TabNodeWrapper from './TabNodeWrapper';
 import {SortableContainer} from 'react-sortable-hoc';
 import {TabsContext, TabsContextType} from './TabsContextProvider';
 import {MenuConfigItem} from '@/layouts/BasicLayout/configs/menuConfig';
+import {useCreation} from 'ahooks';
 
 const {TabPane} = Tabs;
 
@@ -25,7 +26,7 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
     const defaultTabTitle = '加载中...';
     const tabsContext = useContext<TabsContextType>(TabsContext);
     const {
-        sortedCachingNodes,
+        sortedTabNodes,
         tabKeySequence,
         setTabKeySequence,
         currentTabKey,
@@ -39,10 +40,12 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
     };
     const prevTabNode = useRef<ReactElement>(null as any);
     const currentMouseOverNodeState = useState(null as any);
-    const renderWrapper = TabNodeWrapper({
-        currentMouseOverNodeState,
-        prevTabNode
-    });
+    const renderWrapper = useCreation(() => (
+        TabNodeWrapper({
+            currentMouseOverNodeState,
+            prevTabNode
+        })
+    ), []);
     const renderTabBar = (props, TabNavList) => {
         props.children = renderWrapper;
         props.onTabClick = (targetKey, event) => {
@@ -68,7 +71,7 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
             onMouseOver={<CloseCircleFilled style={{fontSize: 15}}/>}
         />
     );
-    const tabClosable = sortedCachingNodes.length > 1 || !sortedCachingNodes[0]?.targetMenu?.isStartPage;
+    const tabClosable = sortedTabNodes.length > 1 || !sortedTabNodes[0]?.targetMenu?.isStartPage;
     const sortableHelperRef = useRef<any>();
     const sortableHelper = <div className="sortable-tab-bar-helper" ref={sortableHelperRef}/>;
     const onSortEnd = ({oldIndex, newIndex}) => {
@@ -112,7 +115,7 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
             helperContainer={() => sortableHelperRef.current}
             onSortEnd={onSortEnd}
         >
-            {sortedCachingNodes.map((node, index) => {
+            {sortedTabNodes.map((node, index) => {
                 const menu: MenuConfigItem | undefined = node.targetMenu;
                 const tabTitle = menu?.name || defaultTabTitle;
                 const tabKey = node.name || index.toString();
@@ -132,5 +135,6 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
 
 export default KeepAliveTabs;
 
-export {default as CachingNode} from './TabNodeProvider';
+export {default as TabNodeProvider} from './TabNodeProvider';
 export * from './TabsContextProvider';
+export * from './TabNodeProvider';

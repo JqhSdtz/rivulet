@@ -1,5 +1,5 @@
 import {Link} from 'ice';
-import {CachingNode} from '@/layouts/BasicLayout';
+import {TabNodeProvider} from '@/layouts/BasicLayout';
 
 const NotFound = () => {
     return (
@@ -17,8 +17,8 @@ const NotFound = () => {
 
 export default () => {
     return (
-        <CachingNode>
+        <TabNodeProvider>
             <NotFound/>
-        </CachingNode>
+        </TabNodeProvider>
     );
 };

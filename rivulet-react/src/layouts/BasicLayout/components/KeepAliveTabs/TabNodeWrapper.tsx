@@ -1,5 +1,5 @@
 import RvUtil from '@/utils/rvUtil';
-import {CachingNodeType} from './TabNodeProvider';
+import {TabNodeType} from './TabNodeProvider';
 import {
     Dispatch,
     MouseEvent,
@@ -34,7 +34,7 @@ const SortableTabNode = SortableElement((props: {
     showBeforeDivider: boolean,
     showAfterDivider: boolean,
     tabNode: ReactElement,
-    cachingNode: CachingNodeType
+    cachingNode: TabNodeType
 }) => {
     const [contextMenuVisible, setContextMenuVisible] = useState(false);
     const onContextMenu = (event: MouseEvent) => {
@@ -87,17 +87,17 @@ export default ({
                     prevTabNode,
                     currentMouseOverNodeState
                 }: TabNodeWrapperProps) => {
-    const {
-        sortedCachingNodes,
-        currentTabKey
-    } = useContext<TabsContextType>(TabsContext);
     return (tabNode) => {
+        const {
+            sortedTabNodes,
+            currentTabKey
+        } = useContext<TabsContextType>(TabsContext);
         const [currentMouseOverNode, setCurrentMouseOverNode] = currentMouseOverNodeState;
-        const index = sortedCachingNodes.findIndex(cachingNode => cachingNode.name === tabNode.key);
-        const cachingNode = sortedCachingNodes[index];
+        const index = sortedTabNodes.findIndex(cachingNode => cachingNode.name === tabNode.key);
+        const cachingNode = sortedTabNodes[index];
         let className = 'keep-alive-tab';
         const isFirst = index === 0;
-        const isLast = index === sortedCachingNodes.length - 1;
+        const isLast = index === sortedTabNodes.length - 1;
         const isActive = isTabActive(tabNode, currentTabKey);
         if (index === -1) {
             className += ' keep-alive-loading-tab';
@@ -110,6 +110,9 @@ export default ({
             }
             if (isActive) {
                 className += ' keep-alive-active-tab';
+            }
+            if (cachingNode.needAttention) {
+                className += ' keep-alive-need-attention-tab';
             }
         }
         let showBeforeDivider = !isFirst;

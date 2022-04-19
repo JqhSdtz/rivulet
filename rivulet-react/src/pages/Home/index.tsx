@@ -2,7 +2,7 @@ import {useRequest} from 'ice';
 import {Table} from 'antd';
 import styles from './index.module.css';
 import {useMount} from 'ahooks';
-import {CachingNode} from '@/layouts/BasicLayout';
+import {TabNodeProvider} from '@/layouts/BasicLayout';
 
 function Home() {
     const {
@@ -41,8 +41,8 @@ function Home() {
 
 export default () => {
     return (
-        <CachingNode>
+        <TabNodeProvider>
             <Home/>
-        </CachingNode>
+        </TabNodeProvider>
     );
 };

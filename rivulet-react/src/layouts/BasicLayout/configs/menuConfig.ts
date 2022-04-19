@@ -1,11 +1,13 @@
 import {SmileOutlined} from '@ant-design/icons';
+import {MenuDataItem} from '@/layouts/BasicLayout';
 
-export interface MenuConfigItem {
+export interface MenuConfigItem extends MenuDataItem{
     name: string;
     path: string;
     icon?: any;
     isStartPage?: boolean;
     testPath: (path: string | undefined) => boolean;
+    children?: MenuConfigItem[]
 }
 
 function testPath(this: MenuConfigItem, path) {
@@ -30,7 +32,21 @@ const config: MenuConfigItem[] = [
         name: '首页',
         path: '/',
         icon: SmileOutlined,
-        testPath
+        testPath,
+        children: [
+            {
+                name: '测试子菜单0',
+                path: '/test?v=100',
+                icon: SmileOutlined,
+                testPath
+            },
+            {
+                name: '测试子菜单1',
+                path: '/test?v=101',
+                icon: SmileOutlined,
+                testPath
+            }
+        ]
     },
     {
         name: '仪表盘',
@@ -56,11 +72,18 @@ for (let i = 0; i < 5; ++i) {
     });
 }
 
-function processConfig(targetConfig) {
+function doProcess(targetConfig: MenuConfigItem[]) {
     targetConfig.forEach(configItem => {
         configItem.key = configItem.path;
         configItem.isStartPage = configItem.path === defaultStartPage;
+        if (configItem.children) {
+            doProcess(configItem.children);
+        }
     });
+}
+
+function processConfig(targetConfig: MenuConfigItem[]) {
+    doProcess(targetConfig);
     return targetConfig;
 }
 

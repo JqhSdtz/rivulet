@@ -1,11 +1,11 @@
 import {Menu} from 'antd';
 import {TabsContext, TabsContextType} from './TabsContextProvider';
-import {CachingNodeType} from './TabNodeProvider';
+import {TabNodeType} from './TabNodeProvider';
 import {ReactElement, RefObject, useContext, useRef} from 'react';
 import {useClickAway} from 'ahooks';
 
 export default (props: {
-    cachingNode: CachingNodeType,
+    cachingNode: TabNodeType,
     tabElemRef: RefObject<HTMLDivElement>,
     setContextMenuVisible: (visible: boolean) => void
 }) => {
@@ -15,15 +15,16 @@ export default (props: {
         setContextMenuVisible
     } = props;
     const {
-        sortedCachingNodes,
+        sortedTabNodes,
         removeNode,
         refreshNode,
+        removeAllNodes,
         removeOtherNodes,
         removeLeftSideNodes,
         removeRightSideNodes
     } = useContext<TabsContextType>(TabsContext);
     const menuItems = [] as ReactElement[];
-    if (sortedCachingNodes.length > 1) {
+    if (sortedTabNodes.length > 1) {
         menuItems.push(
             <Menu.Item key="closeTab" onClick={() => removeNode(cachingNode.name)}>
                 关闭
@@ -40,6 +41,12 @@ export default (props: {
             <Menu.Item key="closeOtherTabs" onClick={() => removeOtherNodes(cachingNode.name)}>
                 关闭其他
             </Menu.Item>
+            {
+                !cachingNode.targetMenu?.isStartPage &&
+                <Menu.Item key="closeAllTabs" onClick={() => removeAllNodes()}>
+                    关闭全部
+                </Menu.Item>
+            }
             <Menu.Item key="closeLeftSideTabs" onClick={() => removeLeftSideNodes(cachingNode.name)}>
                 关闭左侧
             </Menu.Item>
