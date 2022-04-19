@@ -18,7 +18,7 @@ const Tag: React.FC<TagProps> = React.forwardRef(
         <div {...rest} style={{backgroundColor: color}} ref={ref as any}>
             {check ? <CheckOutlined/> : ''}
         </div>
-    ),
+    )
 );
 
 export type ThemeColorProps = {
@@ -45,7 +45,7 @@ const ThemeColor: React.ForwardRefRenderFunction<HTMLDivElement,
                         <Tooltip
                             key={color}
                             title={formatMessage({
-                                id: `app.setting.themecolor.${key}`,
+                                id: `app.setting.themecolor.${key}`
                             })}
                         >
                             <Tag

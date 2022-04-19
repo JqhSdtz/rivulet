@@ -34,12 +34,12 @@ export const RightContent: React.FC<TopNavHeaderProps> = ({
         <div
             className={`${prefixCls}-right-content`}
             style={{
-                minWidth: rightSize,
+                minWidth: rightSize
             }}
         >
             <div
                 style={{
-                    paddingRight: 8,
+                    paddingRight: 8
                 }}
             >
                 <ResizeObserver
@@ -53,7 +53,7 @@ export const RightContent: React.FC<TopNavHeaderProps> = ({
                                 ...props,
                                 // 测试专用
                                 //@ts-ignore
-                                rightContentSize: rightSize,
+                                rightContentSize: rightSize
                             })}
                         </div>
                     )}
@@ -72,16 +72,16 @@ const TopNavHeader: React.FC<TopNavHeaderProps> = props => {
         rightContentRender,
         className: propsClassName,
         style,
-        layout,
+        layout
     } = props;
     const prefixCls = `${props.prefixCls || 'ant-pro'}-top-nav-header`;
     const headerDom = defaultRenderLogoAndTitle(
         {...props, collapsed: false},
-        layout === 'mix' ? 'headerTitleRender' : undefined,
+        layout === 'mix' ? 'headerTitleRender' : undefined
     );
 
     const className = classNames(prefixCls, propsClassName, {
-        light: theme === 'light',
+        light: theme === 'light'
     });
 
     return (

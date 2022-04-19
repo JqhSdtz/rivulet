@@ -30,7 +30,7 @@ export type GlobalHeaderProps = {
 
 const renderLogo = (
     menuHeaderRender: SiderMenuProps['menuHeaderRender'],
-    logoDom: React.ReactNode,
+    logoDom: React.ReactNode
 ) => {
     if (menuHeaderRender === false) {
         return null;
@@ -58,18 +58,18 @@ const GlobalHeader: React.FC<GlobalHeaderProps & PrivateSiderMenuProps> = props 
         headerTheme = 'dark',
         splitMenus,
         menuData,
-        prefixCls,
+        prefixCls
     } = props;
     const baseClassName = `${prefixCls}-global-header`;
     const className = classNames(propClassName, baseClassName, {
-        [`${baseClassName}-layout-${layout}`]: layout && headerTheme === 'dark',
+        [`${baseClassName}-layout-${layout}`]: layout && headerTheme === 'dark'
     });
 
     if (layout === 'mix' && !isMobile && splitMenus) {
         const noChildrenMenuData = (menuData || []).map(item => ({
             ...item,
             children: undefined,
-            routes: undefined,
+            routes: undefined
         }));
         const clearMenuData = clearMenuItem(noChildrenMenuData);
         return (
@@ -112,7 +112,7 @@ const GlobalHeader: React.FC<GlobalHeaderProps & PrivateSiderMenuProps> = props 
                     >
                         {defaultRenderLogoAndTitle(
                             {...props, collapsed: false},
-                            'headerTitleRender',
+                            'headerTitleRender'
                         )}
                     </div>
                 </>

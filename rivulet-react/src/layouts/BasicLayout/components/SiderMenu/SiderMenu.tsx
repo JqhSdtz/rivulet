@@ -25,7 +25,7 @@ export const defaultRenderLogo = (logo: React.ReactNode): React.ReactNode => {
 
 export const defaultRenderLogoAndTitle = (
     props: SiderMenuProps,
-    renderKey: string = 'menuHeaderRender',
+    renderKey: string = 'menuHeaderRender'
 ): React.ReactNode => {
     const {logo, title, layout} = props;
     const renderFunction = props[renderKey || ''];
@@ -40,7 +40,7 @@ export const defaultRenderLogoAndTitle = (
         return renderFunction(
             logoDom,
             props.collapsed ? null : titleDom,
-            props,
+            props
         );
     }
 
@@ -62,7 +62,7 @@ export type SiderMenuProps = {
     menuHeaderRender?: WithFalse<(
         logo: React.ReactNode,
         title: React.ReactNode,
-        props?: SiderMenuProps,
+        props?: SiderMenuProps
     ) => React.ReactNode>;
     menuFooterRender?: WithFalse<(props?: SiderMenuProps) => React.ReactNode>;
     menuContentRender?: WithFalse<(props: SiderMenuProps, defaultDom: React.ReactNode) => React.ReactNode>;
@@ -108,14 +108,14 @@ const SiderMenu: React.FC<SiderMenuProps & PrivateSiderMenuProps> = props => {
         prefixCls,
         onOpenChange,
         headerHeight,
-        logoStyle,
+        logoStyle
     } = props;
     const baseClassName = `${prefixCls}-sider`;
     const {flatMenuKeys} = MenuCounter.useContainer();
     const siderClassName = classNames(`${baseClassName}`, {
         [`${baseClassName}-fixed`]: fixSiderbar,
         [`${baseClassName}-layout-${layout}`]: layout && !isMobile,
-        [`${baseClassName}-light`]: theme !== 'dark',
+        [`${baseClassName}-light`]: theme !== 'dark'
     });
 
     const headerDom = defaultRenderLogoAndTitle(props);
@@ -128,7 +128,7 @@ const SiderMenu: React.FC<SiderMenuProps & PrivateSiderMenuProps> = props => {
             mode="inline"
             handleOpenChange={onOpenChange}
             style={{
-                width: '100%',
+                width: '100%'
             }}
             className={`${baseClassName}-menu`}
         />
@@ -148,7 +148,7 @@ const SiderMenu: React.FC<SiderMenuProps & PrivateSiderMenuProps> = props => {
                         maxWidth: collapsed ? 48 : siderWidth,
                         minWidth: collapsed ? 48 : siderWidth,
                         transition: `background-color 0.3s, min-width 0.3s, max-width 0.3s cubic-bezier(0.645, 0.045, 0.355, 1)`,
-                        ...style,
+                        ...style
                     }}
                 />
             )}
@@ -168,7 +168,7 @@ const SiderMenu: React.FC<SiderMenuProps & PrivateSiderMenuProps> = props => {
                         layout === 'mix' && !isMobile
                             ? headerHeight
                             : undefined,
-                    ...style,
+                    ...style
                 }}
                 width={siderWidth}
                 theme={theme}
@@ -177,7 +177,7 @@ const SiderMenu: React.FC<SiderMenuProps & PrivateSiderMenuProps> = props => {
                 {headerDom && (
                     <div
                         className={classNames(`${baseClassName}-logo`, {
-                            [`${baseClassName}-collapsed`]: collapsed,
+                            [`${baseClassName}-collapsed`]: collapsed
                         })}
                         onClick={
                             layout !== 'mix' ? onMenuHeaderClick : undefined
@@ -201,7 +201,7 @@ const SiderMenu: React.FC<SiderMenuProps & PrivateSiderMenuProps> = props => {
                     style={{
                         flex: 1,
                         overflowY: 'auto',
-                        overflowX: 'hidden',
+                        overflowX: 'hidden'
                     }}
                 >
                     {menuRenderDom}
@@ -244,7 +244,7 @@ const SiderMenu: React.FC<SiderMenuProps & PrivateSiderMenuProps> = props => {
                 {menuFooterRender && (
                     <div
                         className={classNames(`${baseClassName}-footer`, {
-                            [`${baseClassName}-footer-collapsed`]: !collapsed,
+                            [`${baseClassName}-footer-collapsed`]: !collapsed
                         })}
                     >
                         {menuFooterRender(props)}

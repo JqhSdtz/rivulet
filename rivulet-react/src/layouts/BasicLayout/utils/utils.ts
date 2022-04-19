@@ -7,7 +7,7 @@ export const getOpenKeysFromMenuData = (menuData?: MenuDataItem[]) => {
         }
         if (item.routes) {
             const newArray: string[] = pre.concat(
-                getOpenKeysFromMenuData(item.routes) || [],
+                getOpenKeysFromMenuData(item.routes) || []
             );
             return newArray;
         }
@@ -22,7 +22,7 @@ const themeConfig = {
     cyan: '#13C2C2',
     green: '#52C41A',
     geekblue: '#2F54EB',
-    purple: '#722ED1',
+    purple: '#722ED1'
 };
 
 /**
@@ -46,12 +46,12 @@ export function clearMenuItem(menusData: MenuDataItem[]): MenuDataItem[] {
                 if (
                     !finalItem.hideChildrenInMenu &&
                     finalItem.routes.some(
-                        child => child && child.name && !child.hideInMenu,
+                        child => child && child.name && !child.hideInMenu
                     )
                 ) {
                     return {
                         ...item,
-                        routes: clearMenuItem(finalItem.routes),
+                        routes: clearMenuItem(finalItem.routes)
                     };
                 }
                 // children 为空就直接删掉

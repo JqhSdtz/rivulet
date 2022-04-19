@@ -36,5 +36,5 @@ export default {
     'app.setting.copyinfo':
         '복사 성공. src/models/settings.js에 있는 defaultSettings를 교체해 주세요.',
     'app.setting.production.hint':
-        '설정 판넬은 개발 환경에서만 보여집니다. 직접 수동으로 변경바랍니다.',
+        '설정 판넬은 개발 환경에서만 보여집니다. 직접 수동으로 변경바랍니다.'
 };

@@ -12,7 +12,7 @@ export default (props: {
     const {
         cachingNode,
         tabElemRef,
-        setContextMenuVisible,
+        setContextMenuVisible
     } = props;
     const {
         sortedCachingNodes,
@@ -20,20 +20,20 @@ export default (props: {
         refreshNode,
         removeOtherNodes,
         removeLeftSideNodes,
-        removeRightSideNodes,
+        removeRightSideNodes
     } = useContext<TabsContextType>(TabsContext);
     const menuItems = [] as ReactElement[];
     if (sortedCachingNodes.length > 1) {
         menuItems.push(
             <Menu.Item key="closeTab" onClick={() => removeNode(cachingNode.name)}>
                 关闭
-            </Menu.Item>,
+            </Menu.Item>
         );
     }
     menuItems.push(
         <Menu.Item key="refreshTab" onClick={() => refreshNode(cachingNode.name)}>
             刷新
-        </Menu.Item>,
+        </Menu.Item>
     );
     menuItems.push(
         <Menu.SubMenu key="batchCloseTabs" title="批量关闭">
@@ -46,7 +46,7 @@ export default (props: {
             <Menu.Item key="closeRightSideTabs" onClick={() => removeRightSideNodes(cachingNode.name)}>
                 关闭右侧
             </Menu.Item>
-        </Menu.SubMenu>,
+        </Menu.SubMenu>
     );
     const ref = useRef<HTMLDivElement>(null);
     useClickAway((event) => {

@@ -23,11 +23,11 @@ export default ({
                     prefixCls,
                     links,
                     copyright,
-                    style,
+                    style
                 }: GlobalFooterProps) => {
     const context = useContext(ConfigProvider.ConfigContext);
     const baseClassName = context.getPrefixCls(
-        prefixCls || 'pro-global-footer',
+        prefixCls || 'pro-global-footer'
     );
 
     if (

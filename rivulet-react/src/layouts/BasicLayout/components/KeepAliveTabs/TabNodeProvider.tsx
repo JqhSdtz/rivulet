@@ -2,19 +2,21 @@ import {useLocation} from 'ice';
 import {KeepAlive} from 'react-activation';
 import React, {useContext} from 'react';
 import {TabsContext, TabsContextType} from '@/layouts/BasicLayout';
+import {MenuConfigItem} from '@/layouts/BasicLayout/configs/menuConfig';
 
 export interface CachingNodeType {
-    createTime: number
-    updateTime: number
-    name?: string
-    id: string
+    createTime: number;
+    updateTime: number;
+    name?: string;
+    id: string;
+    targetMenu?: MenuConfigItem;
 
-    [key: string]: any
+    [key: string]: any;
 }
 
 export interface TabNodeContextType {
-    tabKey: string
-    closeTab: () => void
+    tabKey: string;
+    closeTab: () => void;
 }
 
 export const TabNodeContext = React.createContext({} as TabNodeContextType);
@@ -23,15 +25,15 @@ export default (props) => {
     const {pathname, search} = useLocation();
     const tabKey = pathname + search;
     const {
-        removeNode,
+        removeNode
     } = useContext<TabsContextType>(TabsContext);
     const closeTab = () => {
         removeNode(tabKey);
-    }
+    };
     const value = {
         tabKey,
-        closeTab,
-    }
+        closeTab
+    };
     return (
         <TabNodeContext.Provider value={value}>
             <KeepAlive

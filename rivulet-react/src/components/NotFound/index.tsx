@@ -20,5 +20,5 @@ export default () => {
         <CachingNode>
             <NotFound/>
         </CachingNode>
-    )
+    );
 };

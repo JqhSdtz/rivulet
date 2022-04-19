@@ -8,7 +8,7 @@ import {
     SetStateAction,
     useContext,
     useRef,
-    useState,
+    useState
 } from 'react';
 import {SortableElement} from 'react-sortable-hoc';
 import {TabsContext, TabsContextType} from './TabsContextProvider';
@@ -16,7 +16,7 @@ import TabContextMenu from './TabContextMenu';
 import {Dropdown} from 'antd';
 
 interface TabDividerProps {
-    isShow: boolean
+    isShow: boolean;
 }
 
 const TabDivider = (props: TabDividerProps) => {
@@ -40,7 +40,7 @@ const SortableTabNode = SortableElement((props: {
     const onContextMenu = (event: MouseEvent) => {
         event.preventDefault();
         setContextMenuVisible(true);
-    }
+    };
     const tabElemRef = useRef<HTMLDivElement>(null);
     const tabContextMenu = (
         <TabContextMenu
@@ -76,8 +76,8 @@ const SortableTabNode = SortableElement((props: {
 });
 
 interface TabNodeWrapperProps {
-    prevTabNode: MutableRefObject<ReactElement>
-    currentMouseOverNodeState: [any, Dispatch<SetStateAction<any>>]
+    prevTabNode: MutableRefObject<ReactElement>;
+    currentMouseOverNodeState: [any, Dispatch<SetStateAction<any>>];
 }
 
 const isSameTab = (tabNode1, tabNode2) => RvUtil.equalAndNotEmpty(tabNode1?.key, tabNode2?.key);
@@ -85,11 +85,11 @@ const isTabActive = (tabNode, currentTabKey) => RvUtil.equalAndNotEmpty(tabNode?
 
 export default ({
                     prevTabNode,
-                    currentMouseOverNodeState,
+                    currentMouseOverNodeState
                 }: TabNodeWrapperProps) => {
     const {
         sortedCachingNodes,
-        currentTabKey,
+        currentTabKey
     } = useContext<TabsContextType>(TabsContext);
     return (tabNode) => {
         const [currentMouseOverNode, setCurrentMouseOverNode] = currentMouseOverNodeState;
@@ -124,10 +124,10 @@ export default ({
         prevTabNode.current = tabNode;
         const onMouseEnter = () => {
             setCurrentMouseOverNode(tabNode);
-        }
+        };
         const onMouseLeave = () => {
             setCurrentMouseOverNode(null);
-        }
+        };
         // SortableTabNode的index属性是SortableElement的属性，不能删
         return (
             <SortableTabNode
@@ -140,6 +140,6 @@ export default ({
                 cachingNode={cachingNode}
                 index={index}
             />
-        )
+        );
     };
 }

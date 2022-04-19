@@ -152,7 +152,7 @@ const K256 = [
     0x90befffa,
     0xa4506ceb,
     0xbef9a3f7,
-    0xc67178f2,
+    0xc67178f2
 ];
 /* global arrays */
 let ihash;

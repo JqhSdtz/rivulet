@@ -14,13 +14,13 @@ const SchemaField = createSchemaField({
     components: {
         FormItem,
         Input,
-        Password,
+        Password
     },
     scope: {
         icon(name) {
-            return React.createElement(ICONS[name])
-        },
-    },
+            return React.createElement(ICONS[name]);
+        }
+    }
 });
 
 const schema = {
@@ -33,15 +33,15 @@ const schema = {
             'x-decorator': 'FormItem',
             'x-component': 'Password',
             'x-component-props': {
-                prefix: '{{icon(\'LockOutlined\')}}',
-            },
-        },
-    },
+                prefix: '{{icon(\'LockOutlined\')}}'
+            }
+        }
+    }
 };
 
 const formLayout: FormProps = {
     layout: 'vertical',
-    size: 'large',
+    size: 'large'
 };
 
 interface IVerifyInitKeyProps {
@@ -56,17 +56,17 @@ export default (props: IVerifyInitKeyProps) => {
                 height: '100%',
                 display: 'flex',
                 justifyContent: 'center',
-                padding: 'auto',
+                padding: 'auto'
             }}
         >
             <Card
                 style={{
                     width: 400,
                     height: 250,
-                    marginTop: 90,
+                    marginTop: 90
                 }}
                 bodyStyle={{
-                    padding: 40,
+                    padding: 40
                 }}
             >
                 <Form
@@ -79,14 +79,14 @@ export default (props: IVerifyInitKeyProps) => {
                                 content: '密钥验证成功！',
                                 onOk() {
                                     props.onPass?.();
-                                },
+                                }
                             });
                         } else {
                             RvModal.error({
                                 content: '密钥验证失败！请检查密钥是否已过期。',
                                 onOk() {
                                     props.onReject?.();
-                                },
+                                }
                             });
                         }
                     }}
@@ -100,7 +100,7 @@ export default (props: IVerifyInitKeyProps) => {
                     style={{
                         display: 'flex',
                         marginTop: 15,
-                        justifyContent: 'flex-end',
+                        justifyContent: 'flex-end'
                     }}
                 >
                     <a href="#如何获取密钥">如何获取密钥</a>

@@ -19,7 +19,7 @@ const BlockCheckbox: React.FC<BlockCheckboxProps> = ({
                                                          configType,
                                                          onChange,
                                                          list,
-                                                         prefixCls,
+                                                         prefixCls
                                                      }) => {
     const baseClassName = `${prefixCls}-drawer-block-checkbox`;
     const dom = useMemo(() => {
@@ -29,14 +29,14 @@ const BlockCheckbox: React.FC<BlockCheckboxProps> = ({
                     className={classNames(
                         `${baseClassName}-item`,
                         `${baseClassName}-item-${item.key}`,
-                        `${baseClassName}-${configType}-item`,
+                        `${baseClassName}-${configType}-item`
                     )}
                     onClick={() => onChange(item.key)}
                 >
                     <CheckOutlined
                         className={`${baseClassName}-selectIcon`}
                         style={{
-                            display: value === item.key ? 'block' : 'none',
+                            display: value === item.key ? 'block' : 'none'
                         }}
                     />
                 </div>
@@ -49,7 +49,7 @@ const BlockCheckbox: React.FC<BlockCheckboxProps> = ({
         <div
             className={baseClassName}
             style={{
-                minHeight: 42,
+                minHeight: 42
             }}
         >
             {dom}

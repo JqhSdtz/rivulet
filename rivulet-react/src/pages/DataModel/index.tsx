@@ -8,7 +8,7 @@ const propertiesTabSchema = {
     type: 'void',
     'x-component': 'FormTab.TabPane',
     'x-component-props': {
-        tab: '属性',
+        tab: '属性'
     },
     properties: {
         layout: {
@@ -17,14 +17,14 @@ const propertiesTabSchema = {
             'x-component-props': {
                 labelCol: 6,
                 wrapperCol: 18,
-                labelWrap: true,
+                labelWrap: true
             },
             properties: {
                 grid: {
                     type: 'void',
                     'x-component': 'FormGrid',
                     'x-component-props': {
-                        maxColumns: 3,
+                        maxColumns: 3
                     },
                     properties: {
                         name: {
@@ -32,44 +32,44 @@ const propertiesTabSchema = {
                             title: '名称',
                             required: true,
                             'x-decorator': 'FormItem',
-                            'x-component': 'Input',
+                            'x-component': 'Input'
                         },
                         title: {
                             type: 'string',
                             title: '标题',
                             required: true,
                             'x-decorator': 'FormItem',
-                            'x-component': 'Input',
+                            'x-component': 'Input'
                         },
                         field3: {
                             type: 'string',
                             title: '字段3',
                             'x-decorator': 'FormItem',
-                            'x-component': 'Input',
+                            'x-component': 'Input'
                         },
                         field4: {
                             type: 'string',
                             title: '字段4',
                             'x-decorator': 'FormItem',
-                            'x-component': 'Input',
+                            'x-component': 'Input'
                         },
                         field5: {
                             type: 'string',
                             title: '字段5',
                             'x-decorator': 'FormItem',
-                            'x-component': 'Input',
+                            'x-component': 'Input'
                         },
                         field6: {
                             type: 'string',
                             title: '字段6',
                             'x-decorator': 'FormItem',
-                            'x-component': 'Input',
-                        },
-                    },
-                },
-            },
-        },
-    },
+                            'x-component': 'Input'
+                        }
+                    }
+                }
+            }
+        }
+    }
 };
 
 const schema = {
@@ -79,7 +79,7 @@ const schema = {
             type: 'void',
             'x-component': 'FormTab',
             'x-component-props': {
-                formTab: '{{formTab}}',
+                formTab: '{{formTab}}'
             },
             properties: {
                 propertiesTab: propertiesTabSchema,
@@ -87,7 +87,7 @@ const schema = {
                     type: 'void',
                     'x-component': 'FormTab.TabPane',
                     'x-component-props': {
-                        tab: 'A2',
+                        tab: 'A2'
                     },
                     properties: {
                         bbb: {
@@ -95,22 +95,22 @@ const schema = {
                             title: 'BBB',
                             'x-decorator': 'FormItem',
                             required: true,
-                            'x-component': 'Input',
+                            'x-component': 'Input'
                         },
                         ccc: {
                             type: 'string',
                             title: 'CCC',
                             'x-decorator': 'FormItem',
                             required: true,
-                            'x-component': 'Input',
-                        },
-                    },
+                            'x-component': 'Input'
+                        }
+                    }
                 },
                 tab3: {
                     type: 'void',
                     'x-component': 'FormTab.TabPane',
                     'x-component-props': {
-                        tab: 'A3',
+                        tab: 'A3'
                     },
                     properties: {
                         ccc: {
@@ -118,13 +118,13 @@ const schema = {
                             title: 'CCC',
                             'x-decorator': 'FormItem',
                             required: true,
-                            'x-component': 'Input',
-                        },
-                    },
-                },
-            },
-        },
-    },
+                            'x-component': 'Input'
+                        }
+                    }
+                }
+            }
+        }
+    }
 };
 
 const SchemaField = createSchemaField({
@@ -133,8 +133,8 @@ const SchemaField = createSchemaField({
         FormTab,
         Input,
         FormGrid,
-        FormLayout,
-    },
+        FormLayout
+    }
 });
 
 function DataModel() {

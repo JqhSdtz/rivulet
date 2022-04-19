@@ -8,23 +8,23 @@ const {Step} = Steps;
 
 
 export default () => {
-    const [current, setCurrent] = React.useState(0)
+    const [current, setCurrent] = React.useState(0);
     const next = () => {
         setCurrent(current + 1);
     };
     const steps = [
         {
             title: '验证初始密钥',
-            content: <VerifyInitKey onPass={next}/>,
+            content: <VerifyInitKey onPass={next}/>
         },
         {
             title: '创建初始帐号',
-            content: <CreateInitialUser onPass={next}/>,
+            content: <CreateInitialUser onPass={next}/>
         },
         {
             title: '初始化完成',
-            content: <SuccessResult/>,
-        },
+            content: <SuccessResult/>
+        }
     ];
     return (
         <div style={{width: '80%', marginLeft: '10%', marginTop: '1.5rem'}}>

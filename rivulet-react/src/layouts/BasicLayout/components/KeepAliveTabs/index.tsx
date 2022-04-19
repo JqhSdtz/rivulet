@@ -1,6 +1,5 @@
 import React, {ReactElement, useContext, useRef, useState} from 'react';
 import {HeaderViewProps} from '../Header';
-import {MenuDataItem} from '../..';
 import {Tabs} from 'antd';
 import './index.less';
 import MouseOver from '@/components/Common/MouseOver';
@@ -8,6 +7,7 @@ import {CloseCircleFilled, CloseOutlined} from '@ant-design/icons';
 import TabNodeWrapper from './TabNodeWrapper';
 import {SortableContainer} from 'react-sortable-hoc';
 import {TabsContext, TabsContextType} from './TabsContextProvider';
+import {MenuConfigItem} from '@/layouts/BasicLayout/configs/menuConfig';
 
 const {TabPane} = Tabs;
 
@@ -30,18 +30,18 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
         setTabKeySequence,
         currentTabKey,
         activeNode,
-        removeNode,
+        removeNode
     } = tabsContext;
     const onEdit = (targetKey, action) => {
         if (action === 'remove') {
             removeNode(targetKey);
         }
-    }
+    };
     const prevTabNode = useRef<ReactElement>(null as any);
     const currentMouseOverNodeState = useState(null as any);
     const renderWrapper = TabNodeWrapper({
         currentMouseOverNodeState,
-        prevTabNode,
+        prevTabNode
     });
     const renderTabBar = (props, TabNavList) => {
         props.children = renderWrapper;
@@ -51,13 +51,13 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
                 bubbles: true,
                 cancelable: true,
                 detail: {
-                    tabKey: targetKey,
-                },
+                    tabKey: targetKey
+                }
             };
             const customEvent = new CustomEvent('tabClick', eventInitDict);
             event.target.dispatchEvent(customEvent);
             activeNode(targetKey);
-        }
+        };
         return <TabNavList {...props} />;
     };
     const closeIcon = (
@@ -68,7 +68,7 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
             onMouseOver={<CloseCircleFilled style={{fontSize: 15}}/>}
         />
     );
-    const tabClosable = sortedCachingNodes.length > 1;
+    const tabClosable = sortedCachingNodes.length > 1 || !sortedCachingNodes[0]?.targetMenu?.isStartPage;
     const sortableHelperRef = useRef<any>();
     const sortableHelper = <div className="sortable-tab-bar-helper" ref={sortableHelperRef}/>;
     const onSortEnd = ({oldIndex, newIndex}) => {
@@ -95,7 +95,7 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
             }
         });
         setTabKeySequence(curTabKeySequence);
-    }
+    };
     return (
         <SortableTabs
             type="editable-card"
@@ -113,7 +113,7 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
             onSortEnd={onSortEnd}
         >
             {sortedCachingNodes.map((node, index) => {
-                const menu: MenuDataItem = node.targetMenu;
+                const menu: MenuConfigItem | undefined = node.targetMenu;
                 const tabTitle = menu?.name || defaultTabTitle;
                 const tabKey = node.name || index.toString();
                 const tabElem = (
@@ -124,7 +124,7 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
                 );
                 return (
                     <TabPane tab={tabElem} key={tabKey} closable={tabClosable} closeIcon={closeIcon}/>
-                )
+                );
             })}
         </SortableTabs>
     );

@@ -19,14 +19,14 @@ export default (props: SiderMenuProps) => {
                 const result: Result = await request.post('/auth/logout');
                 if (result.successful) {
                     setAuth({
-                        hasLoggedIn: false,
+                        hasLoggedIn: false
                     });
                 } else {
                     RvModal.error({
-                        content: '退出登录失败！' + result.errorMessage,
+                        content: '退出登录失败！' + result.errorMessage
                     });
                 }
-            },
+            }
         });
     }
 
@@ -44,5 +44,5 @@ export default (props: SiderMenuProps) => {
                 </span>
             </Menu.Item>
         </Menu.SubMenu>
-    )
+    );
 }

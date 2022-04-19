@@ -20,7 +20,7 @@ export type HeaderViewProps = GlobalHeaderProps & {
     headerTitleRender?: WithFalse<(
         logo: React.ReactNode,
         title: React.ReactNode,
-        props: HeaderViewProps,
+        props: HeaderViewProps
     ) => React.ReactNode>;
     headerContentRender?: WithFalse<(props: HeaderViewProps) => React.ReactNode>;
     siderWidth?: number;
@@ -40,7 +40,7 @@ class HeaderView extends Component<HeaderViewProps & PrivateSiderMenuProps,
             navTheme,
             layout,
             headerRender,
-            headerContentRender,
+            headerContentRender
         } = this.props;
         const isTop = layout === 'top';
         const clearMenuData = clearMenuItem(this.props.menuData || []);
@@ -82,7 +82,7 @@ class HeaderView extends Component<HeaderViewProps & PrivateSiderMenuProps,
             hasSiderMenu,
             isMobile,
             prefixCls,
-            headerHeight,
+            headerHeight
         } = this.props;
         const needFixedHeader = fixedHeader || layout === 'mix';
         const isTop = layout === 'top';
@@ -94,7 +94,7 @@ class HeaderView extends Component<HeaderViewProps & PrivateSiderMenuProps,
             [`${prefixCls}-fixed-header`]: needFixedHeader,
             [`${prefixCls}-fixed-header-action`]: !collapsed,
             [`${prefixCls}-top-menu`]: isTop,
-            [`${prefixCls}-header-${navTheme}`]: navTheme && layout !== 'mix',
+            [`${prefixCls}-header-${navTheme}`]: navTheme && layout !== 'mix'
         });
 
         /** 计算侧边栏的宽度，不然导致左边的样式会出问题 */
@@ -112,7 +112,7 @@ class HeaderView extends Component<HeaderViewProps & PrivateSiderMenuProps,
                         style={{
                             height: headerHeight,
                             lineHeight: headerHeight,
-                            background: 'transparent',
+                            background: 'transparent'
                         }}
                     />
                 )}
@@ -124,7 +124,7 @@ class HeaderView extends Component<HeaderViewProps & PrivateSiderMenuProps,
                         width,
                         zIndex: layout === 'mix' ? 100 : 19,
                         right,
-                        ...style,
+                        ...style
                     }}
                     className={className}
                 >

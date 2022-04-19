@@ -17,7 +17,7 @@ const RegionalSetting: React.FC<{
             dataSource={regionalSetting.map(key => {
                 return {
                     title: formatMessage({
-                        id: `app.setting.regionalsettings.${key}`,
+                        id: `app.setting.regionalsettings.${key}`
                     }),
                     action: (
                         <Switch
@@ -30,11 +30,11 @@ const RegionalSetting: React.FC<{
                             onChange={checked =>
                                 changeSetting(
                                     `${key}Render`,
-                                    checked === true ? undefined : false,
+                                    checked === true ? undefined : false
                                 )
                             }
                         />
-                    ),
+                    )
                 };
             })}
         />

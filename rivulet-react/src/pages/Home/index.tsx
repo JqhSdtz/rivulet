@@ -9,7 +9,7 @@ function Home() {
         data,
         error,
         loading,
-        request: fetchRepos,
+        request: fetchRepos
     } = useRequest({url: '/api/getRepos'});
     const {dataSource = []} = data || {};
 

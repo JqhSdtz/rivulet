@@ -4,7 +4,7 @@ import {PageLoading} from '@/layouts/BasicLayout';
 
 const appConfig: IAppConfig = {
     request: {
-        baseURL: '/api',
+        baseURL: '/api'
     },
     app: {
         rootId: 'ice-container',
@@ -13,28 +13,28 @@ const appConfig: IAppConfig = {
             const currentUser = appInitialData.currentUser;
             const initialStates = {
                 app: appInitialData.appState,
-                user: appInitialData.currentUser,
+                user: appInitialData.currentUser
             };
             const auth = {
-                hasLoggedIn: !!currentUser,
+                hasLoggedIn: !!currentUser
             };
             return {
                 initialStates: initialStates,
-                auth: auth,
-            }
-        },
+                auth: auth
+            };
+        }
     },
     router: {
         type: 'browser',
-        fallback: <PageLoading/>,
-    },
+        fallback: <PageLoading/>
+    }
 };
 
 remHelper.initRem({
     pcWidth: 1280,
     maxFontSize: 18,
     pcOnly: true,
-    responsive: true,
+    responsive: true
 });
 
 runApp(appConfig);

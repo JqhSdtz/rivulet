@@ -5,7 +5,7 @@ function useMenuCounter() {
     const [flatMenuKeys, setFlatMenuKeys] = useState<string[]>([]);
     return {
         flatMenuKeys,
-        setFlatMenuKeys,
+        setFlatMenuKeys
     };
 }
 

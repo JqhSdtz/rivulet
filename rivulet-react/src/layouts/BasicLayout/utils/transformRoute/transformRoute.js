@@ -70,13 +70,13 @@ const bigfishCompatibleConversions = (route, props) => {
             {
                 path,
                 menu,
-                ...indexRoute,
-            },
+                ...indexRoute
+            }
         ].concat(routes || [])
         : routes;
     // 拼接返回的 menu 数据
     const result = {
-        ...route,
+        ...route
     };
     if (name) {
         result.name = name;
@@ -93,7 +93,7 @@ const bigfishCompatibleConversions = (route, props) => {
         // 需要重新进行一次
         const finroutes = formatter({
             ...props,
-            data: childrenRoutes,
+            data: childrenRoutes
         }, route);
         /** 在菜单中只隐藏此项，子项往上提，仍旧展示 */
         if (flatMenu) {
@@ -179,8 +179,8 @@ function formatter(props, parent = {path: '/'}) {
                 pro_layout_parentKeys: Array.from(new Set([
                     ...(item.parentKeys || []),
                     ...pro_layout_parentKeys,
-                    `/${parent.key || ''}`.replace(/\/\//g, '/').replace(/\/\//g, '/'),
-                ])).filter((key) => key && key !== '/'),
+                    `/${parent.key || ''}`.replace(/\/\//g, '/').replace(/\/\//g, '/')
+                ])).filter((key) => key && key !== '/')
             };
             if (localeName) {
                 finallyItem.name = localeName;
@@ -194,7 +194,7 @@ function formatter(props, parent = {path: '/'}) {
                 const formatterChildren = formatter({
                     ...props,
                     data: item.routes,
-                    parentName: locale || '',
+                    parentName: locale || ''
                 }, finallyItem);
                 // Reduce memory usage
                 finallyItem.routes =
@@ -300,7 +300,7 @@ const transformRoute = (routes, locale, formatMessage, ignoreFilter) => {
     const originalMenuData = memoizeOneFormatter({
         data: routes,
         formatMessage,
-        locale,
+        locale
     });
     const menuData = ignoreFilter
         ? clearChildren(originalMenuData)

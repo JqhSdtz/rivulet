@@ -5,7 +5,7 @@ export default () => {
     const appDispatchers = store.useModelDispatchers('app');
     const onEnter = () => {
         appDispatchers.finishAppInit(null);
-    }
+    };
     return (
         <Result
             status="success"
@@ -14,7 +14,7 @@ export default () => {
             extra={[
                 <Button type="primary" onClick={onEnter}>
                     进入应用
-                </Button>,
+                </Button>
             ]}
         />
     );

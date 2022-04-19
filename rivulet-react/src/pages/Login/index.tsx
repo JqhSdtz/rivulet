@@ -11,20 +11,20 @@ import md5 from 'md5';
 import RvModal from '@/components/Common/RvModal';
 
 const form = createForm({
-    validateFirst: true,
+    validateFirst: true
 });
 
 const SchemaField = createSchemaField({
     components: {
         FormItem,
         Input,
-        Password,
+        Password
     },
     scope: {
         icon(name) {
-            return React.createElement(ICONS[name])
-        },
-    },
+            return React.createElement(ICONS[name]);
+        }
+    }
 });
 
 const schema = {
@@ -37,8 +37,8 @@ const schema = {
             'x-decorator': 'FormItem',
             'x-component': 'Input',
             'x-component-props': {
-                prefix: '{{icon(\'UserOutlined\')}}',
-            },
+                prefix: '{{icon(\'UserOutlined\')}}'
+            }
         },
         password: {
             type: 'string',
@@ -47,15 +47,15 @@ const schema = {
             'x-decorator': 'FormItem',
             'x-component': 'Password',
             'x-component-props': {
-                prefix: '{{icon(\'LockOutlined\')}}',
-            },
-        },
-    },
+                prefix: '{{icon(\'LockOutlined\')}}'
+            }
+        }
+    }
 };
 
 const formLayout: FormProps = {
     layout: 'vertical',
-    size: 'large',
+    size: 'large'
 };
 
 export default () => {
@@ -71,13 +71,13 @@ export default () => {
                 content: '登录成功！',
                 onOk() {
                     setAuth({
-                        hasLoggedIn: true,
+                        hasLoggedIn: true
                     });
-                },
+                }
             });
         } else {
             RvModal.error({
-                content: '登录失败！' + result.errorMessage,
+                content: '登录失败！' + result.errorMessage
             });
         }
     }
@@ -89,17 +89,17 @@ export default () => {
                 display: 'flex',
                 justifyContent: 'center',
                 background: '#eee',
-                padding: 'auto',
+                padding: 'auto'
             }}
         >
             <Card
                 style={{
                     width: 400,
                     height: 340,
-                    marginTop: 'calc(50vh - 170px)',
+                    marginTop: 'calc(50vh - 170px)'
                 }}
                 bodyStyle={{
-                    padding: 40,
+                    padding: 40
                 }}
             >
                 <Form
@@ -116,7 +116,7 @@ export default () => {
                     style={{
                         display: 'flex',
                         marginTop: 15,
-                        justifyContent: 'flex-end',
+                        justifyContent: 'flex-end'
                     }}
                 >
                     <a href="#忘记密码">忘记密码?</a>

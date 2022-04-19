@@ -107,7 +107,7 @@ const renderFooter: React.FC<Omit<PageContainerProps & {
                      onTabChange,
                      tabBarExtraContent,
                      tabProps,
-                     prefixedClassName,
+                     prefixedClassName
                  }) => {
     if (Array.isArray(tabList) || tabBarExtraContent) {
         return (
@@ -139,7 +139,7 @@ const renderFooter: React.FC<Omit<PageContainerProps & {
 const renderPageHeader = (
     content: React.ReactNode,
     extraContent: React.ReactNode,
-    prefixedClassName: string,
+    prefixedClassName: string
 ): React.ReactNode => {
     if (!content && !extraContent) {
         return null;
@@ -177,7 +177,7 @@ const ProBreadcrumb: React.FC<BreadcrumbProps> = props => {
             style={{
                 height: '100%',
                 display: 'flex',
-                alignItems: 'center',
+                alignItems: 'center'
             }}
         >
             <Breadcrumb
@@ -228,9 +228,9 @@ const ProPageHeader: React.FC<PageContainerProps & { prefixedClassName: string }
         footer: renderFooter({
             ...restProps,
             breadcrumbRender,
-            prefixedClassName,
+            prefixedClassName
         }),
-        ...header,
+        ...header
     };
 
     const {breadcrumb} = pageHeaderProps as {
@@ -249,7 +249,7 @@ const ProPageHeader: React.FC<PageContainerProps & { prefixedClassName: string }
             'tags',
             'footer',
             'avatar',
-            'backIcon',
+            'backIcon'
         ].every(item => !pageHeaderProps[item]) &&
         noHasBreadCrumb &&
         !content &&
@@ -267,7 +267,7 @@ const ProPageHeader: React.FC<PageContainerProps & { prefixedClassName: string }
                         ? undefined
                         : {
                             ...pageHeaderProps.breadcrumb,
-                            ...value.breadcrumbProps,
+                            ...value.breadcrumbProps
                         }
                 }
                 breadcrumbRender={getBreadcrumbRender}
@@ -302,7 +302,7 @@ const PageContainer: React.FC<PageContainerProps> = props => {
 
     const containerClassName = classNames(prefixedClassName, className, {
         [`${prefixCls}-page-container-ghost`]: ghost,
-        [`${prefixCls}-page-container-with-footer`]: footer,
+        [`${prefixCls}-page-container-with-footer`]: footer
     });
 
     const content = useMemo(() => {
@@ -315,7 +315,7 @@ const PageContainer: React.FC<PageContainerProps> = props => {
                     <div
                         style={{
                             height: 48,
-                            marginTop: 24,
+                            marginTop: 24
                         }}
                     />
                 )}

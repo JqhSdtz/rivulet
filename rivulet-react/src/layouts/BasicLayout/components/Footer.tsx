@@ -26,7 +26,7 @@ const FooterView: React.FC<FooterProps> = ({
                                                copyright,
                                                style,
                                                className,
-                                               prefixCls,
+                                               prefixCls
                                            }: FooterProps) => (
     <Footer className={className} style={{padding: 0, ...style}}>
         <GlobalFooter

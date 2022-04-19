@@ -1,5 +1,5 @@
 const compatibleLayout = (
-    layout?: 'side' | 'top' | 'mix' | 'sidemenu' | 'topmenu',
+    layout?: 'side' | 'top' | 'mix' | 'sidemenu' | 'topmenu'
 ) => {
     const layoutEnum = ['sidemenu', 'topmenu'];
     if (layoutEnum.includes(layout!)) {

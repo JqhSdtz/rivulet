@@ -3,7 +3,7 @@ import {useHistory, useLocation} from 'ice';
 import {useAliveController} from 'react-activation';
 import React, {useContext, useState} from 'react';
 import {RouteContext} from '@/layouts/BasicLayout';
-import {MenuConfigItem} from '@/layouts/BasicLayout/configs/menuConfig';
+import {defaultStartPage, MenuConfigItem} from '@/layouts/BasicLayout/configs/menuConfig';
 
 function sortCachingNodes(tabKeySequence, cachingNodes): CachingNodeType[] {
     const sortedCachingNodes: CachingNodeType[] = [];
@@ -36,22 +36,23 @@ function synchronizeTabKeySequence(prevTabKeySequence, cachingNodes): string[] {
 }
 
 export interface TabsContextType {
-    sortedCachingNodes: CachingNodeType[]
-    tabKeySequence: string[]
-    setTabKeySequence: (tabKeySequence: string[]) => void
-    currentTabKey: string
-    activeNode: (targetKey: string | undefined) => void
-    removeNode: (targetKey: string | undefined) => void
-    refreshNode: (targetKey: string | undefined) => void
-    removeOtherNodes: (targetKey) => void
-    removeLeftSideNodes: (targetKey) => void
-    removeRightSideNodes: (targetKey) => void
+    sortedCachingNodes: CachingNodeType[];
+    tabKeySequence: string[];
+    setTabKeySequence: (tabKeySequence: string[]) => void;
+    currentTabKey: string;
+    activeNode: (targetKey: string | undefined) => void;
+    removeNode: (targetKey: string | undefined) => void;
+    refreshNode: (targetKey: string | undefined) => void;
+    removeAllNodes: () => void;
+    removeOtherNodes: (targetKey) => void;
+    removeLeftSideNodes: (targetKey) => void;
+    removeRightSideNodes: (targetKey) => void;
 }
 
 export const TabsContext = React.createContext({} as TabsContextType);
 
 export default (props) => {
-    const {getCachingNodes, drop, refresh} = useAliveController();
+    const {getCachingNodes, drop, refresh, clear} = useAliveController();
     const cachingNodes = getCachingNodes();
     const {menuData} = useContext(RouteContext);
     const {pathname, search} = useLocation();
@@ -67,30 +68,40 @@ export default (props) => {
     const activeNode = (targetKey) => {
         if (!targetKey) return;
         history.push(targetKey ?? '');
-    }
+    };
+    const activeStartPage = () => activeNode(defaultStartPage);
     const removeNode = (targetKey) => {
-        if (!targetKey || sortedCachingNodes.length <= 1) return;
+        if (!targetKey) return;
         const isActive = targetKey === currentTabKey;
         if (isActive) {
             drop(targetKey).then(() => {
             });
-            const curIdx = sortedCachingNodes.findIndex(
-                routeNode => routeNode.name === targetKey,
-            );
-            if (curIdx === 0) {
-                activeNode(sortedCachingNodes[1].name ?? '');
-            } else if (curIdx > 0) {
-                activeNode(sortedCachingNodes[curIdx - 1].name ?? '');
+            if (sortedCachingNodes.length === 1) {
+                activeStartPage();
+            } else {
+                const curIdx = sortedCachingNodes.findIndex(
+                    routeNode => routeNode.name === targetKey
+                );
+                if (curIdx === 0) {
+                    activeNode(sortedCachingNodes[1].name ?? '');
+                } else if (curIdx > 0) {
+                    activeNode(sortedCachingNodes[curIdx - 1].name ?? '');
+                }
             }
         } else {
             drop(targetKey).then(() => {
             });
         }
-    }
+    };
     const refreshNode = (targetKey) => {
         if (!targetKey) return;
         refresh(targetKey).then(() => {
         });
+    };
+    const removeAllNodes = () => {
+        clear().then(() => {
+        });
+        activeStartPage();
     };
     const removeOtherNodes = (targetKey) => {
         activeNode(targetKey);
@@ -113,7 +124,7 @@ export default (props) => {
             drop(node.name ?? '').then(() => {
             });
         }
-    }
+    };
     const removeRightSideNodes = (targetKey) => {
         for (let i = sortedCachingNodes.length - 1; i >= 0; --i) {
             const node = sortedCachingNodes[i];
@@ -126,7 +137,7 @@ export default (props) => {
             drop(node.name ?? '').then(() => {
             });
         }
-    }
+    };
 
     const value: TabsContextType = {
         sortedCachingNodes,
@@ -136,13 +147,14 @@ export default (props) => {
         activeNode,
         removeNode,
         refreshNode,
+        removeAllNodes,
         removeOtherNodes,
         removeLeftSideNodes,
-        removeRightSideNodes,
+        removeRightSideNodes
     };
     return (
         <TabsContext.Provider value={value}>
             {props.children}
         </TabsContext.Provider>
-    )
+    );
 }

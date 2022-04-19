@@ -6,11 +6,11 @@ import app from '@/models/app';
 const store = createStore(
     {
         user,
-        app,
+        app
     },
     {
         // options
-    },
+    }
 );
 
 export default store;

@@ -16,7 +16,7 @@ export default (props: MouseOverProps) => {
         className += ' ' + props.onMouseOverClassName;
     }
     const onMouseOver = useMemoizedFn(() => {
-        setMouseOver(true)
+        setMouseOver(true);
     });
     const onMouseOut = useMemoizedFn(() => {
         setMouseOver(false);
@@ -26,5 +26,5 @@ export default (props: MouseOverProps) => {
         <div className={className} onMouseOver={onMouseOver} onMouseOut={onMouseOut}>
             <div style={{pointerEvents: 'none'}}>{targetComponent}</div>
         </div>
-    )
+    );
 }

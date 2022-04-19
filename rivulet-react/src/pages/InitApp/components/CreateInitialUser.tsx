@@ -10,20 +10,20 @@ import {request, useAuth} from 'ice';
 import RvModal from '@/components/Common/RvModal';
 
 const form = createForm({
-    validateFirst: true,
+    validateFirst: true
 });
 
 const SchemaField = createSchemaField({
     components: {
         FormItem,
         Input,
-        Password,
+        Password
     },
     scope: {
         icon(name) {
-            return React.createElement(ICONS[name])
-        },
-    },
+            return React.createElement(ICONS[name]);
+        }
+    }
 });
 
 const schema = {
@@ -36,13 +36,13 @@ const schema = {
             'x-decorator': 'FormItem',
             'x-component': 'Input',
             'x-component-props': {
-                prefix: '{{icon(\'UserOutlined\')}}',
+                prefix: '{{icon(\'UserOutlined\')}}'
             },
             'x-validator': {
                 triggerType: 'onBlur',
                 minLength: 2,
-                maxLength: 32,
-            },
+                maxLength: 32
+            }
         },
         password: {
             type: 'string',
@@ -51,21 +51,21 @@ const schema = {
             'x-decorator': 'FormItem',
             'x-component': 'Password',
             'x-component-props': {
-                prefix: '{{icon(\'LockOutlined\')}}',
+                prefix: '{{icon(\'LockOutlined\')}}'
             },
             'x-validator': [
                 {
                     triggerType: 'onBlur',
-                    minLength: 8,
-                },
-            ],
-        },
-    },
+                    minLength: 8
+                }
+            ]
+        }
+    }
 };
 
 const formLayout: FormProps = {
     layout: 'vertical',
-    size: 'large',
+    size: 'large'
 };
 
 interface ICreateIntialUserProps {
@@ -84,17 +84,17 @@ export default (props: ICreateIntialUserProps) => {
                 content: '创建初始用户成功！',
                 onOk() {
                     setAuth({
-                        hasLoggedIn: true,
+                        hasLoggedIn: true
                     });
                     props.onPass?.();
-                },
+                }
             });
         } else {
             RvModal.error({
                 content: '创建初始用户失败！',
                 onOk() {
                     props.onReject?.();
-                },
+                }
             });
         }
     }
@@ -105,17 +105,17 @@ export default (props: ICreateIntialUserProps) => {
                 height: '100%',
                 display: 'flex',
                 justifyContent: 'center',
-                padding: 'auto',
+                padding: 'auto'
             }}
         >
             <Card
                 style={{
                     width: 400,
                     height: 340,
-                    marginTop: 90,
+                    marginTop: 90
                 }}
                 bodyStyle={{
-                    padding: 40,
+                    padding: 40
                 }}
             >
                 <Form
@@ -132,7 +132,7 @@ export default (props: ICreateIntialUserProps) => {
                     style={{
                         display: 'flex',
                         marginTop: 15,
-                        justifyContent: 'flex-end',
+                        justifyContent: 'flex-end'
                     }}
                 >
                     <a href="#创建初始用户须知">创建初始用户须知</a>

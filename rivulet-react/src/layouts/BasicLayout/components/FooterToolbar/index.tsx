@@ -14,7 +14,7 @@ export type FooterToolbarProps = {
     className?: string;
     renderContent?: (
         props: FooterToolbarProps & RouteContextType & { leftWidth?: string },
-        dom: JSX.Element,
+        dom: JSX.Element
     ) => ReactNode;
     prefixCls?: string;
 };
@@ -70,9 +70,9 @@ const FooterToolbar: React.FC<FooterToolbarProps> = props => {
                     {
                         ...props,
                         ...value,
-                        leftWidth: width,
+                        leftWidth: width
                     },
-                    dom,
+                    dom
                 )
                 : dom}
         </div>

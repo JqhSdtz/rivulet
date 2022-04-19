@@ -1,6 +1,6 @@
 const state = {
-    appInitialized: false,
-}
+    appInitialized: false
+};
 type IAppState = typeof state;
 
 export default {
@@ -8,6 +8,6 @@ export default {
     reducers: {
         finishAppInit(prevState: IAppState) {
             prevState.appInitialized = true;
-        },
-    },
-}
+        }
+    }
+};

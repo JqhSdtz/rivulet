@@ -7,7 +7,7 @@ import {getFormatMessage} from './index';
 
 export const renderLayoutSettingItem = (item: SettingItemProps) => {
     const action = React.cloneElement(item.action, {
-        disabled: item.disabled,
+        disabled: item.disabled
     });
     return (
         <Tooltip
@@ -37,7 +37,7 @@ const LayoutSetting: React.FC<{
                 {
                     title: formatMessage({
                         id: 'app.setting.content-width',
-                        defaultMessage: 'Content Width',
+                        defaultMessage: 'Content Width'
                     }),
                     action: (
                         <Select
@@ -53,23 +53,23 @@ const LayoutSetting: React.FC<{
                                 <Select.Option value="Fixed">
                                     {formatMessage({
                                         id: 'app.setting.content-width.fixed',
-                                        defaultMessage: 'Fixed',
+                                        defaultMessage: 'Fixed'
                                     })}
                                 </Select.Option>
                             )}
                             <Select.Option value="Fluid">
                                 {formatMessage({
                                     id: 'app.setting.content-width.fluid',
-                                    defaultMessage: 'Fluid',
+                                    defaultMessage: 'Fluid'
                                 })}
                             </Select.Option>
                         </Select>
-                    ),
+                    )
                 },
                 {
                     title: formatMessage({
                         id: 'app.setting.fixedheader',
-                        defaultMessage: 'Fixed Header',
+                        defaultMessage: 'Fixed Header'
                     }),
                     action: (
                         <Switch
@@ -80,17 +80,17 @@ const LayoutSetting: React.FC<{
                                 changeSetting('fixedHeader', checked);
                             }}
                         />
-                    ),
+                    )
                 },
                 {
                     title: formatMessage({
                         id: 'app.setting.fixedsidebar',
-                        defaultMessage: 'Fixed Sidebar',
+                        defaultMessage: 'Fixed Sidebar'
                     }),
                     disabled: layout === 'top',
                     disabledReason: formatMessage({
                         id: 'app.setting.fixedsidebar.hint',
-                        defaultMessage: 'Works on Side Menu Layout',
+                        defaultMessage: 'Works on Side Menu Layout'
                     }),
                     action: (
                         <Switch
@@ -101,7 +101,7 @@ const LayoutSetting: React.FC<{
                                 changeSetting('fixSiderbar', checked)
                             }
                         />
-                    ),
+                    )
                 },
                 {
                     title: formatMessage({id: 'app.setting.splitMenus'}),
@@ -115,8 +115,8 @@ const LayoutSetting: React.FC<{
                                 changeSetting('splitMenus', checked);
                             }}
                         />
-                    ),
-                },
+                    )
+                }
             ]}
             renderItem={renderLayoutSettingItem}
         />

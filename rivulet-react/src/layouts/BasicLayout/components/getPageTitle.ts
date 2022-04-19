@@ -5,7 +5,7 @@ export const matchParamsPath = (
     pathname: string,
     search: string,
     breadcrumb?: Record<string, MenuDataItem>,
-    breadcrumbMap?: Map<string, MenuDataItem>,
+    breadcrumbMap?: Map<string, MenuDataItem>
 ): MenuDataItem => {
     // Internal logic use breadcrumbMap to ensure the order
     // 内部逻辑使用 breadcrumbMap 来确保查询顺序
@@ -21,7 +21,7 @@ export const matchParamsPath = (
     }
 
     return {
-        path: '',
+        path: ''
     };
 };
 
@@ -44,7 +44,7 @@ export type GetPageTitleProps = {
  */
 const getPageTitleInfo = (
     props: GetPageTitleProps,
-    ignoreTitle?: boolean,
+    ignoreTitle?: boolean
 ): {
     // 页面标题
     title: string;
@@ -61,8 +61,8 @@ const getPageTitleInfo = (
         formatMessage,
         title,
         menu = {
-            locale: false,
-        },
+            locale: false
+        }
     } = props;
     const pageTitle = ignoreTitle ? '' : title || '';
     const currRouterData = matchParamsPath(pathname, search, breadcrumb, breadcrumbMap);
@@ -70,7 +70,7 @@ const getPageTitleInfo = (
         return {
             title: pageTitle,
             id: '',
-            pageName: pageTitle,
+            pageName: pageTitle
         };
     }
     let pageName = currRouterData.name;
@@ -78,7 +78,7 @@ const getPageTitleInfo = (
     if (menu.locale !== false && currRouterData.locale && formatMessage) {
         pageName = formatMessage({
             id: currRouterData.locale || '',
-            defaultMessage: currRouterData.name,
+            defaultMessage: currRouterData.name
         });
     }
 
@@ -86,20 +86,20 @@ const getPageTitleInfo = (
         return {
             title: pageTitle,
             id: currRouterData.locale || '',
-            pageName: pageTitle,
+            pageName: pageTitle
         };
     }
     if (ignoreTitle || !title) {
         return {
             title: pageName,
             id: currRouterData.locale || '',
-            pageName,
+            pageName
         };
     }
     return {
         title: `${pageName} - ${title}`,
         id: currRouterData.locale || '',
-        pageName,
+        pageName
     };
 };
 
