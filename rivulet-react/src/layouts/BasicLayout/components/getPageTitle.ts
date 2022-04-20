@@ -1,23 +1,24 @@
 import type {MenuDataItem} from '../typings';
 import type {ProSettings} from '../configs/defaultSettings';
+import {MenuConfigItem} from '@/layouts/BasicLayout/configs/menuConfig';
 
 export const matchParamsPath = (
     pathname: string,
     search: string,
-    breadcrumb?: Record<string, MenuDataItem>,
-    breadcrumbMap?: Map<string, MenuDataItem>
+    breadcrumb?: Record<string, MenuConfigItem>,
+    breadcrumbMap?: Map<string, MenuConfigItem>
 ): MenuDataItem => {
     // Internal logic use breadcrumbMap to ensure the order
     // 内部逻辑使用 breadcrumbMap 来确保查询顺序
     const path = pathname + search;
     if (breadcrumbMap) {
-        return [...breadcrumbMap.values()].find(value => value.testPath(path)) as MenuDataItem;
+        return [...breadcrumbMap.values()].find(value => value.testPath?.(path) ?? false) as MenuConfigItem;
     }
 
     // External uses use breadcrumb
     // 外部用户使用 breadcrumb 参数
     if (breadcrumb) {
-        return Object.values(breadcrumb).find(value => value.testPath(path)) as MenuDataItem;
+        return Object.values(breadcrumb).find(value => value.testPath?.(path) ?? false) as MenuConfigItem;
     }
 
     return {

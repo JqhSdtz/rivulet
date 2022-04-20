@@ -122,7 +122,8 @@ class MenuUtil {
             //  get defaultTitle by menuItemRender
             const defaultTitle = item.icon ? (
                 <span className={`${prefixCls}-menu-item`} title={name}>
-                    {!isChildren && getIcon(item.icon, iconPrefixes)}
+                    {/*{!isChildren && getIcon(item.icon, iconPrefixes)}*/}
+                    {getIcon(item.icon, iconPrefixes)}
                     <span className={`${prefixCls}-menu-item-title`}>
                         {name}
                     </span>
@@ -190,7 +191,8 @@ class MenuUtil {
         // if local is true formatMessage all name。
         const name = this.getIntlName(item);
         const {prefixCls} = this.props;
-        const icon = isChildren ? null : getIcon(item.icon, iconPrefixes);
+        // const icon = isChildren ? null : getIcon(item.icon, iconPrefixes);
+        const icon = getIcon(item.icon, iconPrefixes);
         let defaultItem = (
             <span className={`${prefixCls}-menu-item`}>
                 {icon}

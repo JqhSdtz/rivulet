@@ -573,7 +573,7 @@ const SettingDrawer: React.FC<SettingDrawerProps> = props => {
                                             })
                                         );
                                     } catch (error) {
-                                        // console.log(error);
+
                                     }
                                 }}
                             >

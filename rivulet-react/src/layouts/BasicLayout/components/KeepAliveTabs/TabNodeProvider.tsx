@@ -19,11 +19,11 @@ export type TabNodeType = {
 } & TabStatus;
 
 export interface TabNodeCallbacks {
-    beforeCloseCallback?: (clearAttention: () => void) => boolean | Promise<boolean>
+    beforeCloseCallback?: (clearAttention: () => void, doClose: () => void) => boolean | Promise<boolean>
 }
 
 interface TabNodeCallbacksSetter {
-    beforeClose: (callback: (clearAttention: () => void) => boolean| Promise<boolean>) => void
+    beforeClose: (callback: (clearAttention: () => void, doClose: () => void) => boolean| Promise<boolean>) => void
 }
 
 export type TabNodeContextType = {

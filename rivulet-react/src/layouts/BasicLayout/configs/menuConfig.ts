@@ -1,16 +1,16 @@
-import {SmileOutlined} from '@ant-design/icons';
+import {SmileFilled, SmileOutlined} from '@ant-design/icons';
 import {MenuDataItem} from '@/layouts/BasicLayout';
 
 export interface MenuConfigItem extends MenuDataItem{
-    name: string;
-    path: string;
-    icon?: any;
     isStartPage?: boolean;
-    testPath: (path: string | undefined) => boolean;
+    testPath?: (path: string | undefined) => boolean;
     children?: MenuConfigItem[]
 }
 
 function testPath(this: MenuConfigItem, path) {
+    if (!this.path) {
+        return false;
+    }
     // 需要判断例如 /test?v=1&t=0 是否属于路径为/test?v=1的菜单项
     if (!path || path.length < this.path.length) {
         return false;
@@ -32,19 +32,40 @@ const config: MenuConfigItem[] = [
         name: '首页',
         path: '/',
         icon: SmileOutlined,
-        testPath,
+        testPath
+    },
+    {
+        name: '测试子目录',
+        icon: SmileOutlined,
         children: [
             {
-                name: '测试子菜单0',
-                path: '/test?v=100',
+                name: '测试1',
+                path: '/test?v=1',
                 icon: SmileOutlined,
                 testPath
             },
             {
-                name: '测试子菜单1',
-                path: '/test?v=101',
-                icon: SmileOutlined,
+                name: '测试2',
+                path: '/test?v=2',
+                icon: SmileFilled,
                 testPath
+            },
+            {
+                name: '测试子子目录',
+                icon: SmileOutlined,
+                children: [
+                    {
+                        name: '测试3',
+                        path: '/test?v=3',
+                        icon: SmileFilled,
+                        testPath
+                    },            {
+                        name: '测试4',
+                        path: '/test?v=4',
+                        icon: SmileFilled,
+                        testPath
+                    }
+                ]
             }
         ]
     },
@@ -61,16 +82,6 @@ const config: MenuConfigItem[] = [
         testPath
     }
 ];
-
-for (let i = 0; i < 5; ++i) {
-    config.push({
-        name: '测试' + i,
-        path: '/test?v=' + i,
-        // path: '/test' + i,
-        icon: SmileOutlined,
-        testPath
-    });
-}
 
 function doProcess(targetConfig: MenuConfigItem[]) {
     targetConfig.forEach(configItem => {

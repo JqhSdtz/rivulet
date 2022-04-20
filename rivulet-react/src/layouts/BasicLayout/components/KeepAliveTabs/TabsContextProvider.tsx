@@ -23,7 +23,7 @@ function matchMenuConfig(menuItems: MenuConfigItem[], node: TabNodeType) {
     }
     for (let i = 0; i < menuItems.length; ++i) {
         const menu = menuItems[i];
-        if (menu.testPath(node?.name)) {
+        if (menu.testPath?.(node?.name) ?? false) {
             node.targetMenu = menu;
             return;
         }
@@ -103,16 +103,11 @@ export default (props) => {
         } else if (curIdx > 0) {
             activeNode(sortedTabNodes[curIdx - 1].name ?? '');
         }
-    }
+    };
     const activeStartPage = () => activeNode(defaultStartPage);
-    const dropNode = async (targetKey, dropSync = false) => {
-        const callbacks = tabNodeCallbacksMap.get(targetKey);
-        const prevStatus = tabStatusHandler.get(targetKey);
-        const clearAttention = () => {
-            tabStatusHandler.set(targetKey, {
-                ...prevStatus,
-                needAttention: false
-            });
+    const dropNode = async (targetKey, dropSync = false, ignoreCallback = false) => {
+        const doClose = () => {
+            removeNode(targetKey, true);
         };
         const doDrop = async () => {
             if (dropSync) {
@@ -121,11 +116,23 @@ export default (props) => {
                 drop(targetKey).then(() => {
                 });
             }
+        };
+        if (ignoreCallback) {
+            await doDrop();
+            return true;
         }
+        const callbacks = tabNodeCallbacksMap.get(targetKey);
+        const prevStatus = tabStatusHandler.get(targetKey);
+        const clearAttention = () => {
+            tabStatusHandler.set(targetKey, {
+                ...prevStatus,
+                needAttention: false
+            });
+        };
         if (callbacks?.beforeCloseCallback) {
-            const shouldClose = await callbacks.beforeCloseCallback(clearAttention);
+            const shouldClose = await callbacks.beforeCloseCallback(clearAttention, doClose);
             if (shouldClose) {
-               await doDrop();
+                await doDrop();
             } else {
                 tabStatusHandler.set(targetKey, {
                     ...prevStatus,
@@ -138,11 +145,11 @@ export default (props) => {
         }
         return true;
     };
-    const removeNode = (targetKey) => {
+    const removeNode = (targetKey, ignoreCallback = false) => {
         if (!targetKey) return;
         const isActive = targetKey === currentTabKey;
         if (isActive) {
-            dropNode(targetKey).then(shouldClose => {
+            dropNode(targetKey, false, ignoreCallback).then(shouldClose => {
                 if (!shouldClose) {
                     return;
                 }
@@ -153,7 +160,7 @@ export default (props) => {
                 }
             });
         } else {
-            dropNode(targetKey).then(() => {
+            dropNode(targetKey, false, ignoreCallback).then(() => {
             });
         }
     };
@@ -166,6 +173,9 @@ export default (props) => {
         let dropCount = 0;
         let isCurrentTabDropFail = false;
         const dropPromiseList = sortedTabNodes.map(node => {
+            if (node.targetMenu?.isStartPage) {
+                return Promise.resolve();
+            }
             return dropNode(node.name ?? '').then((shouldClose) => {
                 dropCount += shouldClose ? 1 : 0;
                 if (!shouldClose && node.name === currentTabKey) {

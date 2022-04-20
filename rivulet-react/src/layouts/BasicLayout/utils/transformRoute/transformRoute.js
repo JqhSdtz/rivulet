@@ -244,7 +244,7 @@ class RoutesMap extends Map {
     get(path) {
         try {
             for (const value of this.values()) {
-                if (value.testPath(path)) {
+                if (value.testPath?.(path) ?? false) {
                     return value;
                 }
             }

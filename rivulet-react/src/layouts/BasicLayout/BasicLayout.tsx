@@ -36,7 +36,8 @@ import type {WaterMarkProps} from './components/WaterMark';
 import {ConfigProviderWrap} from '@ant-design/pro-provider';
 import {AliveScope} from 'react-activation';
 import {useLocation} from 'ice';
-import TabContextProvider from '@/layouts/BasicLayout/components/KeepAliveTabs/TabsContextProvider';
+import {TabsContextProvider} from './components/KeepAliveTabs';
+import getMatchMenu from './utils/getMatchMenu/getMatchMenu';
 
 let layoutIndex = 0;
 
@@ -343,9 +344,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
     }
     const matchMenus = useMemo(() => {
         const menuKey = location.pathname + location.search;
-        // return getMatchMenu(menuKey || '/', menuData || [], true);
-        const matchMenu = menuData.find(menu => menu.testPath(menuKey));
-        return matchMenu ? [matchMenu] : [];
+        return getMatchMenu(menuKey || '/', menuData || [], true);
     }, [location.pathname, location.search, menuData]);
 
     const matchMenuKeys = useMemo(
@@ -546,7 +545,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
                     </ConfigProviderWrap>
                 ) : (
                     <AliveScope>
-                        <TabContextProvider>
+                        <TabsContextProvider>
                             <div className={className}>
                                 <Layout style={style}>
                                     {siderMenuDom}
@@ -567,7 +566,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
                                     </div>
                                 </Layout>
                             </div>
-                        </TabContextProvider>
+                        </TabsContextProvider>
                     </AliveScope>
                 )}
             </RouteContext.Provider>

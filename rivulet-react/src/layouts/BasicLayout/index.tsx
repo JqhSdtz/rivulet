@@ -20,7 +20,7 @@ import getPageTitle from './components/getPageTitle';
 import PageLoading from './components/PageLoading';
 import FooterToolbar from './components/FooterToolbar';
 import WaterMark from './components/WaterMark';
-import {asideMenuConfig} from './configs/menuConfig';
+import {asideMenuConfig, MenuConfigItem} from './configs/menuConfig';
 import KeepAliveTabs from '@/layouts/BasicLayout/components/KeepAliveTabs';
 import {SiderMenuProps} from '@/layouts/BasicLayout/components/SiderMenu/SiderMenu';
 import UserCenterMenu from '@/layouts/BasicLayout/customs/UserCenterMenu';
@@ -42,14 +42,17 @@ const menuDataRender = async () => {
     return loopMenuItem(menuItems);
 };
 
-const menuItemRender = (item, defaultDom) => {
+const menuItemRender = (item: MenuConfigItem, defaultDom) => {
     if (!item.path) {
         return defaultDom;
     }
-    const separator = item.path.indexOf('?') > -1 ? '&' : '?';
-    // 加时间戳以实现每次点击菜单都生成一个新的页面，同时还能防止点击过快
-    // 比如时间出除以500，就可以保证两次打开页面的间隔大于500毫秒
-    const path = item.path + separator + '_timestamp=' + Math.floor(Date.now() / 500);
+    let path = item.path;
+    if (!item.isStartPage) {
+        const separator = item.path.indexOf('?') > -1 ? '&' : '?';
+        // 加时间戳以实现每次点击菜单都生成一个新的页面，同时还能防止点击过快
+        // 比如时间出除以500，就可以保证两次打开页面的间隔大于500毫秒
+        path += separator + '_timestamp=' + Math.floor(Date.now() / 500);
+    }
     return <Link to={path}>{defaultDom}</Link>;
 };
 
@@ -69,7 +72,10 @@ export default function BasicLayout({children, location}) {
             }}
             fixSiderbar
             fixedHeader
-            menu={{request: menuDataRender}}
+            menu={{
+                autoClose: false,
+                request: menuDataRender
+            }}
             menuItemRender={menuItemRender}
             bottomButtonsRender={(props: SiderMenuProps) => (
                 <Menu theme={props.theme} mode="vertical" selectable={false}>

@@ -136,5 +136,6 @@ const KeepAliveTabs: React.FC<HeaderViewProps> = () => {
 export default KeepAliveTabs;
 
 export {default as TabNodeProvider} from './TabNodeProvider';
+export {default as TabsContextProvider} from './TabsContextProvider';
 export * from './TabsContextProvider';
 export * from './TabNodeProvider';
