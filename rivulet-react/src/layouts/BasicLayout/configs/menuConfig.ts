@@ -39,12 +39,6 @@ const config: MenuConfigItem[] = [
         icon: SmileOutlined,
         children: [
             {
-                name: '测试1',
-                path: '/test?v=1',
-                icon: SmileOutlined,
-                testPath
-            },
-            {
                 name: '测试2',
                 path: '/test?v=2',
                 icon: SmileFilled,
@@ -55,11 +49,6 @@ const config: MenuConfigItem[] = [
                 icon: SmileOutlined,
                 children: [
                     {
-                        name: '测试3',
-                        path: '/test?v=3',
-                        icon: SmileFilled,
-                        testPath
-                    },            {
                         name: '测试4',
                         path: '/test?v=4',
                         icon: SmileFilled,
@@ -68,6 +57,18 @@ const config: MenuConfigItem[] = [
                 ]
             }
         ]
+    },
+    {
+        name: '测试5',
+        path: '/test?v=5',
+        icon: SmileOutlined,
+        testPath
+    },
+    {
+        name: '测试6',
+        path: '/test?v=6',
+        icon: SmileOutlined,
+        testPath
     },
     {
         name: '仪表盘',

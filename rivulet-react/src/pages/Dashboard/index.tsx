@@ -9,8 +9,8 @@ const Dashboard = () => {
         beforeClose
     } = useContext<TabNodeContextType>(TabNodeContext);
     beforeClose((clearAttention, doClose) => {
-        setTimeout(clearAttention, 3000);
-        setTimeout(doClose, 4000);
+        setTimeout(clearAttention, 300);
+        setTimeout(doClose, 400);
         return false;
     });
     const [counter, setCounter] = useState(0);

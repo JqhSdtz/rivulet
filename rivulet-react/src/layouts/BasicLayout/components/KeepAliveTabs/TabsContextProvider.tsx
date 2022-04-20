@@ -4,7 +4,7 @@ import {useAliveController} from 'react-activation';
 import React, {useContext, useState} from 'react';
 import {RouteContext} from '@/layouts/BasicLayout';
 import {defaultStartPage, MenuConfigItem} from '@/layouts/BasicLayout/configs/menuConfig';
-import {useCreation, useMap} from 'ahooks';
+import {useCreation, useLatest, useMap} from 'ahooks';
 
 function sortCachingNodes(tabKeySequence, cachingNodes): TabNodeType[] {
     const sortedTabNodes: TabNodeType[] = [];
@@ -47,8 +47,8 @@ function fillCachingNodeWithMenuDataAndStatus(sortedTabNodes: TabNodeType[], men
 
 function synchronizeTabKeySequence(prevTabKeySequence, cachingNodes): string[] {
     let curTabKeySequence = prevTabKeySequence.filter(tabKey => cachingNodes.findIndex(node => node.name === tabKey) !== -1);
-    if (cachingNodes.length > prevTabKeySequence.length) {
-        const addedTabKey: [] = cachingNodes.slice(prevTabKeySequence.length).map(node => node.name);
+    if (cachingNodes.length > curTabKeySequence.length) {
+        const addedTabKey: [] = cachingNodes.slice(curTabKeySequence.length).map(node => node.name);
         curTabKeySequence = curTabKeySequence.concat(addedTabKey);
     }
     return curTabKeySequence;
@@ -86,26 +86,26 @@ export default (props) => {
     const tabNodeCallbacksMap = useCreation(() => new Map<string, TabNodeCallbacks>(), []);
     // 将cachingNodes中的增加和删除反映到tabKeySequence中
     tabKeySequence = synchronizeTabKeySequence(tabKeySequence, cachingNodes);
-    // 对cachingNodes进行排序
-    const sortedTabNodes = sortCachingNodes(tabKeySequence, cachingNodes);
+    // 对cachingNodes进行排序，因为涉及回调，可能导致闭包问题，所以使用useLatest包裹
+    const sortedTabNodesRef = useLatest(sortCachingNodes(tabKeySequence, cachingNodes));
     // 设置cachingNode对应的MenuItem
-    fillCachingNodeWithMenuDataAndStatus(sortedTabNodes, menuData as MenuConfigItem[], tabStatusMap);
+    fillCachingNodeWithMenuDataAndStatus(sortedTabNodesRef.current, menuData as MenuConfigItem[], tabStatusMap);
     const activeNode = (targetKey) => {
         if (!targetKey) return;
         history.push(targetKey ?? '');
     };
     const activePrevNode = (targetKey) => {
-        const curIdx = sortedTabNodes.findIndex(
+        const curIdx = sortedTabNodesRef.current.findIndex(
             node => node.name === targetKey
         );
         if (curIdx === 0) {
-            activeNode(sortedTabNodes[1].name ?? '');
+            activeNode(sortedTabNodesRef.current[1].name ?? '');
         } else if (curIdx > 0) {
-            activeNode(sortedTabNodes[curIdx - 1].name ?? '');
+            activeNode(sortedTabNodesRef.current[curIdx - 1].name ?? '');
         }
     };
     const activeStartPage = () => activeNode(defaultStartPage);
-    const dropNode = async (targetKey, dropSync = false, ignoreCallback = false) => {
+    const dropNode = async (targetKey, dropSync = false, fromCallback = false) => {
         const doClose = () => {
             removeNode(targetKey, true);
         };
@@ -117,7 +117,7 @@ export default (props) => {
                 });
             }
         };
-        if (ignoreCallback) {
+        if (fromCallback) {
             await doDrop();
             return true;
         }
@@ -145,22 +145,22 @@ export default (props) => {
         }
         return true;
     };
-    const removeNode = (targetKey, ignoreCallback = false) => {
+    const removeNode = (targetKey, fromCallback = false) => {
         if (!targetKey) return;
         const isActive = targetKey === currentTabKey;
         if (isActive) {
-            dropNode(targetKey, false, ignoreCallback).then(shouldClose => {
+            dropNode(targetKey, false, fromCallback).then(shouldClose => {
                 if (!shouldClose) {
                     return;
                 }
-                if (sortedTabNodes.length === 1) {
+                if (sortedTabNodesRef.current.length === 1) {
                     activeStartPage();
                 } else {
                     activePrevNode(targetKey);
                 }
             });
         } else {
-            dropNode(targetKey, false, ignoreCallback).then(() => {
+            dropNode(targetKey, false, fromCallback).then(() => {
             });
         }
     };
@@ -172,7 +172,7 @@ export default (props) => {
     const removeAllNodes = () => {
         let dropCount = 0;
         let isCurrentTabDropFail = false;
-        const dropPromiseList = sortedTabNodes.map(node => {
+        const dropPromiseList = sortedTabNodesRef.current.map(node => {
             if (node.targetMenu?.isStartPage) {
                 return Promise.resolve();
             }
@@ -184,7 +184,7 @@ export default (props) => {
             });
         });
         Promise.all(dropPromiseList).then(() => {
-            if (dropCount === sortedTabNodes.length) {
+            if (dropCount === sortedTabNodesRef.current.length) {
                 // 全部关闭成功
                 activeStartPage();
             } else if (!isCurrentTabDropFail) {
@@ -195,7 +195,7 @@ export default (props) => {
     };
     const removeOtherNodes = (targetKey) => {
         activeNode(targetKey);
-        sortedTabNodes.forEach(node => {
+        sortedTabNodesRef.current.forEach(node => {
             if (node.name !== targetKey) {
                 dropNode(node.name ?? '').then(() => {
                 });
@@ -203,8 +203,8 @@ export default (props) => {
         });
     };
     const removeLeftSideNodes = (targetKey) => {
-        for (let i = 0; i < sortedTabNodes.length; ++i) {
-            const node = sortedTabNodes[i];
+        for (let i = 0; i < sortedTabNodesRef.current.length; ++i) {
+            const node = sortedTabNodesRef.current[i];
             if (node.name === targetKey) {
                 return;
             }
@@ -216,8 +216,8 @@ export default (props) => {
         }
     };
     const removeRightSideNodes = (targetKey) => {
-        for (let i = sortedTabNodes.length - 1; i >= 0; --i) {
-            const node = sortedTabNodes[i];
+        for (let i = sortedTabNodesRef.current.length - 1; i >= 0; --i) {
+            const node = sortedTabNodesRef.current[i];
             if (node.name === targetKey) {
                 return;
             }
@@ -236,7 +236,7 @@ export default (props) => {
     };
 
     const value: TabsContextType = {
-        sortedTabNodes,
+        sortedTabNodes: sortedTabNodesRef.current,
         tabKeySequence,
         setTabKeySequence,
         currentTabKey,
