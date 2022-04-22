@@ -1,5 +1,6 @@
 const state = {
-    appInitialized: false
+    appInitialized: false,
+    beforeLogValidPath: ''
 };
 type IAppState = typeof state;
 
