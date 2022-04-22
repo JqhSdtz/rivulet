@@ -29,7 +29,7 @@
         "eslint": "^7.30.0",
         "eslint-config-prettier": "^8.3.0",
         "eslint-plugin-prettier": "^4.0.0",
-        "ice.js": "^2.6.2",
+        "ice.js": "^2.6.3",
         "stylelint": "^13.1.0"
     },
     "scripts": {

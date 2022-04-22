@@ -1,10 +1,10 @@
 import {SmileFilled, SmileOutlined} from '@ant-design/icons';
 import {MenuDataItem} from '@/layouts/BasicLayout';
 
-export interface MenuConfigItem extends MenuDataItem{
+export interface MenuConfigItem extends MenuDataItem {
     isStartPage?: boolean;
     testPath?: (path: string | undefined) => boolean;
-    children?: MenuConfigItem[]
+    children?: MenuConfigItem[];
 }
 
 function testPath(this: MenuConfigItem, path) {
@@ -59,18 +59,6 @@ const config: MenuConfigItem[] = [
         ]
     },
     {
-        name: '测试5',
-        path: '/test?v=5',
-        icon: SmileOutlined,
-        testPath
-    },
-    {
-        name: '测试6',
-        path: '/test?v=6',
-        icon: SmileOutlined,
-        testPath
-    },
-    {
         name: '仪表盘',
         path: '/dashboard',
         icon: SmileOutlined,
@@ -79,6 +67,18 @@ const config: MenuConfigItem[] = [
     {
         name: '数据模型',
         path: '/data_model',
+        icon: SmileOutlined,
+        testPath
+    },
+    {
+        name: '测试5',
+        path: '/test?v=5',
+        icon: SmileOutlined,
+        testPath
+    },
+    {
+        name: '测试6',
+        path: '/test?v=6',
         icon: SmileOutlined,
         testPath
     }

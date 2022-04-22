@@ -2,7 +2,7 @@ import {useLocation} from 'ice';
 import {KeepAlive} from 'react-activation';
 import React, {useContext} from 'react';
 import {TabsContext, TabsContextType} from '@/layouts/BasicLayout';
-import {MenuConfigItem} from '@/layouts/BasicLayout/configs/menuConfig';
+import {MenuConfigItem} from '@/menuConfig';
 
 export interface TabStatus {
     needAttention?: boolean

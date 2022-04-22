@@ -3,7 +3,7 @@ import {useHistory, useLocation} from 'ice';
 import {useAliveController} from 'react-activation';
 import React, {useContext, useState} from 'react';
 import {RouteContext} from '@/layouts/BasicLayout';
-import {defaultStartPage, MenuConfigItem} from '@/layouts/BasicLayout/configs/menuConfig';
+import {defaultStartPage, MenuConfigItem} from '@/menuConfig';
 import {useCreation, useLatest, useMap} from 'ahooks';
 
 function sortCachingNodes(tabKeySequence, cachingNodes): TabNodeType[] {

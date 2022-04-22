@@ -1,4 +1,4 @@
-import {createElement} from 'react';
+import {createElement, useEffect} from 'react';
 import type {BasicLayoutProps} from './BasicLayout';
 import ProLayout from './BasicLayout';
 import type {FooterProps} from './components/Footer';
@@ -20,7 +20,7 @@ import getPageTitle from './components/getPageTitle';
 import PageLoading from './components/PageLoading';
 import FooterToolbar from './components/FooterToolbar';
 import WaterMark from './components/WaterMark';
-import {asideMenuConfig, MenuConfigItem} from './configs/menuConfig';
+import {asideMenuConfig, MenuConfigItem} from '@/menuConfig';
 import KeepAliveTabs from '@/layouts/BasicLayout/components/KeepAliveTabs';
 import {SiderMenuProps} from '@/layouts/BasicLayout/components/SiderMenu/SiderMenu';
 import UserCenterMenu from '@/layouts/BasicLayout/customs/UserCenterMenu';
@@ -56,7 +56,10 @@ const menuItemRender = (item: MenuConfigItem, defaultDom) => {
     return <Link to={path}>{defaultDom}</Link>;
 };
 
-export default function BasicLayout({children, location}) {
+export default ({children, location}) => {
+    useEffect(() => {
+        window.onbeforeunload = () => '直接关闭可能会丢失部分您正在执行的操作，是否继续？';
+    }, []);
     return (
         <ProLayout
             title="icejs & antd"
@@ -111,7 +114,6 @@ export type {ProSettings} from './configs/defaultSettings';
 export type {MenuDataItem} from './typings';
 
 export {
-    BasicLayout,
     RouteContext,
     PageLoading,
     GridContent,

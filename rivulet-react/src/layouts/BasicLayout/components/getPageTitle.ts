@@ -1,6 +1,6 @@
 import type {MenuDataItem} from '../typings';
 import type {ProSettings} from '../configs/defaultSettings';
-import {MenuConfigItem} from '@/layouts/BasicLayout/configs/menuConfig';
+import {MenuConfigItem} from '@/menuConfig';
 
 export const matchParamsPath = (
     pathname: string,

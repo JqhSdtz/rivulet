@@ -7,7 +7,7 @@ import {CloseCircleFilled, CloseOutlined} from '@ant-design/icons';
 import TabNodeWrapper from './TabNodeWrapper';
 import {SortableContainer} from 'react-sortable-hoc';
 import {TabsContext, TabsContextType} from './TabsContextProvider';
-import {MenuConfigItem} from '@/layouts/BasicLayout/configs/menuConfig';
+import {MenuConfigItem} from '@/menuConfig';
 import {useCreation} from 'ahooks';
 
 const {TabPane} = Tabs;

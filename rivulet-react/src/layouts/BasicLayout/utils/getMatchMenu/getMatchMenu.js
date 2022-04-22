@@ -19,12 +19,11 @@ export const getMenuMatches = (flatMenus = [], path) => flatMenus
  * 获取当前的选中菜单列表
  * @param pathname
  * @param menuData
+ * @param fullKeys 要不要展示全部的 key
+
  * @returns FlatArray<unknown[][], 1>[]
  */
 export const getMatchMenu = (pathname, menuData,
-                             /**
-                              * 要不要展示全部的 key
-                              */
                              fullKeys) => {
     const flatMenus = getFlatMenu(menuData);
     let menuPathKeys = getMenuMatches(Object.values(flatMenus), pathname || '/');
