@@ -4,8 +4,9 @@ import React, {useContext} from 'react';
 import {TabsContext, TabsContextType} from '@/layouts/BasicLayout';
 import {MenuConfigItem} from '@/menuConfig';
 
-export interface TabStatus {
-    needAttention?: boolean
+export interface TabNodeAttributes {
+    isActive?: boolean;
+    needAttention?: boolean;
 }
 
 export type TabNodeType = {
@@ -16,14 +17,14 @@ export type TabNodeType = {
     targetMenu?: MenuConfigItem;
 
     [key: string]: any;
-} & TabStatus;
+} & TabNodeAttributes;
 
 export interface TabNodeCallbacks {
-    beforeCloseCallback?: (clearAttention: () => void, doClose: () => void) => boolean | Promise<boolean>
+    beforeCloseCallback?: (clearAttention: () => void, doClose: () => void) => boolean | Promise<boolean>;
 }
 
 interface TabNodeCallbacksSetter {
-    beforeClose: (callback: (clearAttention: () => void, doClose: () => void) => boolean| Promise<boolean>) => void
+    beforeClose: (callback: (clearAttention: () => void, doClose: () => void) => boolean | Promise<boolean>) => void;
 }
 
 export type TabNodeContextType = {

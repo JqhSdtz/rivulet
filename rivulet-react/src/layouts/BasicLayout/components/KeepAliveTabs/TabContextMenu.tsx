@@ -5,12 +5,12 @@ import {ReactElement, RefObject, useContext, useRef} from 'react';
 import {useClickAway} from 'ahooks';
 
 export default (props: {
-    cachingNode: TabNodeType,
+    tabNode: TabNodeType,
     tabElemRef: RefObject<HTMLDivElement>,
     setContextMenuVisible: (visible: boolean) => void
 }) => {
     const {
-        cachingNode,
+        tabNode,
         tabElemRef,
         setContextMenuVisible
     } = props;
@@ -26,31 +26,31 @@ export default (props: {
     const menuItems = [] as ReactElement[];
     if (sortedTabNodes.length > 1) {
         menuItems.push(
-            <Menu.Item key="closeTab" onClick={() => removeNode(cachingNode.name)}>
+            <Menu.Item key="closeTab" onClick={() => removeNode(tabNode.name)}>
                 关闭
             </Menu.Item>
         );
     }
     menuItems.push(
-        <Menu.Item key="refreshTab" onClick={() => refreshNode(cachingNode.name)}>
+        <Menu.Item key="refreshTab" onClick={() => refreshNode(tabNode.name)}>
             刷新
         </Menu.Item>
     );
     menuItems.push(
         <Menu.SubMenu key="batchCloseTabs" title="批量关闭">
-            <Menu.Item key="closeOtherTabs" onClick={() => removeOtherNodes(cachingNode.name)}>
+            <Menu.Item key="closeOtherTabs" onClick={() => removeOtherNodes(tabNode.name)}>
                 关闭其他
             </Menu.Item>
             {
-                !cachingNode.targetMenu?.isStartPage &&
+                !tabNode.targetMenu?.isStartPage &&
                 <Menu.Item key="closeAllTabs" onClick={() => removeAllNodes()}>
                     关闭全部
                 </Menu.Item>
             }
-            <Menu.Item key="closeLeftSideTabs" onClick={() => removeLeftSideNodes(cachingNode.name)}>
+            <Menu.Item key="closeLeftSideTabs" onClick={() => removeLeftSideNodes(tabNode.name)}>
                 关闭左侧
             </Menu.Item>
-            <Menu.Item key="closeRightSideTabs" onClick={() => removeRightSideNodes(cachingNode.name)}>
+            <Menu.Item key="closeRightSideTabs" onClick={() => removeRightSideNodes(tabNode.name)}>
                 关闭右侧
             </Menu.Item>
         </Menu.SubMenu>

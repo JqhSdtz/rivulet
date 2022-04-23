@@ -1,4 +1,4 @@
-import {TabNodeCallbacks, TabNodeType, TabStatus} from './TabNodeProvider';
+import {TabNodeAttributes, TabNodeCallbacks, TabNodeType} from './TabNodeProvider';
 import {useHistory, useLocation} from 'ice';
 import {useAliveController} from 'react-activation';
 import React, {useContext, useState} from 'react';
@@ -33,14 +33,22 @@ function matchMenuConfig(menuItems: MenuConfigItem[], node: TabNodeType) {
     }
 }
 
-function fillCachingNodeWithMenuDataAndStatus(sortedTabNodes: TabNodeType[], menuData: MenuConfigItem[], tabStatusMap: Map<string, TabStatus>) {
+function fillCachingNodeWithMenuDataAndStatus(
+    sortedTabNodes: TabNodeType[],
+    menuData: MenuConfigItem[],
+    tabAttributesMap: Map<string, TabNodeAttributes>,
+    currentTabKey: string
+) {
     sortedTabNodes.forEach(node => {
         if (!node.targetMenu) {
             matchMenuConfig(menuData, node);
         }
-        const tabStatus = tabStatusMap.get(node.name ?? '');
-        if (tabStatus) {
-            node.needAttention = tabStatus.needAttention;
+        node.isActive = node.name === currentTabKey;
+        const tabAttributes = tabAttributesMap.get(node.name ?? '');
+        if (tabAttributes) {
+            for (const [key, value] of Object.entries(tabAttributes)) {
+                node[key] = value;
+            }
         }
     });
 }
@@ -55,6 +63,7 @@ function synchronizeTabKeySequence(prevTabKeySequence, cachingNodes): string[] {
 }
 
 interface TabNodeOperations {
+    findNode: (targetKey: string | undefined) => TabNodeType | undefined;
     activeNode: (targetKey: string | undefined) => void;
     removeNode: (targetKey: string | undefined) => void;
     refreshNode: (targetKey: string | undefined) => void;
@@ -67,8 +76,10 @@ interface TabNodeOperations {
 export type TabsContextType = {
     sortedTabNodes: TabNodeType[];
     tabKeySequence: string[];
-    setTabKeySequence: (tabKeySequence: string[]) => void;
     currentTabKey: string;
+    currentTabNode: TabNodeType | undefined;
+    setTabKeySequence: (tabKeySequence: string[]) => void;
+    setTabNodeAttributes: (targetKey: string | undefined, attributes: TabNodeAttributes) => void;
     setTabNodeCallbacks: (targetKey: string | undefined, callbacks: TabNodeCallbacks) => void;
 } & TabNodeOperations;
 
@@ -81,7 +92,7 @@ export default (props) => {
     const {pathname, search} = useLocation();
     const history = useHistory();
     const currentTabKey = pathname + search;
-    const [tabStatusMap, tabStatusHandler] = useMap<string, TabStatus>([]);
+    const [tabAttributesMap, tabAttributesHandler] = useMap<string, TabNodeAttributes>([]);
     let [tabKeySequence, setTabKeySequence] = useState([] as string[]);
     const tabNodeCallbacksMap = useCreation(() => new Map<string, TabNodeCallbacks>(), []);
     // 将cachingNodes中的增加和删除反映到tabKeySequence中
@@ -89,7 +100,16 @@ export default (props) => {
     // 对cachingNodes进行排序，因为涉及回调，可能导致闭包问题，所以使用useLatest包裹
     const sortedTabNodesRef = useLatest(sortCachingNodes(tabKeySequence, cachingNodes));
     // 设置cachingNode对应的MenuItem
-    fillCachingNodeWithMenuDataAndStatus(sortedTabNodesRef.current, menuData as MenuConfigItem[], tabStatusMap);
+    fillCachingNodeWithMenuDataAndStatus(sortedTabNodesRef.current, menuData as MenuConfigItem[], tabAttributesMap, currentTabKey);
+    const findNode = targetKey => sortedTabNodesRef.current.find(node => node.name === targetKey ?? '') as TabNodeType | undefined;
+    const currentTabNode = findNode(currentTabKey);
+    const setTabNodeAttributes = (targetKey, value) => {
+        const prevAttr = tabAttributesHandler.get(targetKey);
+        tabAttributesHandler.set(targetKey, {
+            ...prevAttr,
+            ...value
+        });
+    };
     const activeNode = (targetKey) => {
         if (!targetKey) return;
         history.push(targetKey ?? '');
@@ -122,10 +142,10 @@ export default (props) => {
             return true;
         }
         const callbacks = tabNodeCallbacksMap.get(targetKey);
-        const prevStatus = tabStatusHandler.get(targetKey);
+        const prevAttributes = tabAttributesHandler.get(targetKey);
         const clearAttention = () => {
-            tabStatusHandler.set(targetKey, {
-                ...prevStatus,
+            tabAttributesHandler.set(targetKey, {
+                ...prevAttributes,
                 needAttention: false
             });
         };
@@ -134,8 +154,8 @@ export default (props) => {
             if (shouldClose) {
                 await doDrop();
             } else {
-                tabStatusHandler.set(targetKey, {
-                    ...prevStatus,
+                tabAttributesHandler.set(targetKey, {
+                    ...prevAttributes,
                     needAttention: true
                 });
                 return false;
@@ -147,8 +167,8 @@ export default (props) => {
     };
     const removeNode = (targetKey, fromCallback = false) => {
         if (!targetKey) return;
-        const isActive = targetKey === currentTabKey;
-        if (isActive) {
+        const targetNode = findNode(targetKey);
+        if (targetNode?.isActive) {
             dropNode(targetKey, false, fromCallback).then(shouldClose => {
                 if (!shouldClose) {
                     return;
@@ -178,7 +198,7 @@ export default (props) => {
             }
             return dropNode(node.name ?? '').then((shouldClose) => {
                 dropCount += shouldClose ? 1 : 0;
-                if (!shouldClose && node.name === currentTabKey) {
+                if (!shouldClose && node.isActive) {
                     isCurrentTabDropFail = true;
                 }
             });
@@ -208,7 +228,7 @@ export default (props) => {
             if (node.name === targetKey) {
                 return;
             }
-            if (node.name === currentTabKey) {
+            if (node.isActive) {
                 activeNode(targetKey);
             }
             dropNode(node.name ?? '').then(() => {
@@ -221,7 +241,7 @@ export default (props) => {
             if (node.name === targetKey) {
                 return;
             }
-            if (node.name === currentTabKey) {
+            if (node.isActive) {
                 activeNode(targetKey);
             }
             dropNode(node.name ?? '').then(() => {
@@ -238,8 +258,11 @@ export default (props) => {
     const value: TabsContextType = {
         sortedTabNodes: sortedTabNodesRef.current,
         tabKeySequence,
-        setTabKeySequence,
         currentTabKey,
+        currentTabNode,
+        setTabKeySequence,
+        setTabNodeAttributes,
+        findNode,
         activeNode,
         removeNode,
         refreshNode,

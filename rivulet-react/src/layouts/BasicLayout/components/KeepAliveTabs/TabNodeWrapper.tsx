@@ -44,7 +44,7 @@ const SortableTabNode = SortableElement((props: {
     const tabElemRef = useRef<HTMLDivElement>(null);
     const tabContextMenu = (
         <TabContextMenu
-            cachingNode={props.cachingNode}
+            tabNode={props.cachingNode}
             tabElemRef={tabElemRef}
             setContextMenuVisible={setContextMenuVisible}
         />

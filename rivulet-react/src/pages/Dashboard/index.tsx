@@ -17,7 +17,7 @@ const Dashboard = () => {
     const [activeCounter, setActiveCounter] = useState(0);
     useActivate(() => {
         setActiveCounter(activeCounter + 1);
-    })
+    });
     return (
         <div style={{margin: '20px'}}>
             <div>
