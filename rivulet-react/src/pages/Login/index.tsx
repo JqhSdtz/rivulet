@@ -37,7 +37,8 @@ const schema = {
             'x-decorator': 'FormItem',
             'x-component': 'Input',
             'x-component-props': {
-                prefix: '{{icon(\'UserOutlined\')}}'
+                prefix: '{{icon(\'UserOutlined\')}}',
+                autoFocus: true
             }
         },
         password: {

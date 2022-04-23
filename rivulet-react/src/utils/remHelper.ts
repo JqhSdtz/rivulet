@@ -34,7 +34,7 @@ function initRem(param) {
     if (!initialed) {
         initialed = true;
         if (option.responsive) {
-            window.addEventListener('resize', () => initRem());
+            window.addEventListener('resize', () => initRem(undefined));
         }
     }
 }

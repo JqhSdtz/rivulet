@@ -24,7 +24,13 @@ export default (props: {
         removeRightSideNodes
     } = useContext<TabsContextType>(TabsContext);
     const menuItems = [] as ReactElement[];
-    if (sortedTabNodes.length > 1) {
+    const notSinglePage = sortedTabNodes.length > 1;
+    const isStartPage = tabNode.targetMenu?.isStartPage;
+    const openNewBrowserTab = () => {
+        removeNode(tabNode.name);
+        window.open(tabNode.name);
+    }
+    if (notSinglePage) {
         menuItems.push(
             <Menu.Item key="closeTab" onClick={() => removeNode(tabNode.name)}>
                 关闭
@@ -36,13 +42,20 @@ export default (props: {
             刷新
         </Menu.Item>
     );
+    if (notSinglePage && !isStartPage) {
+        menuItems.push(
+            <Menu.Item key="openNewBrowserTab" onClick={openNewBrowserTab}>
+                新页面打开
+            </Menu.Item>
+        );
+    }
     menuItems.push(
         <Menu.SubMenu key="batchCloseTabs" title="批量关闭">
             <Menu.Item key="closeOtherTabs" onClick={() => removeOtherNodes(tabNode.name)}>
                 关闭其他
             </Menu.Item>
             {
-                !tabNode.targetMenu?.isStartPage &&
+                notSinglePage && !isStartPage &&
                 <Menu.Item key="closeAllTabs" onClick={() => removeAllNodes()}>
                     关闭全部
                 </Menu.Item>

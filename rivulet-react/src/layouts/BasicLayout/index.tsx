@@ -49,9 +49,8 @@ const menuItemRender = (item: MenuConfigItem, defaultDom) => {
     let path = item.path;
     if (!item.isStartPage) {
         const separator = item.path.indexOf('?') > -1 ? '&' : '?';
-        // 加时间戳以实现每次点击菜单都生成一个新的页面，同时还能防止点击过快
-        // 比如时间出除以500，就可以保证两次打开页面的间隔大于500毫秒
-        path += separator + '_timestamp=' + Math.floor(Date.now() / 500);
+        // 加时间戳和随机数以保证每次点击菜单都生成一个新的页面
+        path += separator + '_timestamp=' + Date.now();
     }
     return <Link to={path}>{defaultDom}</Link>;
 };
