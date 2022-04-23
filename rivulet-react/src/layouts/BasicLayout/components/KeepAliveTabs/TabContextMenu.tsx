@@ -78,7 +78,10 @@ export default (props: {
     }, ref, ['tabClick', 'click', 'contextmenu']);
     return (
         <div ref={ref} onContextMenu={(event) => event.preventDefault()}>
-            <Menu onClick={() => setContextMenuVisible(false)}>
+            <Menu
+                onClick={() => setContextMenuVisible(false)}
+                selectable={false}
+            >
                 {menuItems}
             </Menu>
         </div>
