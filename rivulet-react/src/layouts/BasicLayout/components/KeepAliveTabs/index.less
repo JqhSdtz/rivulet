@@ -133,13 +133,17 @@
 
     // 页签被拖动时，会隐藏原本的页签，然后复制一个放到如下的容器中
     .sortable-tab-bar-helper {
+        .keep-alive-tab-divider {
+            display: none;
+        }
+
         .@{ant-prefix}-tabs-tab {
             background-color: white;
             border-radius: 1rem;
             height: 2rem;
             box-shadow: @box-shadow-base;
 
-            .keep-alive-tab-divider, .@{ant-prefix}-tabs-tab-remove {
+            .@{ant-prefix}-tabs-tab-remove {
                 display: none;
             }
         }
