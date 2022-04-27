@@ -20,9 +20,9 @@ module.exports = {
             }
         ]
     ],
-    babelPlugins: [
-        'react-activation/babel'
-    ],
+    // babelPlugins: [
+    //     'react-activation-local/babel'
+    // ],
     proxy: {
         '/api': {
             enable: true,

@@ -1,4 +1,4 @@
-import {Redirect, useAuth, useLocation} from 'ice';
+import {Redirect, useAuth} from 'ice';
 import store from '@/store';
 
 export default (WrappedComponent) => {
@@ -9,7 +9,7 @@ export default (WrappedComponent) => {
         }
         const [auth] = useAuth();
         if (!auth.hasLoggedIn) {
-            const {pathname, search} = useLocation();
+            const {pathname, search} = props.location;
             appDispatchers.setState({beforeLogValidPath: pathname + search});
             return <Redirect to="/login"/>;
         } else {

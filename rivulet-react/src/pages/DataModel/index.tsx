@@ -2,7 +2,6 @@ import {FormGrid, FormItem, FormLayout, FormTab, Input} from '@formily/antd';
 import {createSchemaField, FormProvider} from '@formily/react';
 import {createForm} from '@formily/core';
 import {useCreation} from 'ahooks';
-import {TabNodeProvider} from '@/layouts/BasicLayout';
 
 const propertiesTabSchema = {
     type: 'void',
@@ -137,7 +136,7 @@ const SchemaField = createSchemaField({
     }
 });
 
-function DataModel() {
+export default () => {
     const form = useCreation(() => createForm(), []);
     const formTab = useCreation(() => FormTab?.createFormTab?.(), []);
     return (
@@ -146,11 +145,3 @@ function DataModel() {
         </FormProvider>
     );
 }
-
-export default () => {
-    return (
-        <TabNodeProvider>
-            <DataModel/>
-        </TabNodeProvider>
-    );
-};

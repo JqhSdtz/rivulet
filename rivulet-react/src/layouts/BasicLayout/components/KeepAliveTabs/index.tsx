@@ -137,5 +137,6 @@ export default KeepAliveTabs;
 
 export {default as TabNodeProvider} from './TabNodeProvider';
 export {default as TabsContextProvider} from './TabsContextProvider';
+export {default as TabsContent} from './TabsContent';
 export * from './TabsContextProvider';
 export * from './TabNodeProvider';

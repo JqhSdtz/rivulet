@@ -1,9 +1,8 @@
 import {useContext, useState} from 'react';
-import {TabNodeProvider} from '@/layouts/BasicLayout';
 import {TabNodeContext, TabNodeContextType} from '@/layouts/BasicLayout';
 import {useActivate} from 'react-activation';
 
-const Dashboard = () => {
+export default () => {
     const {
         closeTab,
         beforeClose
@@ -27,13 +26,5 @@ const Dashboard = () => {
             <button onClick={() => setCounter(counter + 1)}>Add</button>
             <button onClick={() => closeTab()} style={{marginLeft: '3rem'}}>Close Tab</button>
         </div>
-    );
-}
-
-export default () => {
-    return (
-        <TabNodeProvider>
-            <Dashboard/>
-        </TabNodeProvider>
     );
 };

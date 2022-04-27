@@ -18,6 +18,7 @@ export default (props: {
         sortedTabNodes,
         removeNode,
         refreshNode,
+        setSplitView,
         removeAllNodes,
         removeOtherNodes,
         removeLeftSideNodes,
@@ -29,7 +30,7 @@ export default (props: {
     const openNewBrowserTab = () => {
         removeNode(tabNode.name);
         window.open(tabNode.name);
-    }
+    };
     if (notSinglePage) {
         menuItems.push(
             <Menu.Item key="closeTab" onClick={() => removeNode(tabNode.name)}>
@@ -40,6 +41,11 @@ export default (props: {
     menuItems.push(
         <Menu.Item key="refreshTab" onClick={() => refreshNode(tabNode.name)}>
             刷新
+        </Menu.Item>
+    );
+    menuItems.push(
+        <Menu.Item key="splitView" onClick={() => setSplitView(tabNode.name, 1)}>
+            分屏
         </Menu.Item>
     );
     if (notSinglePage && !isStartPage) {

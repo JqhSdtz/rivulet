@@ -2,9 +2,8 @@ import {useRequest} from 'ice';
 import {Table} from 'antd';
 import styles from './index.module.css';
 import {useMount} from 'ahooks';
-import {TabNodeProvider} from '@/layouts/BasicLayout';
 
-function Home() {
+export default () => {
     const {
         data,
         error,
@@ -36,13 +35,5 @@ function Home() {
                 </Table>
             )}
         </div>
-    );
-}
-
-export default () => {
-    return (
-        <TabNodeProvider>
-            <Home/>
-        </TabNodeProvider>
     );
 };

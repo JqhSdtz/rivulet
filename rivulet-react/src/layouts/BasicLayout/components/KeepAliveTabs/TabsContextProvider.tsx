@@ -1,10 +1,23 @@
 import {TabNodeAttributes, TabNodeCallbacks, TabNodeType} from './TabNodeProvider';
 import {useHistory, useLocation} from 'ice';
 import {useAliveController} from 'react-activation';
-import React, {useContext, useState} from 'react';
+import React, {useContext, useRef, useState} from 'react';
 import {RouteContext} from '@/layouts/BasicLayout';
 import {defaultStartPage, MenuConfigItem} from '@/menuConfig';
 import {useCreation, useLatest, useMap} from 'ahooks';
+
+function preProcessCachingNodes(cachingNodes, currentTabKey): TabNodeType[] {
+    if (cachingNodes.length === 0 || cachingNodes[cachingNodes.length - 1].name !== currentTabKey) {
+        cachingNodes.push({
+            name: currentTabKey,
+            id: currentTabKey
+        });
+    }
+    // 去重
+    return cachingNodes.filter((node, index, arr) => {
+        return arr.map(mapNode => mapNode.name).indexOf(node.name) === index;
+    });
+}
 
 function sortCachingNodes(tabKeySequence, cachingNodes): TabNodeType[] {
     const sortedTabNodes: TabNodeType[] = [];
@@ -50,6 +63,7 @@ function fillCachingNodeWithMenuDataAndStatus(
                 node[key] = value;
             }
         }
+        node.splitViewIndex = node.splitViewIndex ?? 0;
     });
 }
 
@@ -78,6 +92,8 @@ export type TabsContextType = {
     tabKeySequence: string[];
     currentTabKey: string;
     currentTabNode: TabNodeType | undefined;
+    splitViews: string[][];
+    setSplitView: (targetKey: string | undefined, index: number) => void;
     setTabKeySequence: (tabKeySequence: string[]) => void;
     setTabNodeAttributes: (targetKey: string | undefined, attributes: TabNodeAttributes) => void;
     setTabNodeCallbacks: (targetKey: string | undefined, callbacks: TabNodeCallbacks) => void;
@@ -92,22 +108,30 @@ export default (props) => {
     const {pathname, search} = useLocation();
     const history = useHistory();
     const currentTabKey = pathname + search;
+    const splitViewsRef = useRef<Array<Array<string>>>([[]]);
     const [tabAttributesMap, tabAttributesHandler] = useMap<string, TabNodeAttributes>([]);
     let [tabKeySequence, setTabKeySequence] = useState([] as string[]);
     const tabNodeCallbacksMap = useCreation(() => new Map<string, TabNodeCallbacks>(), []);
+    const processedCachingNodes = preProcessCachingNodes(cachingNodes, currentTabKey);
     // 将cachingNodes中的增加和删除反映到tabKeySequence中
-    tabKeySequence = synchronizeTabKeySequence(tabKeySequence, cachingNodes);
+    tabKeySequence = synchronizeTabKeySequence(tabKeySequence, processedCachingNodes);
     // 对cachingNodes进行排序，因为涉及回调，可能导致闭包问题，所以使用useLatest包裹
-    const sortedTabNodesRef = useLatest(sortCachingNodes(tabKeySequence, cachingNodes));
+    const sortedTabNodesRef = useLatest(sortCachingNodes(tabKeySequence, processedCachingNodes));
     // 设置cachingNode对应的MenuItem
     fillCachingNodeWithMenuDataAndStatus(sortedTabNodesRef.current, menuData as MenuConfigItem[], tabAttributesMap, currentTabKey);
     const findNode = targetKey => sortedTabNodesRef.current.find(node => node.name === targetKey ?? '') as TabNodeType | undefined;
     const currentTabNode = findNode(currentTabKey);
-    const setTabNodeAttributes = (targetKey, value) => {
+    const setTabNodeAttributes = (targetKey, value: TabNodeAttributes) => {
         const prevAttr = tabAttributesHandler.get(targetKey);
         tabAttributesHandler.set(targetKey, {
             ...prevAttr,
             ...value
+        });
+    };
+    const setSplitView = (targetKey, index) => {
+        splitViewsRef.current[index].push(targetKey);
+        setTabNodeAttributes(targetKey, {
+            splitViewIndex: index
         });
     };
     const activeNode = (targetKey) => {
@@ -257,6 +281,8 @@ export default (props) => {
 
     const value: TabsContextType = {
         sortedTabNodes: sortedTabNodesRef.current,
+        splitViews: splitViewsRef.current,
+        setSplitView,
         tabKeySequence,
         currentTabKey,
         currentTabNode,

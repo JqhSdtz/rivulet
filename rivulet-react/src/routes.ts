@@ -9,6 +9,34 @@ import InitApp from '@/pages/InitApp';
 import HomeRouteWrapper from '@/wrappers/HomeRouteWrapper';
 import LoginRouteWrapper from '@/wrappers/LoginRouteWrapper';
 import InitAppRouteWrapper from '@/wrappers/InitAppRouteWrapper';
+import ContentRouteWrapper from '@/wrappers/MenuRouteWrapper';
+
+const menuRouterConfig: IRouterConfig[] = [
+    {
+        path: '/dashboard',
+        component: Dashboard
+    },
+    {
+        path: '/data_model',
+        component: DataModel
+    },
+    {
+        path: '/test',
+        component: DataModel
+    },
+    {
+        path: '/',
+        exact: true,
+        component: Home
+    },
+    {
+        component: NotFound
+    }
+];
+
+menuRouterConfig.forEach(menuRouter => {
+   menuRouter.wrappers = [ContentRouteWrapper];
+});
 
 const routerConfig: IRouterConfig[] = [
     {
@@ -25,28 +53,7 @@ const routerConfig: IRouterConfig[] = [
         path: '/',
         component: Layout,
         wrappers: [HomeRouteWrapper],
-        children: [
-            {
-                path: '/dashboard',
-                component: Dashboard
-            },
-            {
-                path: '/data_model',
-                component: DataModel
-            },
-            {
-                path: '/test',
-                component: DataModel
-            },
-            {
-                path: '/',
-                exact: true,
-                component: Home
-            },
-            {
-                component: NotFound
-            }
-        ]
+        children: menuRouterConfig
     }
 ];
 

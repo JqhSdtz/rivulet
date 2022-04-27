@@ -1,7 +1,6 @@
 import {Link} from 'ice';
-import {TabNodeProvider} from '@/layouts/BasicLayout';
 
-const NotFound = () => {
+export default () => {
     return (
         <div>
             <h2>404</h2>
@@ -12,13 +11,5 @@ const NotFound = () => {
                 <Link to="/dashboard">Dashboard</Link>
             </div>
         </div>
-    );
-};
-
-export default () => {
-    return (
-        <TabNodeProvider>
-            <NotFound/>
-        </TabNodeProvider>
     );
 };

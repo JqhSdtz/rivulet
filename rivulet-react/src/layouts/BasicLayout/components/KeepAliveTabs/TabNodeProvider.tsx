@@ -1,12 +1,23 @@
-import {useLocation} from 'ice';
 import {KeepAlive} from 'react-activation';
 import React, {useContext} from 'react';
 import {TabsContext, TabsContextType} from '@/layouts/BasicLayout';
 import {MenuConfigItem} from '@/menuConfig';
+import {WrappedComponentFactory} from 'react-sortable-hoc';
 
 export interface TabNodeAttributes {
     isActive?: boolean;
     needAttention?: boolean;
+    splitViewIndex?: number;
+}
+
+type WrappedComponent<P> =
+    | React.ComponentClass<P>
+    | React.FC<P>
+    | WrappedComponentFactory<P>;
+
+export interface TabComponentType {
+    node: WrappedComponent<any>;
+    props: any;
 }
 
 export type TabNodeType = {
@@ -15,6 +26,7 @@ export type TabNodeType = {
     name?: string;
     id: string;
     targetMenu?: MenuConfigItem;
+    component?: TabComponentType
 
     [key: string]: any;
 } & TabNodeAttributes;
@@ -34,9 +46,8 @@ export type TabNodeContextType = {
 
 export const TabNodeContext = React.createContext({} as TabNodeContextType);
 
-export default (props) => {
-    const {pathname, search} = useLocation();
-    const tabKey = pathname + search;
+export default (props: {tabKey: string; children: any}) => {
+    const tabKey = props.tabKey;
     const {
         removeNode,
         setTabNodeCallbacks
@@ -60,6 +71,7 @@ export default (props) => {
                 name={tabKey}
                 id={tabKey}
                 saveScrollPosition="screen"
+                _nk=""
             >
                 {props.children}
             </KeepAlive>

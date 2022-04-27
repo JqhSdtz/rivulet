@@ -7,6 +7,7 @@ const appConfig: IAppConfig = {
         baseURL: '/api'
     },
     app: {
+        strict: true,
         rootId: 'ice-container',
         getInitialData: async (ctx) => {
             const appInitialData = await request.get('/app/initialData');
