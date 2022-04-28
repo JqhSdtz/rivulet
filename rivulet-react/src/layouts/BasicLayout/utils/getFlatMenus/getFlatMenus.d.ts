@@ -1,4 +1,5 @@
-import { MenuDataItem } from '../types';
+import {MenuDataItem} from '../types';
+
 /**
  * 获取打平的 menuData
  * 以 path 为 key

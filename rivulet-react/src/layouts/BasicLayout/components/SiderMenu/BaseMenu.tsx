@@ -12,6 +12,7 @@ import {getOpenKeysFromMenuData} from '../../utils/utils';
 import type {MenuDataItem, MessageDescriptor, Route, RouterTypes, WithFalse} from '../../typings';
 import MenuCounter from './Counter';
 import type {PrivateSiderMenuProps} from './SiderMenu';
+import type {ItemType} from 'antd/lib/menu/hooks/useItems';
 
 // todo
 export type MenuMode =
@@ -39,12 +40,27 @@ export type BaseMenuProps = {
     style?: React.CSSProperties;
     theme?: MenuTheme;
     formatMessage?: (message: MessageDescriptor) => string;
+
+    /**
+     * @name 处理父级菜单的 props，可以复写菜单的点击功能，一般用于埋点
+     * @see 子级的菜单要使用 menuItemRender 来处理
+     *
+     * @example 使用 a 标签跳转到特殊的地址 subMenuItemRender={(item, defaultDom) => { return <a onClick={()=> history.push(item.path) }>{defaultDom}</a> }}
+     * @example 增加埋点 subMenuItemRender={(item, defaultDom) => { return <a onClick={()=> log.click(item.name) }>{defaultDom}</a> }}
+     */
     subMenuItemRender?: WithFalse<(
         item: MenuDataItem & {
             isUrl: boolean;
         },
         defaultDom: React.ReactNode
     ) => React.ReactNode>;
+    /**
+     * @name 处理菜单的 props，可以复写菜单的点击功能，一般结合 Router 框架使用
+     * @see 非子级的菜单要使用 subMenuItemRender 来处理
+     *
+     * @example 使用 a 标签 menuItemRender={(item, defaultDom) => { return <a onClick={()=> history.push(item.path) }>{defaultDom}</a> }}
+     * @example 使用 Link 标签 menuItemRender={(item, defaultDom) => { return <Link to={item.path}>{defaultDom}</Link> }}
+     */
     menuItemRender?: WithFalse<(
         item: MenuDataItem & {
             isUrl: boolean;
@@ -53,12 +69,17 @@ export type BaseMenuProps = {
         defaultDom: React.ReactNode,
         menuProps: BaseMenuProps
     ) => React.ReactNode>;
+
+    /**
+     * @name 处理 menuData 的方法，与 menuDataRender 不同，postMenuData处理完成后会直接渲染，不再进行国际化和拼接处理
+     *
+     * @example 增加菜单图标 postMenuData={(menuData) => { return menuData.map(item => { return { ...item, icon: <Icon type={item.icon} /> } }) }}
+     */
     postMenuData?: (menusData?: MenuDataItem[]) => MenuDataItem[];
 } & Partial<RouterTypes<Route>> &
     Omit<MenuProps, 'openKeys' | 'onOpenChange' | 'title'> &
     Partial<PureSettings>;
 
-const {SubMenu, ItemGroup} = Menu;
 
 let IconFont = createFromIconfontCN({
     scriptUrl: defaultSettings.iconfontUrl
@@ -102,20 +123,13 @@ class MenuUtil {
         this.props = props;
     }
 
-    getNavMenuItems = (
-        menusData: MenuDataItem[] = [],
-        isChildren: boolean
-    ): React.ReactNode[] =>
-        menusData
-            .map(item => this.getSubMenuOrItem(item, isChildren))
-            .filter(item => item);
+    getNavMenuItems = (menusData: MenuDataItem[] = [], isChildren: boolean): ItemType[] =>
+        menusData.map((item) => this.getSubMenuOrItem(item, isChildren)).filter((item) => item);
 
     /** Get SubMenu or Item */
-    getSubMenuOrItem = (
-        item: MenuDataItem,
-        isChildren: boolean
-    ): React.ReactNode => {
-        if (Array.isArray(item.routes) && item && item.routes.length > 0) {
+    getSubMenuOrItem = (item: MenuDataItem, isChildren: boolean): ItemType => {
+        const children = item?.children || item?.routes;
+        if (Array.isArray(children) && children.length > 0) {
             const name = this.getIntlName(item);
             const {subMenuItemRender, prefixCls, menu, iconPrefixes} =
                 this.props;
@@ -138,28 +152,27 @@ class MenuUtil {
             const title = subMenuItemRender
                 ? subMenuItemRender({...item, isUrl: false}, defaultTitle)
                 : defaultTitle;
-            const MenuComponents: React.ElementType =
-                menu?.type === 'group' ? ItemGroup : SubMenu;
-            return (
-                <MenuComponents
-                    title={title}
-                    key={item.key || item.path}
-                    onTitleClick={item.onTitleClick}
-                >
-                    {this.getNavMenuItems(item.routes, true)}
-                </MenuComponents>
-            );
+            return {
+                type: menu?.type === 'group' ? ('group' as const) : (undefined as any),
+                label: title,
+                children: this.getNavMenuItems(children, true),
+                onTitleClick: item.onTitleClick,
+                key: item.key || item.path
+            } as ItemType;
         }
 
-        return (
-            <Menu.Item
-                disabled={item.disabled}
-                key={item.key || item.path}
-                onClick={item.onTitleClick}
-            >
-                {this.getMenuItemPath(item, isChildren)}
-            </Menu.Item>
-        );
+        return {
+            label: this.getMenuItemPath(item, isChildren),
+            title: this.getIntlName(item),
+            key: item.key! || item.path!,
+            disabled: item.disabled,
+            onClick: (e) => {
+                if (isUrl(item?.path || '')) {
+                    window.open(item.path);
+                }
+                item.onTitleClick?.(e);
+            }
+        };
     };
 
     getIntlName = (item: MenuDataItem) => {
@@ -179,7 +192,7 @@ class MenuUtil {
      *
      * @memberof SiderMenu
      */
-    getMenuItemPath = (item: MenuDataItem, isChildren: boolean) => {
+    getMenuItemPath = (item: MenuDataItem, isChildren: boolean): React.ReactNode => {
         const itemPath = this.conversionPath(item.path || '/');
         const {
             location = {pathname: '/'},
@@ -191,33 +204,18 @@ class MenuUtil {
         // if local is true formatMessage all name。
         const name = this.getIntlName(item);
         const {prefixCls} = this.props;
-        // const icon = isChildren ? null : getIcon(item.icon, iconPrefixes);
-        const icon = getIcon(item.icon, iconPrefixes);
-        let defaultItem = (
-            <span className={`${prefixCls}-menu-item`}>
-                {icon}
-                <span className={`${prefixCls}-menu-item-title`}>{name}</span>
-            </span>
-        );
+        const icon = isChildren ? null : getIcon(item.icon, iconPrefixes);
         const isHttpUrl = isUrl(itemPath);
-
-        // Is it a http link
-        if (isHttpUrl) {
-            defaultItem = (
-                <span
-                    title={name}
-                    onClick={() => {
-                        window?.open?.(itemPath);
-                    }}
-                    className={`${prefixCls}-menu-item ${prefixCls}-menu-item-link`}
-                >
-                    {icon}
-                    <span className={`${prefixCls}-menu-item-title`}>
-                        {name}
-                    </span>
-                </span>
-            );
-        }
+        const defaultItem = (
+            <span
+                className={classNames(`${prefixCls}-menu-item`, {
+                    [`${prefixCls}-menu-item-link`]: isHttpUrl
+                })}
+            >
+        {icon}
+                <span className={`${prefixCls}-menu-item-title`}>{name}</span>
+      </span>
+        );
 
         if (menuItemRender) {
             const renderItemProps = {
@@ -226,7 +224,10 @@ class MenuUtil {
                 itemPath,
                 isMobile,
                 replace: itemPath === location.pathname,
-                onClick: () => onCollapse && onCollapse(true),
+                onClick: () => {
+                    if (isHttpUrl) window.open(itemPath);
+                    if (onCollapse) onCollapse(true);
+                },
                 children: undefined
             };
             return menuItemRender(renderItemProps, defaultItem, this.props);
@@ -419,6 +420,7 @@ const BaseMenu: React.FC<BaseMenuProps & PrivateSiderMenuProps> = props => {
             {...openKeysProps}
             key="Menu"
             mode={mode}
+            items={menuUtils.getNavMenuItems(finallyData, false)}
             inlineIndent={16}
             defaultOpenKeys={defaultOpenKeysRef.current}
             theme={theme}
@@ -427,9 +429,7 @@ const BaseMenu: React.FC<BaseMenuProps & PrivateSiderMenuProps> = props => {
             className={cls}
             onOpenChange={setOpenKeys}
             {...props.menuProps}
-        >
-            {menuUtils.getNavMenuItems(finallyData, false)}
-        </Menu>
+        />
     );
 };
 

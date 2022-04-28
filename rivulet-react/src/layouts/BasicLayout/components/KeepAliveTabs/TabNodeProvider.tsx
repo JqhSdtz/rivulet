@@ -46,7 +46,7 @@ export type TabNodeContextType = {
 
 export const TabNodeContext = React.createContext({} as TabNodeContextType);
 
-export default (props: {tabKey: string; children: any}) => {
+export default (props: { tabKey: string; children: any }) => {
     const tabKey = props.tabKey;
     const {
         removeNode,

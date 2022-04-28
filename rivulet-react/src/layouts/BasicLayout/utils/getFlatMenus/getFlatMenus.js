@@ -1,4 +1,5 @@
-import { stripQueryStringAndHashFromPath } from '../transformRoute/transformRoute';
+import {stripQueryStringAndHashFromPath} from '../transformRoute/transformRoute';
+
 /**
  * 获取打平的 menuData
  * 以 path 为 key
@@ -11,11 +12,11 @@ export const getFlatMenus = (menuData = []) => {
             return;
         }
         menus[stripQueryStringAndHashFromPath(item.path || item.key || '/')] = {
-            ...item,
+            ...item
         };
-        menus[item.key || item.path || '/'] = { ...item };
+        menus[item.key || item.path || '/'] = {...item};
         if (item.routes) {
-            menus = { ...menus, ...getFlatMenus(item.routes) };
+            menus = {...menus, ...getFlatMenus(item.routes)};
         }
     });
     return menus;
