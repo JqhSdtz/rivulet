@@ -24,7 +24,6 @@ import {asideMenuConfig, MenuConfigItem} from '@/menuConfig';
 import KeepAliveTabs from '@/layouts/BasicLayout/components/KeepAliveTabs';
 import {SiderMenuProps} from '@/layouts/BasicLayout/components/SiderMenu/SiderMenu';
 import UserCenterMenu from '@/layouts/BasicLayout/customs/UserCenterMenu';
-import {Menu} from 'antd';
 
 const loopMenuItem = menus =>
     menus.map(({icon, children, ...item}) => ({
@@ -79,11 +78,7 @@ export default ({children, location}) => {
                 request: menuDataRender
             }}
             menuItemRender={menuItemRender}
-            bottomButtonsRender={(props: SiderMenuProps) => (
-                <Menu theme={props.theme} mode="vertical" selectable={false}>
-                    <UserCenterMenu {...props} />
-                </Menu>
-            )}
+            bottomButtonsRender={(props: SiderMenuProps) => <UserCenterMenu {...props} />}
             headerRender={props => <KeepAliveTabs {...props} />}
             footerRender={() => (
                 <DefaultFooter

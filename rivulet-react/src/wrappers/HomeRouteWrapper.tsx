@@ -1,21 +1,24 @@
 import {Redirect, useAuth} from 'ice';
 import store from '@/store';
 
+let beforeLogValidPath = '';
+
 export default (WrappedComponent) => {
     return (props) => {
-        const [appState, appDispatchers] = store.useModel('app');
+        const appState = store.useModelState('app');
         if (!appState.appInitialized) {
             return <Redirect to="/initApp"/>;
         }
         const [auth] = useAuth();
         if (!auth.hasLoggedIn) {
             const {pathname, search} = props.location;
-            appDispatchers.setState({beforeLogValidPath: pathname + search});
+            beforeLogValidPath = pathname + search;
             return <Redirect to="/login"/>;
         } else {
-            if (appState.beforeLogValidPath) {
-                appDispatchers.setState({beforeLogValidPath: ''});
-                return <Redirect to={appState.beforeLogValidPath}/>;
+            if (beforeLogValidPath) {
+                const redirect = <Redirect to={beforeLogValidPath}/>;
+                beforeLogValidPath = '';
+                return redirect;
             } else {
                 return <WrappedComponent {...props} />;
             }

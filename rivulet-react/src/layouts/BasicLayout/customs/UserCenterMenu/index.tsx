@@ -30,19 +30,33 @@ export default (props: SiderMenuProps) => {
         });
     }
 
+    const items = [
+        {
+            key: 'userCenterMenu',
+            label: userState.username,
+            icon: <UserOutlined/>,
+            children: [
+                {
+                    key: 'logout',
+                    className: `${prefixCls}-menu-item`,
+                    onClick: logout,
+                    label: (
+                        <span
+                            title="退出登录"
+                            className={`${prefixCls}-menu-item`}
+                        >
+                            <PowerOffOutlined/>
+                            <span className={`${prefixCls}-menu-item-title`}>
+                                退出登录
+                            </span>
+                        </span>
+                    )
+                }
+            ]
+        }
+    ];
+
     return (
-        <Menu.SubMenu key="userCenterMenu" icon={<UserOutlined/>} title={userState.username}>
-            <Menu.Item key="logout" onClick={logout}>
-                <span
-                    title="退出登录"
-                    className={`${prefixCls}-menu-item`}
-                >
-                    <PowerOffOutlined/>
-                    <span className={`${prefixCls}-menu-item-title`}>
-                        退出登录
-                    </span>
-                </span>
-            </Menu.Item>
-        </Menu.SubMenu>
+        <Menu theme={props.theme} mode="vertical" selectable={false} items={items}/>
     );
 }

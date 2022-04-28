@@ -1,8 +1,9 @@
 import {Menu} from 'antd';
 import {TabsContext, TabsContextType} from './TabsContextProvider';
 import {TabNodeType} from './TabNodeProvider';
-import {ReactElement, RefObject, useContext, useRef} from 'react';
+import {RefObject, useContext, useRef} from 'react';
 import {useClickAway} from 'ahooks';
+import {ItemType} from 'antd/lib/menu/hooks/useItems';
 
 export default (props: {
     tabNode: TabNodeType,
@@ -24,7 +25,7 @@ export default (props: {
         removeLeftSideNodes,
         removeRightSideNodes
     } = useContext<TabsContextType>(TabsContext);
-    const menuItems = [] as ReactElement[];
+    const menuItems = [] as ItemType[];
     const notSinglePage = sortedTabNodes.length > 1;
     const isStartPage = tabNode.targetMenu?.isStartPage;
     const openNewBrowserTab = () => {
@@ -32,48 +33,57 @@ export default (props: {
         window.open(tabNode.name);
     };
     if (notSinglePage) {
-        menuItems.push(
-            <Menu.Item key="closeTab" onClick={() => removeNode(tabNode.name)}>
-                关闭
-            </Menu.Item>
-        );
+        menuItems.push({
+            key: 'closeTab',
+            label: '关闭',
+            onClick: () => removeNode(tabNode.name)
+        });
     }
-    menuItems.push(
-        <Menu.Item key="refreshTab" onClick={() => refreshNode(tabNode.name)}>
-            刷新
-        </Menu.Item>
-    );
-    menuItems.push(
-        <Menu.Item key="splitView" onClick={() => setSplitView(tabNode.name, 1)}>
-            分屏
-        </Menu.Item>
-    );
+    menuItems.push({
+        key: 'refreshTab',
+        label: '刷新',
+        onClick: () => refreshNode(tabNode.name)
+    });
+    menuItems.push({
+        key: 'splitView',
+        label: '分屏',
+        onClick: () => setSplitView(tabNode.name, 1)
+    });
     if (notSinglePage && !isStartPage) {
-        menuItems.push(
-            <Menu.Item key="openNewBrowserTab" onClick={openNewBrowserTab}>
-                新页面打开
-            </Menu.Item>
-        );
+        menuItems.push({
+            key: 'openNewBrowserTab',
+            label: '新页面打开',
+            onClick: openNewBrowserTab
+        });
     }
-    menuItems.push(
-        <Menu.SubMenu key="batchCloseTabs" title="批量关闭">
-            <Menu.Item key="closeOtherTabs" onClick={() => removeOtherNodes(tabNode.name)}>
-                关闭其他
-            </Menu.Item>
-            {
-                notSinglePage && !isStartPage &&
-                <Menu.Item key="closeAllTabs" onClick={() => removeAllNodes()}>
-                    关闭全部
-                </Menu.Item>
-            }
-            <Menu.Item key="closeLeftSideTabs" onClick={() => removeLeftSideNodes(tabNode.name)}>
-                关闭左侧
-            </Menu.Item>
-            <Menu.Item key="closeRightSideTabs" onClick={() => removeRightSideNodes(tabNode.name)}>
-                关闭右侧
-            </Menu.Item>
-        </Menu.SubMenu>
-    );
+    const batchCloseTabsChildren = [] as ItemType[];
+    batchCloseTabsChildren.push({
+        key: 'closeOtherTabs',
+        label: '关闭其他',
+        onClick: () => removeOtherNodes(tabNode.name)
+    });
+    if (notSinglePage && !isStartPage) {
+        batchCloseTabsChildren.push({
+            key: 'closeAllTabs',
+            label: '关闭全部',
+            onClick: () => removeAllNodes()
+        });
+    }
+    batchCloseTabsChildren.push({
+        key: 'closeLeftSideTabs',
+        label: '关闭左侧',
+        onClick: () => removeLeftSideNodes(tabNode.name)
+    });
+    batchCloseTabsChildren.push({
+        key: 'closeRightSideTabs',
+        label: '关闭右侧',
+        onClick: () => removeRightSideNodes(tabNode.name)
+    });
+    menuItems.push({
+        key: 'batchCloseTabs',
+        label: '批量关闭',
+        children: batchCloseTabsChildren
+    });
     const ref = useRef<HTMLDivElement>(null);
     useClickAway((event) => {
         // 页签元素也在右键菜单之外，但不能在右键点页签元素时隐藏右键菜单
@@ -87,9 +97,8 @@ export default (props: {
             <Menu
                 onClick={() => setContextMenuVisible(false)}
                 selectable={false}
-            >
-                {menuItems}
-            </Menu>
+                items={menuItems}
+            />
         </div>
     );
 }
