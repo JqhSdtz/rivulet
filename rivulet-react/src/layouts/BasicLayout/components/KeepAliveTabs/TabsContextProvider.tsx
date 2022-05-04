@@ -1,33 +1,55 @@
-import {TabNodeAttributes, TabNodeCallbacks, TabNodeType} from './TabNodeProvider';
+import {TabNodeCallbacks, TabNodeType} from './TabNodeProvider';
 import {useHistory, useLocation} from 'ice';
 import {useAliveController} from 'react-activation';
-import React, {useContext, useRef, useState} from 'react';
+import React, {MutableRefObject, ReactElement, useContext, useRef} from 'react';
 import {RouteContext} from '@/layouts/BasicLayout';
 import {defaultStartPage, MenuConfigItem} from '@/menuConfig';
-import {useCreation, useLatest, useMap} from 'ahooks';
+import {useCreation, useLatest, useUpdate} from 'ahooks';
+import {nanoid} from 'nanoid';
+import RvUtil from '@/utils/rvUtil';
 
-function preProcessCachingNodes(cachingNodes, currentTabKey): TabNodeType[] {
-    if (cachingNodes.length === 0 || cachingNodes[cachingNodes.length - 1].name !== currentTabKey) {
-        cachingNodes.push({
-            name: currentTabKey,
-            id: currentTabKey
-        });
-    }
-    // 去重
-    return cachingNodes.filter((node, index, arr) => {
-        return arr.map(mapNode => mapNode.name).indexOf(node.name) === index;
-    });
-}
+const temporaryTabNodesMap = new Map<string, TabNodeType>();
 
-function sortCachingNodes(tabKeySequence, cachingNodes): TabNodeType[] {
-    const sortedTabNodes: TabNodeType[] = [];
-    tabKeySequence.forEach(tabKey => {
-        const cachingNode = cachingNodes.find(node => node.name === tabKey);
-        if (cachingNode) {
-            sortedTabNodes.push(cachingNode);
+function transferTemporaryTabNode(cachingNodes: TabNodeType[]) {
+    const latestCachingNode = cachingNodes[cachingNodes.length - 1];
+    if (!latestCachingNode || latestCachingNode._temporary) return;
+    const temporaryTabNode = temporaryTabNodesMap.get(latestCachingNode.name ?? '');
+    if (!temporaryTabNode) return;
+    temporaryTabNode._temporary = false;
+    RvUtil.mergeObject(latestCachingNode, temporaryTabNode, true);
+    const splitView = temporaryTabNode.splitView;
+    splitView.tabNodes.forEach((tabNode, index) => {
+        if (tabNode.name === cachingNodes[0].name) {
+            splitView.tabNodes[index] = cachingNodes[0];
         }
     });
-    return sortedTabNodes;
+    temporaryTabNodesMap.delete(latestCachingNode.name ?? '');
+}
+
+function preProcessCachingNodes(cachingNodes: TabNodeType[], splitViewContainer: SplitViewContainerType, currentTabKey: string): TabNodeType[] {
+    // 先去重，此处有待进一步考虑
+    cachingNodes = cachingNodes.filter((node, index, arr) => {
+        return arr.map(mapNode => mapNode.name).indexOf(node.name) === index;
+    });
+    const activeSplitView = splitViewContainer.splitViews.find(view => view.isActive) ?? splitViewContainer.splitViews[0];
+    // 还没有KeepAlive节点被渲染，则根据当前的url判断当前要打开哪个页面，提前加入一个CachingNode节点
+    // 防止出现没有KeepAlive就没有CachingNode，没有CachingNode就渲染不了KeepAlive的死循环
+    if (cachingNodes.length === 0 || cachingNodes[cachingNodes.length - 1].name !== currentTabKey) {
+        const temporaryNode = {
+            _temporary: true,
+            createTime: Date.now(),
+            updateTime: Date.now(),
+            name: currentTabKey,
+            id: currentTabKey,
+            isActive: true,
+            splitView: activeSplitView
+        };
+        cachingNodes.push(temporaryNode);
+        temporaryTabNodesMap.set(temporaryNode.name, temporaryNode);
+    }
+    // 将临时创建的tabNode的属性转移到正式的tabNode上
+    transferTemporaryTabNode(cachingNodes);
+    return cachingNodes;
 }
 
 function matchMenuConfig(menuItems: MenuConfigItem[], node: TabNodeType) {
@@ -46,110 +68,154 @@ function matchMenuConfig(menuItems: MenuConfigItem[], node: TabNodeType) {
     }
 }
 
-function fillCachingNodeWithMenuDataAndStatus(
-    sortedTabNodes: TabNodeType[],
-    menuData: MenuConfigItem[],
-    tabAttributesMap: Map<string, TabNodeAttributes>,
-    currentTabKey: string
-) {
-    sortedTabNodes.forEach(node => {
-        if (!node.targetMenu) {
-            matchMenuConfig(menuData, node);
-        }
-        node.isActive = node.name === currentTabKey;
-        const tabAttributes = tabAttributesMap.get(node.name ?? '');
-        if (tabAttributes) {
-            for (const [key, value] of Object.entries(tabAttributes)) {
-                node[key] = value;
-            }
-        }
-        node.splitViewIndex = node.splitViewIndex ?? 0;
-    });
-}
-
-function synchronizeTabKeySequence(prevTabKeySequence, cachingNodes): string[] {
-    let curTabKeySequence = prevTabKeySequence.filter(tabKey => cachingNodes.findIndex(node => node.name === tabKey) !== -1);
-    if (cachingNodes.length > curTabKeySequence.length) {
-        const addedTabKey: [] = cachingNodes.slice(curTabKeySequence.length).map(node => node.name);
-        curTabKeySequence = curTabKeySequence.concat(addedTabKey);
-    }
-    return curTabKeySequence;
-}
-
 interface TabNodeOperations {
-    findNode: (targetKey: string | undefined) => TabNodeType | undefined;
-    activeNode: (targetKey: string | undefined) => void;
-    removeNode: (targetKey: string | undefined) => void;
-    refreshNode: (targetKey: string | undefined) => void;
-    removeAllNodes: () => void;
-    removeOtherNodes: (targetKey) => void;
-    removeLeftSideNodes: (targetKey) => void;
-    removeRightSideNodes: (targetKey) => void;
+    findNode(targetKey: string | undefined): TabNodeType | undefined;
+
+    activeNode(targetKey: string | undefined): void;
+
+    removeNode(targetKey: string | undefined): void;
+
+    refreshNode(targetKey: string | undefined): void;
+
+    removeAllNodes(): void;
+
+    removeNodesOfSplitView(targetKey: string | undefined, isMerge: boolean): void;
+
+    removeOtherNodes(targetKey): void;
+
+    removeLeftSideNodes(targetKey): void;
+
+    removeRightSideNodes(targetKey): void;
+
+    setSplitViewOfTab(targetKey: string | undefined, index: number): void;
+
+    setTabNodeCallbacks(targetKey: string | undefined, callbacks: TabNodeCallbacks): void;
+}
+
+export interface SplitViewType {
+    id: string,
+    isActive?: boolean;
+    tabBarElement?: ReactElement;
+    tabNodes: TabNodeType[];
+}
+
+export interface SplitViewContainerType {
+    splitViews: SplitViewType[];
 }
 
 export type TabsContextType = {
-    sortedTabNodes: TabNodeType[];
-    tabKeySequence: string[];
+    tabNodes: TabNodeType[];
     currentTabKey: string;
     currentTabNode: TabNodeType | undefined;
-    splitViews: string[][];
-    setSplitView: (targetKey: string | undefined, index: number) => void;
-    setTabKeySequence: (tabKeySequence: string[]) => void;
-    setTabNodeAttributes: (targetKey: string | undefined, attributes: TabNodeAttributes) => void;
-    setTabNodeCallbacks: (targetKey: string | undefined, callbacks: TabNodeCallbacks) => void;
+    splitViewContainer: SplitViewContainerType;
+    keepAliveTabsElemRef: MutableRefObject<HTMLDivElement>;
+    updateTabs(): void;
+    getSplitViewContainerCopy(): SplitViewContainerType;
+    resetSplitViewContainer(splitViewContainer: SplitViewContainerType): void;
 } & TabNodeOperations;
 
 export const TabsContext = React.createContext({} as TabsContextType);
 
 export default (props) => {
     const {getCachingNodes, drop, refresh} = useAliveController();
-    const cachingNodes = getCachingNodes();
     const {menuData} = useContext(RouteContext);
     const {pathname, search} = useLocation();
     const history = useHistory();
     const currentTabKey = pathname + search;
-    const splitViewsRef = useRef<Array<Array<string>>>([[]]);
-    const [tabAttributesMap, tabAttributesHandler] = useMap<string, TabNodeAttributes>([]);
-    let [tabKeySequence, setTabKeySequence] = useState([] as string[]);
-    const tabNodeCallbacksMap = useCreation(() => new Map<string, TabNodeCallbacks>(), []);
-    const processedCachingNodes = preProcessCachingNodes(cachingNodes, currentTabKey);
-    // 将cachingNodes中的增加和删除反映到tabKeySequence中
-    tabKeySequence = synchronizeTabKeySequence(tabKeySequence, processedCachingNodes);
-    // 对cachingNodes进行排序，因为涉及回调，可能导致闭包问题，所以使用useLatest包裹
-    const sortedTabNodesRef = useLatest(sortCachingNodes(tabKeySequence, processedCachingNodes));
-    // 设置cachingNode对应的MenuItem
-    fillCachingNodeWithMenuDataAndStatus(sortedTabNodesRef.current, menuData as MenuConfigItem[], tabAttributesMap, currentTabKey);
-    const findNode = targetKey => sortedTabNodesRef.current.find(node => node.name === targetKey ?? '') as TabNodeType | undefined;
-    const currentTabNode = findNode(currentTabKey);
-    const setTabNodeAttributes = (targetKey, value: TabNodeAttributes) => {
-        const prevAttr = tabAttributesHandler.get(targetKey);
-        tabAttributesHandler.set(targetKey, {
-            ...prevAttr,
-            ...value
-        });
+    const updateTabs: () => void = useUpdate();
+    const initSplitView = useCreation<SplitViewType>(() => {
+        return {
+            tabNodes: [],
+            id: nanoid(),
+            isActive: true
+        };
+    }, []);
+    const splitViewContainerRef = useRef<SplitViewContainerType>({
+        splitViews: [initSplitView]
+    });
+    const splitViewContainer = splitViewContainerRef.current;
+    const getSplitViewContainerCopy = () => {
+        const splitViewContainerCopy = {...splitViewContainer};
+        splitViewContainerCopy.splitViews = [...splitViewContainer.splitViews];
+        for (let i = 0; i < splitViewContainer.splitViews.length; ++i) {
+            const splitView = splitViewContainer.splitViews[i];
+            splitViewContainerCopy.splitViews[i] = {...splitView};
+            splitViewContainerCopy.splitViews[i].tabNodes = [...splitView.tabNodes];
+        }
+        return splitViewContainerCopy;
     };
-    const setSplitView = (targetKey, index) => {
-        splitViewsRef.current[index].push(targetKey);
-        setTabNodeAttributes(targetKey, {
-            splitViewIndex: index
-        });
+    const resetSplitViewContainer = (splitViewContainerCopy) => {
+        splitViewContainerRef.current = splitViewContainerCopy;
+    };
+    const lastTabNodesRef = useRef<TabNodeType[]>([]);
+    const tabNodes = preProcessCachingNodes(getCachingNodes(), splitViewContainer, currentTabKey);
+    const lastTabNodes = lastTabNodesRef.current;
+    lastTabNodesRef.current = [...tabNodes];
+    // 筛选出这一次有，上一次没有的节点，记为新增加的节点
+    const newTabNodes = tabNodes.filter(node1 => {
+        node1.isNewTab = !lastTabNodes.some(node2 => node2.name === node1.name);
+        return node1.isNewTab;
+    });
+    // 因为涉及回调，可能导致闭包问题，所以使用useLatest包裹
+    const tabNodesRef = useLatest(tabNodes);
+    const findNode = targetKey => tabNodesRef.current.find(node => node.name === targetKey) as TabNodeType | undefined;
+    const currentTabNode = findNode(currentTabKey) ?? {} as TabNodeType;
+    const removeTabNodeFromSplitView = targetNode => targetNode.splitView.tabNodes = targetNode.splitView.tabNodes.filter(node => node.name !== targetNode.name);
+    // 因为菜单数据可能延迟加载，所以每次都要全部更新一次对应菜单
+    tabNodes.forEach(tabNode => {
+        matchMenuConfig(menuData as MenuConfigItem[], tabNode);
+    });
+    newTabNodes.forEach(tabNode => {
+        const curSplitView = currentTabNode.splitView;
+        tabNode.splitView = curSplitView;
+        tabNode.isActive = tabNode.name === currentTabKey;
+        curSplitView.tabNodes.push(tabNode);
+    });
+    const setActiveSplitView = splitView => {
+        splitViewContainer.splitViews.forEach(splitView => splitView.isActive = false);
+        splitView.isActive = true;
+    };
+    const setSplitViewOfTab = (targetKey, index) => {
+        const targetNode = findNode(targetKey);
+        if (!targetNode) return;
+        const splitViews = splitViewContainer.splitViews;
+        if (!splitViews[index]) {
+            splitViews[index] = {
+                id: nanoid(),
+                tabNodes: []
+            };
+        }
+        splitViews[index].tabNodes.push(targetNode);
+        if (targetNode.splitView) {
+            // 将tabNode从原来的splitView中移除
+            removeTabNodeFromSplitView(targetNode);
+        }
+        targetNode.splitView = splitViews[index];
+        setActiveSplitView(targetNode.splitView);
+        updateTabs();
     };
     const activeNode = (targetKey) => {
         if (!targetKey) return;
-        history.push(targetKey ?? '');
+        const targetNode = findNode(targetKey) ?? {} as TabNodeType;
+        setActiveSplitView(targetNode.splitView);
+        history.push(targetKey);
     };
     const activePrevNode = (targetKey) => {
-        const curIdx = sortedTabNodesRef.current.findIndex(
+        const splitView = findNode(targetKey)?.splitView;
+        if (!splitView) return;
+        const curIdx = splitView.tabNodes.findIndex(
             node => node.name === targetKey
         );
         if (curIdx === 0) {
-            activeNode(sortedTabNodesRef.current[1].name ?? '');
+            activeNode(splitView.tabNodes[1].name ?? '');
         } else if (curIdx > 0) {
-            activeNode(sortedTabNodesRef.current[curIdx - 1].name ?? '');
+            activeNode(splitView.tabNodes[curIdx - 1].name ?? '');
         }
     };
     const activeStartPage = () => activeNode(defaultStartPage);
     const dropNode = async (targetKey, dropSync = false, fromCallback = false) => {
+        const targetNode = findNode(targetKey);
+        if (!targetNode) return;
         const doClose = () => {
             removeNode(targetKey, true);
         };
@@ -160,28 +226,24 @@ export default (props) => {
                 drop(targetKey).then(() => {
                 });
             }
+            // 将tabNode从原来的splitView中移除
+            removeTabNodeFromSplitView(targetNode);
         };
         if (fromCallback) {
             await doDrop();
             return true;
         }
-        const callbacks = tabNodeCallbacksMap.get(targetKey);
-        const prevAttributes = tabAttributesHandler.get(targetKey);
         const clearAttention = () => {
-            tabAttributesHandler.set(targetKey, {
-                ...prevAttributes,
-                needAttention: false
-            });
+            targetNode.needAttention = false;
+            updateTabs();
         };
-        if (callbacks?.beforeCloseCallback) {
-            const shouldClose = await callbacks.beforeCloseCallback(clearAttention, doClose);
+        if (targetNode.beforeCloseCallback) {
+            const shouldClose = await targetNode.beforeCloseCallback(clearAttention, doClose);
             if (shouldClose) {
                 await doDrop();
             } else {
-                tabAttributesHandler.set(targetKey, {
-                    ...prevAttributes,
-                    needAttention: true
-                });
+                targetNode.needAttention = true;
+                updateTabs();
                 return false;
             }
         } else {
@@ -189,22 +251,41 @@ export default (props) => {
         }
         return true;
     };
+    const removeSplitView = (splitViewId: string, shouldUpdateTabs: boolean = true) => {
+        splitViewContainer.splitViews = splitViewContainer.splitViews.filter(view => view.id !== splitViewId);
+        const curSplitViewIndex = splitViewContainer.splitViews.findIndex(view => view.id === splitViewId);
+        const prevSplitViewIndex = curSplitViewIndex === 0 ? 1 : curSplitViewIndex - 1;
+        const prevSplitView = splitViewContainer.splitViews[prevSplitViewIndex];
+        const curSplitView = splitViewContainer.splitViews[curSplitViewIndex];
+        if (curSplitView && prevSplitView) {
+            curSplitView.isActive = false;
+            prevSplitView.isActive = true;
+        }
+        if (shouldUpdateTabs) {
+            updateTabs();
+        }
+    };
     const removeNode = (targetKey, fromCallback = false) => {
-        if (!targetKey) return;
         const targetNode = findNode(targetKey);
-        if (targetNode?.isActive) {
+        if (!targetNode) return;
+        if (targetNode.isActive) {
             dropNode(targetKey, false, fromCallback).then(shouldClose => {
                 if (!shouldClose) {
                     return;
                 }
-                if (sortedTabNodesRef.current.length === 1) {
+                if (tabNodesRef.current.length === 1) {
                     activeStartPage();
+                } else if (targetNode.splitView.tabNodes.length === 1) {
+                    removeSplitView(targetNode.splitView.id);
                 } else {
                     activePrevNode(targetKey);
                 }
             });
         } else {
             dropNode(targetKey, false, fromCallback).then(() => {
+                if (targetNode.splitView.tabNodes.length === 1) {
+                    removeSplitView(targetNode.splitView.id);
+                }
             });
         }
     };
@@ -213,10 +294,10 @@ export default (props) => {
         refresh(targetKey).then(() => {
         });
     };
-    const removeAllNodes = () => {
+    const removeMultiNodes = (tabNodes: TabNodeType[], onAllSuccess: () => void) => {
         let dropCount = 0;
         let isCurrentTabDropFail = false;
-        const dropPromiseList = sortedTabNodesRef.current.map(node => {
+        const dropPromiseList = tabNodes.map(node => {
             if (node.targetMenu?.isStartPage) {
                 return Promise.resolve();
             }
@@ -228,18 +309,39 @@ export default (props) => {
             });
         });
         Promise.all(dropPromiseList).then(() => {
-            if (dropCount === sortedTabNodesRef.current.length) {
+            if (dropCount === tabNodes.length) {
                 // 全部关闭成功
-                activeStartPage();
+                onAllSuccess();
             } else if (!isCurrentTabDropFail) {
                 // 没有全部关闭成功，但当前页面关闭成功，则退回上一个未关闭成功的页面
                 activePrevNode(currentTabKey);
             }
         });
     };
+    const removeAllNodes = () => {
+        removeMultiNodes(tabNodesRef.current, activeStartPage);
+    };
+    const removeNodesOfSplitView = (targetKey: string, isMerge: boolean) => {
+        const targetNode = findNode(targetKey);
+        if (!targetNode) return;
+        const targetSplitView = targetNode.splitView;
+        if (isMerge) {
+            const splitViewIndex = splitViewContainer.splitViews.findIndex(view => view.id === targetSplitView.id);
+            const prevSplitViewIndex = splitViewIndex === 0 ? 1 : splitViewIndex - 1;
+            const prevSplitView = splitViewContainer.splitViews[prevSplitViewIndex];
+            targetSplitView.tabNodes.forEach(node => node.splitView = prevSplitView);
+            removeSplitView(targetSplitView.id);
+        } else {
+            removeMultiNodes(targetSplitView.tabNodes, () => {
+                removeSplitView(targetSplitView.id);
+            });
+        }
+    };
     const removeOtherNodes = (targetKey) => {
+        const targetNode = findNode(targetKey);
+        if (!targetNode) return;
         activeNode(targetKey);
-        sortedTabNodesRef.current.forEach(node => {
+        targetNode.splitView.tabNodes.forEach(node => {
             if (node.name !== targetKey) {
                 dropNode(node.name ?? '').then(() => {
                 });
@@ -247,8 +349,10 @@ export default (props) => {
         });
     };
     const removeLeftSideNodes = (targetKey) => {
-        for (let i = 0; i < sortedTabNodesRef.current.length; ++i) {
-            const node = sortedTabNodesRef.current[i];
+        const targetNode = findNode(targetKey);
+        if (!targetNode) return;
+        for (let i = 0; i < targetNode.splitView.tabNodes.length; ++i) {
+            const node = targetNode.splitView.tabNodes[i];
             if (node.name === targetKey) {
                 return;
             }
@@ -260,8 +364,10 @@ export default (props) => {
         }
     };
     const removeRightSideNodes = (targetKey) => {
-        for (let i = sortedTabNodesRef.current.length - 1; i >= 0; --i) {
-            const node = sortedTabNodesRef.current[i];
+        const targetNode = findNode(targetKey);
+        if (!targetNode) return;
+        for (let i = targetNode.splitView.tabNodes.length - 1; i >= 0; --i) {
+            const node = targetNode.splitView.tabNodes[i];
             if (node.name === targetKey) {
                 return;
             }
@@ -273,30 +379,32 @@ export default (props) => {
         }
     };
     const setTabNodeCallbacks = (targetKey, callbacks) => {
-        if (!targetKey) {
-            return;
-        }
-        tabNodeCallbacksMap.set(targetKey, callbacks);
+        const targetNode = findNode(targetKey);
+        if (!targetNode) return;
+        RvUtil.mergeObject(targetNode, callbacks);
     };
 
+    const keepAliveTabsElemRef = useRef<HTMLDivElement>(null as unknown as HTMLDivElement);
     const value: TabsContextType = {
-        sortedTabNodes: sortedTabNodesRef.current,
-        splitViews: splitViewsRef.current,
-        setSplitView,
-        tabKeySequence,
+        keepAliveTabsElemRef,
+        tabNodes: tabNodesRef.current,
+        splitViewContainer,
         currentTabKey,
         currentTabNode,
-        setTabKeySequence,
-        setTabNodeAttributes,
         findNode,
         activeNode,
         removeNode,
         refreshNode,
         removeAllNodes,
+        removeNodesOfSplitView,
         removeOtherNodes,
         removeLeftSideNodes,
         removeRightSideNodes,
-        setTabNodeCallbacks
+        updateTabs,
+        setSplitViewOfTab,
+        setTabNodeCallbacks,
+        getSplitViewContainerCopy,
+        resetSplitViewContainer
     };
     return (
         <TabsContext.Provider value={value}>

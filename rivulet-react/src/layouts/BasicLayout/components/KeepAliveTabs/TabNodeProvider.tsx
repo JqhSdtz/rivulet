@@ -1,13 +1,14 @@
 import {KeepAlive} from 'react-activation';
-import React, {useContext} from 'react';
-import {TabsContext, TabsContextType} from '@/layouts/BasicLayout';
+import React, {ReactElement, useContext} from 'react';
+import {SplitViewType, TabsContext, TabsContextType} from '@/layouts/BasicLayout';
 import {MenuConfigItem} from '@/menuConfig';
 import {WrappedComponentFactory} from 'react-sortable-hoc';
 
 export interface TabNodeAttributes {
     isActive?: boolean;
+    isNewTab?: boolean;
     needAttention?: boolean;
-    splitViewIndex?: number;
+    splitView: SplitViewType;
 }
 
 type WrappedComponent<P> =
@@ -26,17 +27,18 @@ export type TabNodeType = {
     name?: string;
     id: string;
     targetMenu?: MenuConfigItem;
-    component?: TabComponentType
+    component?: TabComponentType;
+    tabElement?: ReactElement;
 
     [key: string]: any;
-} & TabNodeAttributes;
+} & TabNodeAttributes & TabNodeCallbacks;
 
 export interface TabNodeCallbacks {
-    beforeCloseCallback?: (clearAttention: () => void, doClose: () => void) => boolean | Promise<boolean>;
+    beforeCloseCallback?(clearAttention: () => void, doClose: () => void): boolean | Promise<boolean>;
 }
 
 interface TabNodeCallbacksSetter {
-    beforeClose: (callback: (clearAttention: () => void, doClose: () => void) => boolean | Promise<boolean>) => void;
+    beforeClose(callback: (clearAttention: () => void, doClose: () => void) => boolean | Promise<boolean>): void;
 }
 
 export type TabNodeContextType = {
@@ -71,7 +73,6 @@ export default (props: { tabKey: string; children: any }) => {
                 name={tabKey}
                 id={tabKey}
                 saveScrollPosition="screen"
-                _nk=""
             >
                 {props.children}
             </KeepAlive>

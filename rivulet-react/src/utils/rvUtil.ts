@@ -7,5 +7,13 @@ export default {
         } else {
             return obj1 === obj2;
         }
+    },
+    mergeObject(target, obj, preserveTarget: boolean = false) {
+        for (const [key, value] of Object.entries(obj)) {
+            if (preserveTarget && typeof target[key] !== 'undefined') {
+                continue;
+            }
+            target[key] = value;
+        }
     }
 }

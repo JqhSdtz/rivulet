@@ -14,7 +14,7 @@ import type {WaterMarkProps} from '../WaterMark';
 import WaterMark from '../WaterMark';
 
 export type PageHeaderTabConfig = {
-    /** @name tabs 的列表 */
+    /** @name tabNodes 的列表 */
     tabList?: (TabPaneProps & { key?: React.ReactText })[];
 
     /** @name 当前选中 tab 的 key */
@@ -26,7 +26,7 @@ export type PageHeaderTabConfig = {
     /** @name tab 上额外的区域 */
     tabBarExtraContent?: TabsProps['tabBarExtraContent'];
 
-    /** @name tabs 的其他配置 */
+    /** @name tabNodes 的其他配置 */
     tabProps?: TabsProps;
 
     /**

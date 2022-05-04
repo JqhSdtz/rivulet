@@ -1,19 +1,11 @@
 import RvUtil from '@/utils/rvUtil';
 import {TabNodeType} from './TabNodeProvider';
-import {
-    Dispatch,
-    MouseEvent,
-    MutableRefObject,
-    ReactElement,
-    SetStateAction,
-    useContext,
-    useRef,
-    useState
-} from 'react';
-import {SortableElement} from 'react-sortable-hoc';
+import {Dispatch, MouseEvent, MutableRefObject, ReactElement, SetStateAction, useContext, useState} from 'react';
+import {CSS} from '@dnd-kit/utilities';
 import {TabsContext, TabsContextType} from './TabsContextProvider';
 import TabContextMenu from './TabContextMenu';
 import {Dropdown} from 'antd';
+import {useSortable} from '@dnd-kit/sortable';
 
 interface TabDividerProps {
     isShow: boolean;
@@ -27,25 +19,40 @@ const TabDivider = (props: TabDividerProps) => {
     return <div className={tmpClassName}/>;
 };
 
-const SortableTabNode = SortableElement((props: {
-    className: string,
-    onMouseEnter: () => void,
-    onMouseLeave: () => void,
-    showBeforeDivider: boolean,
-    showAfterDivider: boolean,
-    tabNode: ReactElement,
-    cachingNode: TabNodeType
+const SortableTabNode = (props: {
+    className: string;
+    onMouseEnter: () => void;
+    onMouseLeave: () => void;
+    showBeforeDivider: boolean;
+    showAfterDivider: boolean;
+    tabNodeElem: ReactElement;
+    tabNode: TabNodeType;
 }) => {
+    props.tabNode.tabElement = props.tabNodeElem;
+    const sortableProps = {
+        id: props.tabNode.name ?? '',
+        data: {
+            type: 'tabNode'
+        }
+    };
+    const {
+        attributes,
+        listeners,
+        node,
+        setNodeRef,
+        transform,
+        isDragging
+    } = useSortable(sortableProps);
     const [contextMenuVisible, setContextMenuVisible] = useState(false);
     const onContextMenu = (event: MouseEvent) => {
         event.preventDefault();
+        event.stopPropagation();
         setContextMenuVisible(true);
     };
-    const tabElemRef = useRef<HTMLDivElement>(null);
     const tabContextMenu = (
         <TabContextMenu
-            tabNode={props.cachingNode}
-            tabElemRef={tabElemRef}
+            tabNode={props.tabNode}
+            tabElemRef={node}
             setContextMenuVisible={setContextMenuVisible}
         />
     );
@@ -53,6 +60,12 @@ const SortableTabNode = SortableElement((props: {
     // 所以采用直接添加class，直接设置display为none的方式实现立即关闭右键菜单
     let overlayClassName = 'keep-alive-tab-context-menu';
     if (!contextMenuVisible) overlayClassName += ' tab-context-menu-hidden';
+    const sortableClassName = isDragging ? ' keep-alive-tab-dragged' : '';
+    const sortableStyle = {
+        transform: CSS.Transform.toString(transform),
+        transition: 'transform 0.3s cubic-bezier(0.645, 0.045, 0.355, 1)'
+    };
+
     return (
         <Dropdown
             overlay={tabContextMenu}
@@ -61,19 +74,23 @@ const SortableTabNode = SortableElement((props: {
             visible={contextMenuVisible}
             destroyPopupOnHide
         >
-            <div className={props.className}
-                 ref={tabElemRef}
+            <div className={props.className + sortableClassName}
+                 key={props.tabNode.name}
+                 ref={setNodeRef}
+                 style={sortableStyle}
+                 {...attributes}
+                 {...listeners}
                  onMouseEnter={props.onMouseEnter}
                  onMouseLeave={props.onMouseLeave}
                  onContextMenu={onContextMenu}
             >
                 <TabDivider isShow={props.showBeforeDivider}/>
-                {props.tabNode}
+                {props.tabNodeElem}
                 <TabDivider isShow={props.showAfterDivider}/>
             </div>
         </Dropdown>
     );
-});
+};
 
 interface TabNodeWrapperProps {
     prevTabNode: MutableRefObject<ReactElement>;
@@ -81,25 +98,23 @@ interface TabNodeWrapperProps {
 }
 
 const isSameTab = (tabNode1, tabNode2) => RvUtil.equalAndNotEmpty(tabNode1?.key, tabNode2?.key);
-const isTabActive = (tabNode, currentTabKey) => RvUtil.equalAndNotEmpty(tabNode?.key, currentTabKey);
 
 export default ({
                     prevTabNode,
                     currentMouseOverNodeState
                 }: TabNodeWrapperProps) => {
-    return (tabNode) => {
+    return (tabNodeElem) => {
         const {
-            sortedTabNodes,
-            currentTabKey
+            findNode
         } = useContext<TabsContextType>(TabsContext);
         const [currentMouseOverNode, setCurrentMouseOverNode] = currentMouseOverNodeState;
-        const index = sortedTabNodes.findIndex(cachingNode => cachingNode.name === tabNode.key);
-        const cachingNode = sortedTabNodes[index];
+        const targetNode = findNode(tabNodeElem.key) ?? {} as TabNodeType;
+        const indexInSplitView = targetNode.splitView.tabNodes.findIndex(node => node?.name === tabNodeElem.key);
         let className = 'keep-alive-tab';
-        const isFirst = index === 0;
-        const isLast = index === sortedTabNodes.length - 1;
-        const isActive = isTabActive(tabNode, currentTabKey);
-        if (index === -1) {
+        const isFirst = indexInSplitView === 0;
+        const isLast = indexInSplitView === targetNode.splitView.tabNodes.length - 1;
+        const isActive = targetNode.isActive;
+        if (indexInSplitView === -1) {
             className += ' keep-alive-loading-tab';
         } else {
             if (isFirst) {
@@ -111,27 +126,26 @@ export default ({
             if (isActive) {
                 className += ' keep-alive-active-tab';
             }
-            if (cachingNode.needAttention) {
+            if (targetNode?.needAttention) {
                 className += ' keep-alive-need-attention-tab';
             }
         }
         let showBeforeDivider = !isFirst;
         let showAfterDivider = isLast && !isFirst;
-        if (isActive || isSameTab(currentMouseOverNode, tabNode)) {
+        if (isActive || isSameTab(currentMouseOverNode, tabNodeElem)) {
             showBeforeDivider = false;
             showAfterDivider = false;
         }
-        if (isTabActive(prevTabNode.current, currentTabKey) || isSameTab(currentMouseOverNode, prevTabNode.current)) {
+        if (findNode(prevTabNode.current?.key as string ?? '')?.isActive || isSameTab(currentMouseOverNode, prevTabNode.current)) {
             showBeforeDivider = false;
         }
-        prevTabNode.current = tabNode;
+        prevTabNode.current = tabNodeElem;
         const onMouseEnter = () => {
-            setCurrentMouseOverNode(tabNode);
+            setCurrentMouseOverNode(tabNodeElem);
         };
         const onMouseLeave = () => {
             setCurrentMouseOverNode(null);
         };
-        // SortableTabNode的index属性是SortableElement的属性，不能删
         return (
             <SortableTabNode
                 className={className}
@@ -139,9 +153,8 @@ export default ({
                 onMouseLeave={onMouseLeave}
                 showBeforeDivider={showBeforeDivider}
                 showAfterDivider={showAfterDivider}
-                tabNode={tabNode}
-                cachingNode={cachingNode}
-                index={index}
+                tabNodeElem={tabNodeElem}
+                tabNode={targetNode}
             />
         );
     };

@@ -1,21 +1,22 @@
-import {useContext} from 'react';
+import {ReactElement, useContext} from 'react';
 import {TabNodeProvider, TabsContext, TabsContextType} from '@/layouts/BasicLayout';
 
 export default () => {
     const {
-        splitViews,
-        sortedTabNodes
+        splitViewContainer
     } = useContext<TabsContextType>(TabsContext);
-    const elements = sortedTabNodes.map(node => {
-        const tabComponent = node.component;
+    const splitViewElements = [] as ReactElement[];
+    splitViewContainer.splitViews.forEach(splitView => {
+        const activeTab = splitView.tabNodes.find(node => node.isActive);
+        const tabComponent = activeTab?.component;
         if (!tabComponent) {
-            return <div key={node.name}></div>;
+            return;
         }
         const Component = tabComponent.node;
-        const width = 100 / splitViews.length + '%';
-        return (
-            <div key={node.name} style={{width, display: 'inline-block'}}>
-                <TabNodeProvider tabKey={node.name ?? ''}>
+        const width = 100 / splitViewContainer.splitViews.length + '%';
+        splitViewElements.push(
+            <div key={activeTab.name} style={{width, display: 'inline-block'}}>
+                <TabNodeProvider tabKey={activeTab.name ?? ''}>
                     <Component {...tabComponent.props}/>
                 </TabNodeProvider>
             </div>
@@ -23,7 +24,7 @@ export default () => {
     });
     return (
         <div className="keep-alive-tab-content">
-            {elements}
+            {splitViewElements}
         </div>
     );
 }
