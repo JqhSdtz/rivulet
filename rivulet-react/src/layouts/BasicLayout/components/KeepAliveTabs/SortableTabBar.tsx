@@ -13,6 +13,7 @@ import TabNodeWrapper from '@/layouts/BasicLayout/components/KeepAliveTabs/TabNo
 const {TabPane} = Tabs;
 
 type SortableTabsProps = {
+    className: string;
     splitView: SplitViewType;
 };
 
@@ -52,10 +53,11 @@ const TabBar = (props) => {
         };
         return <TabNavList {...props} />;
     };
+    const className = 'keep-alive-tab-bar' + (props.className ? (' ' + props.className) : '');
     return (
         <Tabs type="editable-card"
               renderTabBar={renderTabBar}
-              className="keep-alive-tab-bar"
+              className={className}
               tabBarGutter={0}
               activeKey={currentTabKey}
               onEdit={onEdit}
@@ -121,7 +123,7 @@ export default (props: SortableTabsProps) => {
     splitView.tabBarElement = (
         <div style={{display: 'inline-flex'}}>
             {splitViewIndex > 0 && <Handle {...attributes} {...listeners}/>}
-            <TabBar>{tabNodes}</TabBar>
+            <TabBar {...props}>{tabNodes}</TabBar>
         </div>
     );
     return (

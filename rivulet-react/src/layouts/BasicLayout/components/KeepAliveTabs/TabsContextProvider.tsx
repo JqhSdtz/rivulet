@@ -112,6 +112,7 @@ export type TabsContextType = {
     updateTabs(): void;
     getSplitViewContainerCopy(): SplitViewContainerType;
     resetSplitViewContainer(splitViewContainer: SplitViewContainerType): void;
+    removeSplitView(splitViewId: string): void;
 } & TabNodeOperations;
 
 export const TabsContext = React.createContext({} as TabsContextType);
@@ -165,12 +166,15 @@ export default (props) => {
     tabNodes.forEach(tabNode => {
         matchMenuConfig(menuData as MenuConfigItem[], tabNode);
     });
-    newTabNodes.forEach(tabNode => {
-        const curSplitView = currentTabNode.splitView;
-        tabNode.splitView = curSplitView;
-        tabNode.isActive = tabNode.name === currentTabKey;
-        curSplitView.tabNodes.push(tabNode);
-    });
+    const curSplitView = currentTabNode.splitView;
+    if (newTabNodes.length > 0) {
+        curSplitView.tabNodes.forEach(node => node.isActive = false);
+        newTabNodes.forEach(tabNode => {
+            tabNode.splitView = curSplitView;
+            tabNode.isActive = tabNode.name === currentTabKey;
+            curSplitView.tabNodes.push(tabNode);
+        });
+    }
     const setActiveSplitView = splitView => {
         splitViewContainer.splitViews.forEach(splitView => splitView.isActive = false);
         splitView.isActive = true;
@@ -404,7 +408,8 @@ export default (props) => {
         setSplitViewOfTab,
         setTabNodeCallbacks,
         getSplitViewContainerCopy,
-        resetSplitViewContainer
+        resetSplitViewContainer,
+        removeSplitView: splitViewId => removeSplitView(splitViewId, false)
     };
     return (
         <TabsContext.Provider value={value}>

@@ -53,6 +53,12 @@
 
     // 重复两遍class可以提升权重，以覆盖默认样式
     .keep-alive-tab-bar.keep-alive-tab-bar {
+        &:not(.keep-alive-tab-bar-moving) {
+            .keep-alive-tab {
+                transition: all 0s !important;
+            }
+        }
+
         .@{ant-prefix}-tabs-nav {
             margin: 0;
             height: @header-height;

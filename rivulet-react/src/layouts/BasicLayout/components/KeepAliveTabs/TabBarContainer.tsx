@@ -1,4 +1,4 @@
-import {useCallback, useContext, useRef, useState} from 'react';
+import {useCallback, useContext, useEffect, useRef, useState} from 'react';
 import {SplitViewContainerType, SplitViewType, TabsContext, TabsContextType} from '@/layouts/BasicLayout';
 import {
     Active,
@@ -6,11 +6,14 @@ import {
     CollisionDetection,
     DndContext,
     DragOverlay,
+    getFirstCollision,
+    MeasuringStrategy,
     PointerSensor,
+    pointerWithin,
     useSensor,
     useSensors
 } from '@dnd-kit/core';
-import {horizontalListSortingStrategy, SortableContext} from '@dnd-kit/sortable';
+import {arrayMove, horizontalListSortingStrategy, SortableContext} from '@dnd-kit/sortable';
 import {createPortal} from 'react-dom';
 import SortableTabBar from '@/layouts/BasicLayout/components/KeepAliveTabs/SortableTabBar';
 import {Modifier} from '@dnd-kit/core/dist/modifiers/types';
@@ -22,6 +25,7 @@ export default () => {
         findNode,
         getSplitViewContainerCopy,
         resetSplitViewContainer,
+        removeSplitView,
         updateTabs
     } = useContext<TabsContextType>(TabsContext);
     const [activeTarget, setActiveTarget] = useState(null as unknown as Active);
@@ -33,7 +37,11 @@ export default () => {
         })
     );
     const splitViewContainerCopyRef = useRef<SplitViewContainerType>();
+    const findSplitView = splitViewId => splitViewContainer.splitViews.find(view => view.id === splitViewId);
     const findSplitViewCopy = splitView => splitViewContainerCopyRef.current?.splitViews.find(view => view.id === splitView.id) ?? {} as SplitViewType;
+    const resetSplitViewOfTabNode = () => splitViewContainer.splitViews.forEach(
+        splitView => splitView.tabNodes.forEach(node => node.splitView = splitView)
+    );
     const handleDragStart = (event) => {
         splitViewContainerCopyRef.current = getSplitViewContainerCopy();
         setActiveTarget(event.active);
@@ -41,68 +49,98 @@ export default () => {
     const handleDragCancel = () => {
         resetSplitViewContainer(splitViewContainerCopyRef.current ?? {} as SplitViewContainerType);
         setActiveTarget(null as unknown as Active);
-        updateTabs();
     };
-    const handleDragEnd = () => {
-        setActiveTarget(null as unknown as Active);
+    const activeTargetType = activeTarget?.data.current?.type;
+    let activeTargetSplitView: SplitViewType | undefined;
+    if (activeTargetType === 'tabBar') {
+        activeTargetSplitView = findSplitView(activeTarget.id);
+    } else if (activeTargetType === 'tabNode') {
+        activeTargetSplitView = findNode(activeTarget.id)?.splitView;
+    }
+    const lastOverTarget = useRef<Active>();
+    const lastOverSplitView = useRef<SplitViewType | undefined>();
+    useEffect(() => {
+        lastOverSplitView.current = activeTargetSplitView;
+        lastOverTarget.current = activeTarget;
+    }, [activeTarget]);
+    const getOverIndexDiff = (overTarget) => {
+        const activeTargetRect = activeTarget.rect.current;
+        // activeTarget的左侧边界在overTarget的右侧边界的左侧减二分之一宽度之后，则认为在右侧
+        const isRightSideOfOverTarget = activeTargetRect.translated
+            && activeTargetRect.translated.left > overTarget.rect.right;
+        return isRightSideOfOverTarget ? 1 : 0;
     };
     const handleDragOver = (event) => {
         const {over: overTarget} = event;
-        const activeTargetType = activeTarget.data.current?.type;
-        if (!overTarget || activeTargetType === 'tabBar') {
-            return;
+        if (!overTarget) return;
+        lastOverTarget.current = overTarget;
+        if (activeTargetType === 'tabBar' || !lastOverSplitView.current) return;
+        const overTargetType = overTarget.data.current?.type;
+        let overTargetSplitView;
+        if (overTargetType === 'tabBar') {
+            lastOverSplitView.current.tabNodes = lastOverSplitView.current.tabNodes.filter(node => node.name !== activeTarget.id);
+            overTargetSplitView = findSplitView(overTarget.id);
+        } else {
+            overTargetSplitView = findNode(overTarget.id)?.splitView;
         }
-        const overTargetNode = findNode(overTarget.id);
-        const overTargetSplitView = overTargetNode?.splitView;
         const overTargetSplitViewCopy = findSplitViewCopy(overTargetSplitView);
-        const activeTargetNode = findNode(activeTarget.id);
-        const activeTargetSplitView = activeTargetNode?.splitView;
         const activeTargetSplitViewCopy = findSplitViewCopy(activeTargetSplitView);
-        if (!overTargetSplitView || !activeTargetSplitView
-            || overTargetSplitView === activeTargetSplitView) {
-            return;
-        }
+        // 对应splitView不存在，直接退出
+        if (!overTargetSplitView || !activeTargetSplitView) return;
+        // 没有离开上一次的splitView，不需要处理
+        if (overTargetSplitView.id === lastOverSplitView.current.id) return;
+        // 将activeTarget从上一个splitView中移除
+        lastOverSplitView.current.tabNodes = lastOverSplitView.current.tabNodes.filter(node => node.name !== activeTarget.id);
+        lastOverSplitView.current = overTargetSplitView;
         const overIndex = overTargetSplitView.tabNodes.findIndex(node => node.name === overTarget.id);
-        const activeTargetRect = activeTarget.rect.current;
-        const isRightSideOfOverTarget = activeTargetRect.translated
-            && activeTargetRect.translated.left > overTarget.rect.right;
-        const indexDiff = isRightSideOfOverTarget ? 1 : 0;
+        const indexDiff = getOverIndexDiff(overTarget);
         const newIndex = overIndex >= 0 ? overIndex + indexDiff : overTargetSplitView.tabNodes.length + 1;
         const overTargetTabsCopy = overTargetSplitViewCopy.tabNodes;
         const activeTargetTabsCopy = activeTargetSplitViewCopy.tabNodes;
-        overTargetSplitView.tabNodes = [
-            ...overTargetTabsCopy.slice(0, newIndex),
-            activeTargetNode,
-            ...overTargetTabsCopy.slice(newIndex, overTargetTabsCopy.length)
-        ];
-        activeTargetSplitView.tabNodes = activeTargetTabsCopy.filter(tab => tab.name !== activeTarget.id);
+        if (overTargetSplitView.id === activeTargetSplitView.id) {
+            const tabNodesWithoutTarget = overTargetTabsCopy.filter(tab => tab.name !== activeTarget.id);
+            overTargetSplitView.tabNodes = [
+                ...tabNodesWithoutTarget.slice(0, newIndex),
+                findNode(activeTarget?.id),
+                ...tabNodesWithoutTarget.slice(newIndex, tabNodesWithoutTarget.length)
+            ];
+        } else {
+            overTargetSplitView.tabNodes = [
+                ...overTargetTabsCopy.slice(0, newIndex),
+                findNode(activeTarget?.id),
+                ...overTargetTabsCopy.slice(newIndex, overTargetTabsCopy.length)
+            ];
+            activeTargetSplitView.tabNodes = activeTargetTabsCopy.filter(tab => tab.name !== activeTarget.id);
+        }
         updateTabs();
     };
-    // const onSortEnd = (event) => {
-    // if (oldIndex === newIndex) {
-    //     return;
-    // }
-    // const prevTabKeySequence = tabKeySequence;
-    // const curTabKeySequence = [] as string[];
-    // prevTabKeySequence.forEach((tabKey, index) => {
-    //     if (newIndex < oldIndex) {
-    //         if (index === newIndex) {
-    //             curTabKeySequence.push(prevTabKeySequence[oldIndex]);
-    //         }
-    //         if (index !== oldIndex) {
-    //             curTabKeySequence.push(tabKey);
-    //         }
-    //     } else {
-    //         if (index !== oldIndex) {
-    //             curTabKeySequence.push(tabKey);
-    //         }
-    //         if (index === newIndex) {
-    //             curTabKeySequence.push(prevTabKeySequence[oldIndex]);
-    //         }
-    //     }
-    // });
-    // setTabKeySequence(curTabKeySequence);
-    // };
+    const handleDragEnd = (event) => {
+        const {over} = event;
+        const overTarget = over ?? lastOverTarget.current;
+        if (!overTarget || !activeTargetSplitView) return;
+        if (activeTargetType === 'tabBar') {
+            const overSplitViewIndex = splitViewContainer.splitViews.findIndex(view => view.id === overTarget.id);
+            const activeSplitViewIndex = splitViewContainer.splitViews.findIndex(view => view.id === activeTarget.id);
+            if (overSplitViewIndex === activeSplitViewIndex) return;
+            splitViewContainer.splitViews = arrayMove(splitViewContainer.splitViews, activeSplitViewIndex, overSplitViewIndex);
+        } else if (activeTargetType === 'tabNode') {
+            const overTargetNode = findNode(overTarget.id);
+            const activeTargetNode = findNode(activeTarget.id);
+            if (!overTargetNode || !activeTargetNode || !lastOverSplitView.current) return;
+            let overTargetSplitView = overTargetNode.splitView;
+            if (overTarget.id === activeTarget.id) {
+                overTargetSplitView = lastOverSplitView.current;
+            }
+            if (activeTargetSplitView.tabNodes.length === 0) {
+                removeSplitView(activeTargetSplitView.id);
+            }
+            const overNodeIndex = overTargetSplitView.tabNodes.findIndex(node => node.name === overTarget.id);
+            const activeNodeIndex = overTargetSplitView.tabNodes.findIndex(node => node.name === activeTarget.id);
+            overTargetSplitView.tabNodes = arrayMove(overTargetSplitView.tabNodes, activeNodeIndex, overNodeIndex + getOverIndexDiff(overTarget));
+        }
+        resetSplitViewOfTabNode();
+        setActiveTarget(null as unknown as Active);
+    };
     let overlayElement: any = null;
     if (activeTarget !== null) {
         const type = activeTarget.data.current?.type;
@@ -123,21 +161,41 @@ export default () => {
         }
     }
     const collisionDetectionStrategy: CollisionDetection = useCallback(args => {
-        const type = activeTarget?.data.current?.type;
-        if (type === 'tabBar') {
+        const activeTargetType = activeTarget?.data.current?.type;
+        if (activeTargetType === 'tabBar') {
             return closestCenter({
                 ...args,
                 droppableContainers: args.droppableContainers.filter(
                     container => container.data.current?.type === 'tabBar'
                 )
             });
-        } else if (type === 'tabNode') {
-            return closestCenter({
-                ...args,
-                droppableContainers: args.droppableContainers.filter(
-                    container => container.data.current?.type === 'tabNode'
-                )
-            });
+        } else if (activeTargetType === 'tabNode') {
+            let intersections = pointerWithin(args);
+            if (intersections.length === 0) {
+                intersections = closestCenter(args);
+            }
+            let overTarget = getFirstCollision(intersections);
+            if (!overTarget) return [];
+            const overTargetType = overTarget?.data?.droppableContainer.data.current.type;
+            tabBar: if (overTargetType === 'tabBar') {
+                const overTargetSplitView = splitViewContainer.splitViews.find(view => view.id === overTarget?.id);
+                if (!overTargetSplitView) break tabBar;
+                const containers = args.droppableContainers.filter(
+                    container => {
+                        const type = container.data.current?.type;
+                        return type === 'tabNode'
+                            // && container.id !== activeTarget.id
+                            && overTargetSplitView.tabNodes.some(node => node.name === container.id);
+                    }
+                );
+                if (containers.length === 0) break tabBar;
+                overTarget = closestCenter({
+                    ...args,
+                    droppableContainers: containers
+                })[0];
+            }
+            if (overTarget.id === activeTarget.id) return [];
+            return [overTarget];
         }
         return [];
     }, [activeTarget, splitViewContainer]);
@@ -167,10 +225,16 @@ export default () => {
         }
         return transform;
     };
+    const className = activeTarget !== null ? 'keep-alive-tab-bar-moving' : '';
     return (
         <DndContext
             sensors={sensors}
             collisionDetection={collisionDetectionStrategy}
+            measuring={{
+                droppable: {
+                    strategy: MeasuringStrategy.Always
+                }
+            }}
             modifiers={[restrictToTabs]}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
@@ -182,7 +246,7 @@ export default () => {
                 strategy={horizontalListSortingStrategy}
             >
                 {splitViewContainer.splitViews.map(splitView => {
-                    return <SortableTabBar key={splitView.id} splitView={splitView}/>;
+                    return <SortableTabBar className={className} key={splitView.id} splitView={splitView}/>;
                 })}
             </SortableContext>
             {createPortal(dragOverlay, document.body)}
