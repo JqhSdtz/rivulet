@@ -28,13 +28,25 @@ const SortableTabNode = (props: {
     tabNodeElem: ReactElement;
     tabNode: TabNodeType;
 }) => {
-    props.tabNode.tabElement = props.tabNodeElem;
+    const {
+        tabNode,
+        tabNodeElem,
+        className,
+        onMouseEnter,
+        onMouseLeave,
+        showAfterDivider,
+        showBeforeDivider
+    } = props;
+    tabNode.tabElement = tabNodeElem;
     const sortableProps = {
-        id: props.tabNode.name ?? '',
+        id: tabNode.name ?? '',
         data: {
             type: 'tabNode'
         }
     };
+    const {
+        tabsEvent
+    } = useContext<TabsContextType>(TabsContext);
     const {
         attributes,
         listeners,
@@ -48,10 +60,21 @@ const SortableTabNode = (props: {
         event.preventDefault();
         event.stopPropagation();
         setContextMenuVisible(true);
+        tabsEvent.emit({
+            type: 'openContextMenu',
+            tabNode
+        });
     };
+    tabsEvent.useSubscription(val => {
+        if (val.type !== 'openContextMenu') return;
+        // 打开其他tabNode的contextmenu时，关闭当前的contextmenu
+        if (val.tabNode.name !== tabNode.name) {
+            setContextMenuVisible(false);
+        }
+    });
     const tabContextMenu = (
         <TabContextMenu
-            tabNode={props.tabNode}
+            tabNode={tabNode}
             tabElemRef={node}
             setContextMenuVisible={setContextMenuVisible}
         />
@@ -73,19 +96,19 @@ const SortableTabNode = (props: {
             visible={contextMenuVisible}
             destroyPopupOnHide
         >
-            <div className={props.className + sortableClassName}
-                 key={props.tabNode.name}
+            <div className={className + sortableClassName}
+                 key={tabNode.name}
                  ref={setNodeRef}
                  style={sortableStyle}
                  {...attributes}
                  {...listeners}
-                 onMouseEnter={props.onMouseEnter}
-                 onMouseLeave={props.onMouseLeave}
+                 onMouseEnter={onMouseEnter}
+                 onMouseLeave={onMouseLeave}
                  onContextMenu={onContextMenu}
             >
-                <TabDivider isShow={props.showBeforeDivider}/>
-                {props.tabNodeElem}
-                <TabDivider isShow={props.showAfterDivider}/>
+                <TabDivider isShow={showBeforeDivider}/>
+                {tabNodeElem}
+                <TabDivider isShow={showAfterDivider}/>
             </div>
         </Dropdown>
     );

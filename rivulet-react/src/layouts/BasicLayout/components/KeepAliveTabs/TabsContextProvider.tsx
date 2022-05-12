@@ -1,14 +1,39 @@
-import {TabNodeCallbacks, TabNodeType} from './TabNodeProvider';
+import {TabNodeAttributes, TabNodeCallbacks, TabNodeType} from './TabNodeProvider';
 import {useHistory, useLocation} from 'ice';
 import {useAliveController} from 'react-activation';
 import React, {MutableRefObject, ReactElement, useContext, useRef} from 'react';
 import {RouteContext} from '@/layouts/BasicLayout';
 import {defaultStartPage, MenuConfigItem} from '@/menuConfig';
-import {useCreation, useLatest, useUpdate} from 'ahooks';
+import {useCreation, useEventEmitter, useLatest, useUpdate} from 'ahooks';
 import {nanoid} from 'nanoid';
 import RvUtil from '@/utils/rvUtil';
+import {EventEmitter} from 'ahooks/lib/useEventEmitter';
+
+type AttributeType = {
+    splitView?: SplitViewType
+} & TabNodeAttributes & TabNodeCallbacks;
 
 const temporaryTabNodesMap = new Map<string, TabNodeType>();
+const tabNodeAttributeMap = new Map<string, AttributeType>();
+
+function refreshTabNode(targetNode: TabNodeType | undefined) {
+    if (!targetNode) return;
+    const tabAttributes = tabNodeAttributeMap.get(targetNode.name ?? '');
+    if (tabAttributes) {
+        for (const [key, value] of Object.entries(tabAttributes)) {
+            targetNode[key] = value;
+        }
+    }
+}
+
+function setTabNodeAttributes(targetKey: string | undefined, attributes: AttributeType) {
+    if (!targetKey) return;
+    const prevAttr = tabNodeAttributeMap.get(targetKey);
+    tabNodeAttributeMap.set(targetKey, {
+        ...prevAttr,
+        ...attributes
+    });
+}
 
 function transferTemporaryTabNode(cachingNodes: TabNodeType[]) {
     const latestCachingNode = cachingNodes[cachingNodes.length - 1];
@@ -49,6 +74,8 @@ function preProcessCachingNodes(cachingNodes: TabNodeType[], splitViewContainer:
     }
     // 将临时创建的tabNode的属性转移到正式的tabNode上
     transferTemporaryTabNode(cachingNodes);
+    // 将tabNode的属性刷新到tabNode对象中
+    cachingNodes.forEach(node => refreshTabNode(node));
     return cachingNodes;
 }
 
@@ -59,7 +86,9 @@ function matchMenuConfig(menuItems: MenuConfigItem[], node: TabNodeType) {
     for (let i = 0; i < menuItems.length; ++i) {
         const menu = menuItems[i];
         if (menu.testPath?.(node?.name) ?? false) {
-            node.targetMenu = menu;
+            setTabNodeAttributes(node.name, {
+                targetMenu: menu
+            });
             return;
         }
         if (menu.routes) {
@@ -90,6 +119,10 @@ interface TabNodeOperations {
     setSplitViewOfTab(targetKey: string | undefined, index: number): void;
 
     setTabNodeCallbacks(targetKey: string | undefined, callbacks: TabNodeCallbacks): void;
+
+    setTabNodeAttributes(targetKey: string | undefined, attributes: AttributeType): void;
+
+    refreshTabNode(targetNode: TabNodeType | undefined): void;
 }
 
 export interface SplitViewType {
@@ -104,6 +137,7 @@ export interface SplitViewContainerType {
 }
 
 export type TabsContextType = {
+    tabsEvent: EventEmitter<any>;
     tabNodes: TabNodeType[];
     currentTabKey: string;
     currentTabNode: TabNodeType | undefined;
@@ -123,6 +157,7 @@ export default (props) => {
     const {pathname, search} = useLocation();
     const history = useHistory();
     const currentTabKey = pathname + search;
+    const tabsEvent = useEventEmitter();
     const updateTabs: () => void = useUpdate();
     const initSplitView = useCreation<SplitViewType>(() => {
         return {
@@ -161,20 +196,28 @@ export default (props) => {
     const tabNodesRef = useLatest(tabNodes);
     const findNode = targetKey => tabNodesRef.current.find(node => node.name === targetKey) as TabNodeType | undefined;
     const currentTabNode = findNode(currentTabKey) ?? {} as TabNodeType;
-    const removeTabNodeFromSplitView = targetNode => targetNode.splitView.tabNodes = targetNode.splitView.tabNodes.filter(node => node.name !== targetNode.name);
-    // 因为菜单数据可能延迟加载，所以每次都要全部更新一次对应菜单
-    tabNodes.forEach(tabNode => {
-        matchMenuConfig(menuData as MenuConfigItem[], tabNode);
-    });
+    const removeTabNodeFromSplitView = targetNode => {
+        targetNode.splitView.tabNodes = targetNode.splitView.tabNodes.filter(node => node.name !== targetNode.name);
+        if (targetNode.splitView.tabNodes.length === 0) {
+            removeSplitView(targetNode.splitView.id);
+        }
+    };
     const curSplitView = currentTabNode.splitView;
     if (newTabNodes.length > 0) {
-        curSplitView.tabNodes.forEach(node => node.isActive = false);
+        curSplitView.tabNodes.forEach(node => setTabNodeAttributes(node.name, {isActive: false}));
         newTabNodes.forEach(tabNode => {
-            tabNode.splitView = curSplitView;
-            tabNode.isActive = tabNode.name === currentTabKey;
+            setTabNodeAttributes(tabNode.name, {
+                splitView: curSplitView,
+                isActive: tabNode.name === currentTabKey
+            });
             curSplitView.tabNodes.push(tabNode);
         });
     }
+    tabNodes.forEach(tabNode => {
+        // 因为菜单数据可能延迟加载，所以每次都要全部更新一次对应菜单
+        matchMenuConfig(menuData as MenuConfigItem[], tabNode);
+        refreshTabNode(tabNode);
+    });
     const setActiveSplitView = splitView => {
         splitViewContainer.splitViews.forEach(splitView => splitView.isActive = false);
         splitView.isActive = true;
@@ -194,7 +237,9 @@ export default (props) => {
             // 将tabNode从原来的splitView中移除
             removeTabNodeFromSplitView(targetNode);
         }
-        targetNode.splitView = splitViews[index];
+        setTabNodeAttributes(targetNode.name, {
+            splitView: splitViews[index]
+        });
         setActiveSplitView(targetNode.splitView);
         updateTabs();
     };
@@ -238,7 +283,9 @@ export default (props) => {
             return true;
         }
         const clearAttention = () => {
-            targetNode.needAttention = false;
+            setTabNodeAttributes(targetNode.name, {
+                needAttention: false
+            });
             updateTabs();
         };
         if (targetNode.beforeCloseCallback) {
@@ -246,7 +293,9 @@ export default (props) => {
             if (shouldClose) {
                 await doDrop();
             } else {
-                targetNode.needAttention = true;
+                setTabNodeAttributes(targetNode.name, {
+                    needAttention: true
+                });
                 updateTabs();
                 return false;
             }
@@ -333,7 +382,7 @@ export default (props) => {
             const splitViewIndex = splitViewContainer.splitViews.findIndex(view => view.id === targetSplitView.id);
             const prevSplitViewIndex = splitViewIndex === 0 ? 1 : splitViewIndex - 1;
             const prevSplitView = splitViewContainer.splitViews[prevSplitViewIndex];
-            targetSplitView.tabNodes.forEach(node => node.splitView = prevSplitView);
+            targetSplitView.tabNodes.forEach(node => setTabNodeAttributes(node.name, {splitView: prevSplitView}));
             removeSplitView(targetSplitView.id);
         } else {
             removeMultiNodes(targetSplitView.tabNodes, () => {
@@ -383,14 +432,14 @@ export default (props) => {
         }
     };
     const setTabNodeCallbacks = (targetKey, callbacks) => {
-        const targetNode = findNode(targetKey);
-        if (!targetNode) return;
-        RvUtil.mergeObject(targetNode, callbacks);
+        setTabNodeAttributes(targetKey, callbacks);
+        refreshTabNode(findNode(targetKey));
     };
 
     const keepAliveTabsElemRef = useRef<HTMLDivElement>(null as unknown as HTMLDivElement);
     const value: TabsContextType = {
         keepAliveTabsElemRef,
+        tabsEvent,
         tabNodes: tabNodesRef.current,
         splitViewContainer,
         currentTabKey,
@@ -407,6 +456,8 @@ export default (props) => {
         updateTabs,
         setSplitViewOfTab,
         setTabNodeCallbacks,
+        setTabNodeAttributes,
+        refreshTabNode,
         getSplitViewContainerCopy,
         resetSplitViewContainer,
         removeSplitView: splitViewId => removeSplitView(splitViewId, false)

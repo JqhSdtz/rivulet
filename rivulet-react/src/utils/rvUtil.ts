@@ -9,6 +9,7 @@ export default {
         }
     },
     mergeObject(target, obj, preserveTarget: boolean = false) {
+        if (!target || !obj) return;
         for (const [key, value] of Object.entries(obj)) {
             if (preserveTarget && typeof target[key] !== 'undefined') {
                 continue;

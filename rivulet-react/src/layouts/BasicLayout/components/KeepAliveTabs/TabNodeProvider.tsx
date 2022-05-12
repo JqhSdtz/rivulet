@@ -5,10 +5,12 @@ import {MenuConfigItem} from '@/menuConfig';
 import {WrappedComponentFactory} from 'react-sortable-hoc';
 
 export interface TabNodeAttributes {
+    targetMenu?: MenuConfigItem;
+    component?: TabComponentType;
+    tabElement?: ReactElement;
     isActive?: boolean;
     isNewTab?: boolean;
     needAttention?: boolean;
-    splitView: SplitViewType;
 }
 
 type WrappedComponent<P> =
@@ -26,9 +28,7 @@ export type TabNodeType = {
     updateTime: number;
     name?: string;
     id: string;
-    targetMenu?: MenuConfigItem;
-    component?: TabComponentType;
-    tabElement?: ReactElement;
+    splitView: SplitViewType;
 
     [key: string]: any;
 } & TabNodeAttributes & TabNodeCallbacks;

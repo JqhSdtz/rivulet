@@ -23,6 +23,7 @@ export default () => {
         keepAliveTabsElemRef,
         splitViewContainer,
         findNode,
+        setTabNodeAttributes,
         getSplitViewContainerCopy,
         resetSplitViewContainer,
         removeSplitView,
@@ -40,7 +41,7 @@ export default () => {
     const findSplitView = splitViewId => splitViewContainer.splitViews.find(view => view.id === splitViewId);
     const findSplitViewCopy = splitView => splitViewContainerCopyRef.current?.splitViews.find(view => view.id === splitView.id) ?? {} as SplitViewType;
     const resetSplitViewOfTabNode = () => splitViewContainer.splitViews.forEach(
-        splitView => splitView.tabNodes.forEach(node => node.splitView = splitView)
+        splitView => splitView.tabNodes.forEach(node => setTabNodeAttributes(node.name, {splitView}))
     );
     const handleDragStart = (event) => {
         splitViewContainerCopyRef.current = getSplitViewContainerCopy();
@@ -67,7 +68,7 @@ export default () => {
         const activeTargetRect = activeTarget.rect.current;
         // activeTarget的左侧边界在overTarget的右侧边界的左侧减二分之一宽度之后，则认为在右侧
         const isRightSideOfOverTarget = activeTargetRect.translated
-            && activeTargetRect.translated.left > overTarget.rect.right;
+            && activeTargetRect.translated.left > overTarget.rect.right - overTarget.rect.width / 2;
         return isRightSideOfOverTarget ? 1 : 0;
     };
     const handleDragOver = (event) => {
@@ -140,6 +141,7 @@ export default () => {
         }
         resetSplitViewOfTabNode();
         setActiveTarget(null as unknown as Active);
+        updateTabs();
     };
     let overlayElement: any = null;
     if (activeTarget !== null) {
