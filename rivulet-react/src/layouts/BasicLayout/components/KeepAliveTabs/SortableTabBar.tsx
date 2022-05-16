@@ -126,6 +126,10 @@ export default (props: SortableTabsProps) => {
             <TabBar {...props}>{tabNodes}</TabBar>
         </div>
     );
+    const strategy = (args) => {
+        console.log(args);
+        return horizontalListSortingStrategy(args);
+    }
     return (
         <div ref={setNodeRef}
              style={style}
@@ -133,7 +137,7 @@ export default (props: SortableTabsProps) => {
         >
             <SortableContext
                 items={splitView.tabNodes.map(node => node.name ?? '')}
-                strategy={horizontalListSortingStrategy}
+                strategy={strategy}
             >
                 {splitView.tabBarElement}
             </SortableContext>

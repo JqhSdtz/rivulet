@@ -146,6 +146,7 @@ export type TabsContextType = {
     updateTabs(): void;
     getSplitViewContainerCopy(): SplitViewContainerType;
     resetSplitViewContainer(splitViewContainer: SplitViewContainerType): void;
+    resetSplitViewOfTabNodes(): void;
     removeSplitView(splitViewId: string): void;
 } & TabNodeOperations;
 
@@ -172,29 +173,43 @@ export default (props) => {
     const splitViewContainer = splitViewContainerRef.current;
     const getSplitViewContainerCopy = () => {
         const splitViewContainerCopy = {...splitViewContainer};
-        splitViewContainerCopy.splitViews = [...splitViewContainer.splitViews];
+        splitViewContainerCopy.splitViews = [];
         for (let i = 0; i < splitViewContainer.splitViews.length; ++i) {
             const splitView = splitViewContainer.splitViews[i];
-            splitViewContainerCopy.splitViews[i] = {...splitView};
-            splitViewContainerCopy.splitViews[i].tabNodes = [...splitView.tabNodes];
+            const newSplitView = {...splitView};
+            newSplitView.tabNodes = [...splitView.tabNodes];
+            splitViewContainerCopy.splitViews.push(newSplitView);
         }
         return splitViewContainerCopy;
     };
+    const resetSplitViewOfTabNodes = () => splitViewContainerRef.current.splitViews.forEach(
+        splitView => splitView.tabNodes.forEach(node => setTabNodeAttributes(node.name, {splitView}))
+    );
     const resetSplitViewContainer = (splitViewContainerCopy) => {
         splitViewContainerRef.current = splitViewContainerCopy;
+        resetSplitViewOfTabNodes();
     };
     const lastTabNodesRef = useRef<TabNodeType[]>([]);
     const tabNodes = preProcessCachingNodes(getCachingNodes(), splitViewContainer, currentTabKey);
     const lastTabNodes = lastTabNodesRef.current;
     lastTabNodesRef.current = [...tabNodes];
+    // 因为涉及回调，可能导致闭包问题，所以使用useLatest包裹
+    const tabNodesRef = useLatest(tabNodes);
+    const findNode = targetKey => tabNodesRef.current.find(node => node.name === targetKey) as TabNodeType | undefined;
+    // 将splitViewContainer中的tabNode同步为getCachingNodes获取的node对象，以实现同步更新内容
+    splitViewContainer.splitViews.forEach(splitView => {
+        for (let i = 0; i < splitView.tabNodes.length; ++i) {
+            const tabNode = findNode(splitView.tabNodes[i].name);
+            if (tabNode) {
+                splitView.tabNodes[i] = tabNode;
+            }
+        }
+    });
     // 筛选出这一次有，上一次没有的节点，记为新增加的节点
     const newTabNodes = tabNodes.filter(node1 => {
         node1.isNewTab = !lastTabNodes.some(node2 => node2.name === node1.name);
         return node1.isNewTab;
     });
-    // 因为涉及回调，可能导致闭包问题，所以使用useLatest包裹
-    const tabNodesRef = useLatest(tabNodes);
-    const findNode = targetKey => tabNodesRef.current.find(node => node.name === targetKey) as TabNodeType | undefined;
     const currentTabNode = findNode(currentTabKey) ?? {} as TabNodeType;
     const removeTabNodeFromSplitView = targetNode => {
         targetNode.splitView.tabNodes = targetNode.splitView.tabNodes.filter(node => node.name !== targetNode.name);
@@ -459,6 +474,7 @@ export default (props) => {
         setTabNodeAttributes,
         refreshTabNode,
         getSplitViewContainerCopy,
+        resetSplitViewOfTabNodes,
         resetSplitViewContainer,
         removeSplitView: splitViewId => removeSplitView(splitViewId, false)
     };

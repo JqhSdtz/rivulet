@@ -3,6 +3,7 @@ import React, {ReactElement, useContext} from 'react';
 import {SplitViewType, TabsContext, TabsContextType} from '@/layouts/BasicLayout';
 import {MenuConfigItem} from '@/menuConfig';
 import {WrappedComponentFactory} from 'react-sortable-hoc';
+import {useSortable} from '@dnd-kit/sortable';
 
 export interface TabNodeAttributes {
     targetMenu?: MenuConfigItem;
@@ -11,6 +12,7 @@ export interface TabNodeAttributes {
     isActive?: boolean;
     isNewTab?: boolean;
     needAttention?: boolean;
+    sortableAttr?: ReturnType<typeof useSortable>;
 }
 
 type WrappedComponent<P> =

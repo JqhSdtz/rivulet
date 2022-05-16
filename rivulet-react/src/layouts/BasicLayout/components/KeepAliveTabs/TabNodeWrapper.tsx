@@ -37,7 +37,6 @@ const SortableTabNode = (props: {
         showAfterDivider,
         showBeforeDivider
     } = props;
-    tabNode.tabElement = tabNodeElem;
     const sortableProps = {
         id: tabNode.name ?? '',
         data: {
@@ -45,8 +44,11 @@ const SortableTabNode = (props: {
         }
     };
     const {
-        tabsEvent
+        tabsEvent,
+        setTabNodeAttributes,
+        refreshTabNode
     } = useContext<TabsContextType>(TabsContext);
+    const sortableAttr = useSortable(sortableProps);
     const {
         attributes,
         listeners,
@@ -54,7 +56,12 @@ const SortableTabNode = (props: {
         setNodeRef,
         transform,
         isDragging
-    } = useSortable(sortableProps);
+    } = sortableAttr;
+    setTabNodeAttributes(tabNode.name, {
+        tabElement: tabNodeElem,
+        sortableAttr
+    });
+    refreshTabNode(tabNode);
     const [contextMenuVisible, setContextMenuVisible] = useState(false);
     const onContextMenu = (event: MouseEvent) => {
         event.preventDefault();
