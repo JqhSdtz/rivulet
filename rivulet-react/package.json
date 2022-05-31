@@ -19,7 +19,7 @@
         "nanoid": "^3.3.3",
         "prop-types": "^15.5.8",
         "react": "^17.0.2",
-        "react-activation": "file:../../../react-activation-local/lib",
+        "react-activation": "^0.11.1",
         "react-dom": "^17.0.2"
     },
     "devDependencies": {
@@ -35,7 +35,9 @@
     },
     "resolutions": {
         "@types/react": "^17.0.44",
-        "@types/react-dom": "^17.0.15"
+        "@types/react-dom": "^17.0.15",
+        "vite": "^2.9.9",
+        "vite-plugin-style-import": "^2.0.0"
     },
     "scripts": {
         "start": "icejs start --config build.config.js --force",

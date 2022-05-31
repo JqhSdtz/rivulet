@@ -1,13 +1,13 @@
-import {TabNodeAttributes, TabNodeCallbacks, TabNodeType} from './TabNodeProvider';
+import {createContext, MutableRefObject, ReactElement, useContext, useRef} from 'react';
+import {CachingNode, useAliveController} from 'react-activation';
+import {useCreation, useEventEmitter, useLatest, useUpdate} from 'ahooks';
+import {EventEmitter} from 'ahooks/lib/useEventEmitter';
+import {nanoid} from 'nanoid';
 import {useHistory, useLocation} from 'ice';
-import {useAliveController} from 'react-activation';
-import React, {MutableRefObject, ReactElement, useContext, useRef} from 'react';
 import {RouteContext} from '@/layouts/BasicLayout';
 import {defaultStartPage, MenuConfigItem} from '@/menuConfig';
-import {useCreation, useEventEmitter, useLatest, useUpdate} from 'ahooks';
-import {nanoid} from 'nanoid';
 import RvUtil from '@/utils/rvUtil';
-import {EventEmitter} from 'ahooks/lib/useEventEmitter';
+import {TabNodeAttributes, TabNodeCallbacks, TabNodeType} from './TabNodeProvider';
 
 type AttributeType = {
     splitView?: SplitViewType
@@ -51,15 +51,15 @@ function transferTemporaryTabNode(cachingNodes: TabNodeType[]) {
     temporaryTabNodesMap.delete(latestCachingNode.name ?? '');
 }
 
-function preProcessCachingNodes(cachingNodes: TabNodeType[], splitViewContainer: SplitViewContainerType, currentTabKey: string): TabNodeType[] {
+function preProcessCachingNodes(cachingNodes: CachingNode[], splitViewContainer: SplitViewContainerType, currentTabKey: string): TabNodeType[] {
     // 先去重，此处有待进一步考虑
-    cachingNodes = cachingNodes.filter((node, index, arr) => {
+    const processedCachingNodes: TabNodeType[] = cachingNodes.filter((node, index, arr) => {
         return arr.map(mapNode => mapNode.name).indexOf(node.name) === index;
-    });
+    }) as TabNodeType[];
     const activeSplitView = splitViewContainer.splitViews.find(view => view.isActive) ?? splitViewContainer.splitViews[0];
     // 还没有KeepAlive节点被渲染，则根据当前的url判断当前要打开哪个页面，提前加入一个CachingNode节点
     // 防止出现没有KeepAlive就没有CachingNode，没有CachingNode就渲染不了KeepAlive的死循环
-    if (cachingNodes.length === 0 || cachingNodes[cachingNodes.length - 1].name !== currentTabKey) {
+    if (processedCachingNodes.length === 0 || processedCachingNodes[processedCachingNodes.length - 1].name !== currentTabKey) {
         const temporaryNode = {
             _temporary: true,
             createTime: Date.now(),
@@ -69,14 +69,14 @@ function preProcessCachingNodes(cachingNodes: TabNodeType[], splitViewContainer:
             isActive: true,
             splitView: activeSplitView
         };
-        cachingNodes.push(temporaryNode);
+        processedCachingNodes.push(temporaryNode);
         temporaryTabNodesMap.set(temporaryNode.name, temporaryNode);
     }
     // 将临时创建的tabNode的属性转移到正式的tabNode上
-    transferTemporaryTabNode(cachingNodes);
+    transferTemporaryTabNode(processedCachingNodes);
     // 将tabNode的属性刷新到tabNode对象中
-    cachingNodes.forEach(node => refreshTabNode(node));
-    return cachingNodes;
+    processedCachingNodes.forEach(node => refreshTabNode(node));
+    return processedCachingNodes;
 }
 
 function matchMenuConfig(menuItems: MenuConfigItem[], node: TabNodeType) {
@@ -150,7 +150,7 @@ export type TabsContextType = {
     removeSplitView(splitViewId: string): void;
 } & TabNodeOperations;
 
-export const TabsContext = React.createContext({} as TabsContextType);
+export const TabsContext = createContext({} as TabsContextType);
 
 export default (props) => {
     const {getCachingNodes, drop, refresh} = useAliveController();
@@ -211,10 +211,23 @@ export default (props) => {
         return node1.isNewTab;
     });
     const currentTabNode = findNode(currentTabKey) ?? {} as TabNodeType;
-    const removeTabNodeFromSplitView = targetNode => {
-        targetNode.splitView.tabNodes = targetNode.splitView.tabNodes.filter(node => node.name !== targetNode.name);
-        if (targetNode.splitView.tabNodes.length === 0) {
+    const removeTabNodeFromSplitView = (targetNode: TabNodeType) => {
+        const splitView = targetNode.splitView;
+        const oriIndex = splitView.tabNodes.findIndex(node => node.name === targetNode.name);
+        splitView.tabNodes = splitView.tabNodes.filter(node => node.name !== targetNode.name);
+        if (splitView.tabNodes.length === 0) {
             removeSplitView(targetNode.splitView.id);
+        } else if (targetNode.isActive) {
+            // 如果原有的splitView仍然保留，但是active的tab被移到其他splitView，则active前一个tab
+            if (oriIndex === 0 && splitView.tabNodes.length > 1) {
+                setTabNodeAttributes(splitView.tabNodes[1].name, {
+                    isActive: true
+                });
+            } else if (oriIndex > 0) {
+                setTabNodeAttributes(splitView.tabNodes[oriIndex - 1].name, {
+                    isActive: true
+                });
+            }
         }
     };
     const curSplitView = currentTabNode.splitView;
@@ -246,6 +259,17 @@ export default (props) => {
                 id: nanoid(),
                 tabNodes: []
             };
+            // 新添加tabNode时应该是active的
+            setTabNodeAttributes(targetNode.name, {
+                isActive: true
+            });
+        } else if (targetNode.isActive) {
+            // 原来有对应的splitView，并且新添加的tabNode是active，则将之前的tabNode的isActive设为false
+            splitViews[index].tabNodes.forEach(node => {
+                setTabNodeAttributes(node.name, {
+                    isActive: false
+                });
+            });
         }
         splitViews[index].tabNodes.push(targetNode);
         if (targetNode.splitView) {
@@ -261,6 +285,14 @@ export default (props) => {
     const activeNode = (targetKey) => {
         if (!targetKey) return;
         const targetNode = findNode(targetKey) ?? {} as TabNodeType;
+        targetNode.splitView.tabNodes.forEach(node => {
+            setTabNodeAttributes(node.name, {
+                isActive: false
+            });
+        });
+        setTabNodeAttributes(targetNode.name, {
+            isActive: true
+        });
         setActiveSplitView(targetNode.splitView);
         history.push(targetKey);
     };

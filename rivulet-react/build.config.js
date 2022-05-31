@@ -1,6 +1,6 @@
 module.exports = {
     vite: true,
-    sourceMap: true,
+    sourceMap: false,
     plugins: [
         [
             'build-plugin-ignore-style',
@@ -20,13 +20,10 @@ module.exports = {
             }
         ]
     ],
-    // babelPlugins: [
-    //     'react-activation-local/babel'
-    // ],
     proxy: {
         '/api': {
             enable: true,
             target: 'http://127.0.0.1:8081'
         }
     }
-}
+};

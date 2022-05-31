@@ -72,8 +72,9 @@ export default (props: { tabKey: string; children: any }) => {
     return (
         <TabNodeContext.Provider value={value}>
             <KeepAlive
-                name={tabKey}
                 id={tabKey}
+                name={tabKey}
+                cacheKey={tabKey}
                 saveScrollPosition="screen"
             >
                 {props.children}
