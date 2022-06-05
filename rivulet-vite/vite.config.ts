@@ -5,6 +5,9 @@ import * as path from 'path';
 import reactNodeKey from 'react-node-key/vite';
 
 export default defineConfig({
+    build: {
+        sourcemap: true
+    },
     resolve: {
         alias: [
             {

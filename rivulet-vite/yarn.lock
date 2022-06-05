@@ -390,85 +390,85 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@formily/antd@^2.1.3":
-  version "2.1.3"
-  resolved "https://registry.npmmirror.com/@formily/antd/-/antd-2.1.3.tgz#ff8cf0c0522129109b87f62f7720c17669f8dddf"
-  integrity sha512-GRr0IBEot14ecLc8FC4iHyKQ5brsy7vcPYN13qZKFIpKCTdhR8TeIq5IZdn/dSYPVLjRm/KZKpIMtb2yMEa8KQ==
+"@formily/antd@^2.1.4":
+  version "2.1.4"
+  resolved "https://registry.npmmirror.com/@formily/antd/-/antd-2.1.4.tgz#8836ebce4a14a3f4a18c7854e213d3f5c3d79cdb"
+  integrity sha512-SdJRHnGEiWN3gliMBcpu14VLlTzdjZUuPP7epbSL96KU1Y/eBul5B7q6gbRZ48/k3otTuMnm9DaEjsoiCBpoHA==
   dependencies:
-    "@formily/core" "2.1.3"
-    "@formily/grid" "2.1.3"
-    "@formily/json-schema" "2.1.3"
-    "@formily/react" "2.1.3"
-    "@formily/reactive" "2.1.3"
-    "@formily/reactive-react" "2.1.3"
-    "@formily/shared" "2.1.3"
+    "@formily/core" "2.1.4"
+    "@formily/grid" "2.1.4"
+    "@formily/json-schema" "2.1.4"
+    "@formily/react" "2.1.4"
+    "@formily/reactive" "2.1.4"
+    "@formily/reactive-react" "2.1.4"
+    "@formily/shared" "2.1.4"
     classnames "^2.2.6"
     react-sortable-hoc "^1.11.0"
     react-sticky-box "^1.0.2"
 
-"@formily/core@2.1.3", "@formily/core@^2.1.3":
-  version "2.1.3"
-  resolved "https://registry.npmmirror.com/@formily/core/-/core-2.1.3.tgz#9963a9c89618e3fff2848e61f16a9e72689ab89d"
-  integrity sha512-aSxbMIHV5d1P0EFRorbCzpI31kx9TTCZNibvo88YYGtzFeiIryEZjioNjcaj/0dNLJIcXAF6wU/hwejWNHezIw==
+"@formily/core@2.1.4", "@formily/core@^2.1.4":
+  version "2.1.4"
+  resolved "https://registry.npmmirror.com/@formily/core/-/core-2.1.4.tgz#9e315c3fef08d158224d0b2f97e1308bf2526812"
+  integrity sha512-zvMDHhuJoki1JGjkGgK7IcV8edCvXXOzm8eNwT0TT4UbsvR4h6fQbhStw4MgVAJg/jliWYuHY/CSh4CdusxqIg==
   dependencies:
-    "@formily/reactive" "2.1.3"
-    "@formily/shared" "2.1.3"
-    "@formily/validator" "2.1.3"
+    "@formily/reactive" "2.1.4"
+    "@formily/shared" "2.1.4"
+    "@formily/validator" "2.1.4"
 
-"@formily/grid@2.1.3":
-  version "2.1.3"
-  resolved "https://registry.npmmirror.com/@formily/grid/-/grid-2.1.3.tgz#b03174b92f78111c9822d2f54f7db7db75954e49"
-  integrity sha512-DGqBh3+xxNJsRDvO4hybLGPudk4yTt5yZXT/+z/7dti7VNcxXkgqsrDpIjWyZVmlpAGyCvGgUAN5z4u7C2/Utw==
+"@formily/grid@2.1.4":
+  version "2.1.4"
+  resolved "https://registry.npmmirror.com/@formily/grid/-/grid-2.1.4.tgz#9598ffe246dac29037f9421e02b7e07ab9c35f7a"
+  integrity sha512-kAti1rS4Nks2+cjnm6rLaRLQDXaZSgYiI3WLA3pgTCnzAwvYAp9EgU6on/RWSWX7nwx9hZXwm9EMCnC8bbTZOg==
   dependencies:
-    "@formily/reactive" "2.1.3"
+    "@formily/reactive" "2.1.4"
     "@juggle/resize-observer" "^3.3.1"
 
-"@formily/json-schema@2.1.3":
-  version "2.1.3"
-  resolved "https://registry.npmmirror.com/@formily/json-schema/-/json-schema-2.1.3.tgz#fc1aee70e5001239093eafbad7dc1ded93a95549"
-  integrity sha512-JWdD0hMcsHPR18Wo2oWQq0E59kfPKIu8uuNkDzVhSUe4yQGJ0H63Vq3romUmS9kYlPDd4VMAibEE55aJr2rFGw==
+"@formily/json-schema@2.1.4":
+  version "2.1.4"
+  resolved "https://registry.npmmirror.com/@formily/json-schema/-/json-schema-2.1.4.tgz#be12f7670a0bab8efe94bd770550d7cbe6f70350"
+  integrity sha512-YN96AQo+A4fUvN6dPqaI8IvpFL4h06qxsDsr4ygKB8thDF4C6S3iWxfaLHi8XxA4ZA7LFLjuWkgCrBJZAQtCxg==
   dependencies:
-    "@formily/core" "2.1.3"
-    "@formily/reactive" "2.1.3"
-    "@formily/shared" "2.1.3"
+    "@formily/core" "2.1.4"
+    "@formily/reactive" "2.1.4"
+    "@formily/shared" "2.1.4"
 
-"@formily/path@2.1.3":
-  version "2.1.3"
-  resolved "https://registry.npmmirror.com/@formily/path/-/path-2.1.3.tgz#2697876f2950376a95a2fec71dfd5fa5b71ef6e5"
-  integrity sha512-Bf4sG9CPwXr4S28SPvjqSd+LmHzxuACp0s9AI9bMn/hGsCyOQMV/1qN0VpSHssyYgRlcGuHkTxpo5g8v7nhg8w==
+"@formily/path@2.1.4":
+  version "2.1.4"
+  resolved "https://registry.npmmirror.com/@formily/path/-/path-2.1.4.tgz#883ad88b59544d7aa08528984dc44322fd4e419d"
+  integrity sha512-9eQ/G/fe/zsKcWhIHvX/70AVR3ZCfcCiOoZ60noiMRr/U5+k7rrPBYx82zgiIEG0YuiwIwi2XXcogdFX1VjPEA==
 
-"@formily/react@2.1.3", "@formily/react@^2.1.3":
-  version "2.1.3"
-  resolved "https://registry.npmmirror.com/@formily/react/-/react-2.1.3.tgz#d5bd6a60a7b1e93d7bf6efe40ff7328ef5215af2"
-  integrity sha512-6PztGrL5+iX6LJI90yPtfjUbSBu9OIalxacezlfJv/i9WhCDm9qQzLZ3gydlUtyl9WjpH7u4ybpBkKbhsYKclw==
+"@formily/react@2.1.4", "@formily/react@^2.1.4":
+  version "2.1.4"
+  resolved "https://registry.npmmirror.com/@formily/react/-/react-2.1.4.tgz#c8f3ca1e7fa5e096c05b57e31156438203eb2560"
+  integrity sha512-9nbdKqQSXWrisQIlfLk94xYGpmol0oJeP0Pg70HvwyY41pFojL8pUBdkZvpuO7X5IXeqlE/u7Bbzoo8XENLwkQ==
   dependencies:
-    "@formily/core" "2.1.3"
-    "@formily/json-schema" "2.1.3"
-    "@formily/reactive" "2.1.3"
-    "@formily/reactive-react" "2.1.3"
-    "@formily/shared" "2.1.3"
-    "@formily/validator" "2.1.3"
+    "@formily/core" "2.1.4"
+    "@formily/json-schema" "2.1.4"
+    "@formily/reactive" "2.1.4"
+    "@formily/reactive-react" "2.1.4"
+    "@formily/shared" "2.1.4"
+    "@formily/validator" "2.1.4"
     hoist-non-react-statics "^3.3.2"
 
-"@formily/reactive-react@2.1.3":
-  version "2.1.3"
-  resolved "https://registry.npmmirror.com/@formily/reactive-react/-/reactive-react-2.1.3.tgz#3bf6d56b9757fad84b7c7a2f437e0660a0e377d8"
-  integrity sha512-J+xAepivCnpfOrIvln3SMe+yT1q/rSiNpwZX3xYAD6ERnAg8qi8PQM48HGB/7Be4sWib5idR5vt0u+mVIyzS9A==
+"@formily/reactive-react@2.1.4":
+  version "2.1.4"
+  resolved "https://registry.npmmirror.com/@formily/reactive-react/-/reactive-react-2.1.4.tgz#9ed6ead125e30478e199a6297e45e360ab145325"
+  integrity sha512-aZWo1C3Buah62d9Xw7chmnlcY33FggkoEvjqZ58OJM5aD6lJqRpPWW8fDupat8KciVLBCamvAmRhLYtcTQgXbw==
   dependencies:
-    "@formily/reactive" "2.1.3"
+    "@formily/reactive" "2.1.4"
     hoist-non-react-statics "^3.3.2"
 
-"@formily/reactive@2.1.3":
-  version "2.1.3"
-  resolved "https://registry.npmmirror.com/@formily/reactive/-/reactive-2.1.3.tgz#2b7547b4f433138d6b77328f705983cbf397840e"
-  integrity sha512-P4w7AEAmAIv0YPKSg7s8n1OOtzvTNmLRvTOq4aLbDG3GwX+9PV09XwqpiZpirXk0avVauFah9zUI6Om9xJv01A==
+"@formily/reactive@2.1.4":
+  version "2.1.4"
+  resolved "https://registry.npmmirror.com/@formily/reactive/-/reactive-2.1.4.tgz#2cbd3ad194d5531e476495cb44bc25081e92ef87"
+  integrity sha512-aPuigX37clZLgoQ+a1RD/kngZma8NSrcPlo19d7uWEOTn++1FIcekx8gT0d7eofcAApyurnJXYsNjOr8ninH/g==
 
-"@formily/shared@2.1.3":
-  version "2.1.3"
-  resolved "https://registry.npmmirror.com/@formily/shared/-/shared-2.1.3.tgz#dfa415356409ff56cc4e0acb009ed92af33cc28e"
-  integrity sha512-wQjDUSN8ZCBLSUrXDfqsZGATav4RigGS3fvrqUaSehRdkdC4MTzekIDX5qMcssiUNJsVC0Vu82gZWUGaljaglw==
+"@formily/shared@2.1.4":
+  version "2.1.4"
+  resolved "https://registry.npmmirror.com/@formily/shared/-/shared-2.1.4.tgz#2a4d22973b540e769ce3b354b52e641d4f20f0ea"
+  integrity sha512-7U0j5t647VxyJh56VKapr0SM5wyWOCYbXNiRNKb+lCc2ACSZ1Hcv4FArCM3MEWfa+duXC5Aiix0hOmBpMvDC8A==
   dependencies:
-    "@formily/path" "2.1.3"
+    "@formily/path" "2.1.4"
     camel-case "^4.1.1"
     lower-case "^2.0.1"
     no-case "^3.0.4"
@@ -476,12 +476,12 @@
     pascal-case "^3.1.1"
     upper-case "^2.0.1"
 
-"@formily/validator@2.1.3":
-  version "2.1.3"
-  resolved "https://registry.npmmirror.com/@formily/validator/-/validator-2.1.3.tgz#ec7670f3bf6d20426b9f75cf2c4a22e69a24e893"
-  integrity sha512-rs2qsE/8jwFkxIUU0Bem5Oh1VMtbuoBYUaQ2Cj/pqKKFTlu7qSjxgmF5DKfx6RUENM9w4nffh5L+0xZU4ue1nA==
+"@formily/validator@2.1.4":
+  version "2.1.4"
+  resolved "https://registry.npmmirror.com/@formily/validator/-/validator-2.1.4.tgz#6458a1d7f9be813e369298c9f6751bbf74026534"
+  integrity sha512-V5gIOMSCPWVhs1muu+fDi9JpHYIgzLsY/OsY1abis8wdDq39f69VmJP9g5GB/3NOfXEUiYM5k2YtUaddKsgrCQ==
   dependencies:
-    "@formily/shared" "2.1.3"
+    "@formily/shared" "2.1.4"
 
 "@humanwhocodes/config-array@^0.5.0":
   version "0.5.0"

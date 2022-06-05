@@ -11,6 +11,7 @@ export interface TabNodeAttributes {
     tabElement?: ReactElement;
     isActive?: boolean;
     isNewTab?: boolean;
+    isRemoving?: boolean;
     needAttention?: boolean;
     sortableAttr?: ReturnType<typeof useSortable>;
 }

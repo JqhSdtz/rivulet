@@ -1,5 +1,5 @@
 import {useCallback, useContext, useEffect, useRef, useState} from 'react';
-import {SplitViewContainerType, SplitViewType, TabsContext, TabsContextType} from '@/layouts/BasicLayout';
+import {SplitViewContainerType, SplitViewType, TabNodeType, TabsContext, TabsContextType} from '@/layouts/BasicLayout';
 import {
     Active,
     closestCenter,
@@ -24,6 +24,8 @@ export default () => {
         keepAliveTabsElemRef,
         splitViewContainer,
         findNode,
+        getPrevNode,
+        setTabNodeAttributes,
         getSplitViewContainerCopy,
         resetSplitViewOfTabNodes,
         resetSplitViewContainer,
@@ -41,9 +43,11 @@ export default () => {
     const splitViewContainerCopyRef = useRef<SplitViewContainerType>();
     const findSplitView = splitViewId => splitViewContainer.splitViews.find(view => view.id === splitViewId);
     const findSplitViewCopy = splitView => splitViewContainerCopyRef.current?.splitViews.find(view => view.id === splitView.id) ?? {} as SplitViewType;
+    const activeNodePrevNode = useRef<TabNodeType>();
     const handleDragStart = (event) => {
         splitViewContainerCopyRef.current = getSplitViewContainerCopy();
         setActiveTarget(event.active);
+        activeNodePrevNode.current = getPrevNode(event.active.id);
     };
     const lastOverTarget = useRef<Active>();
     const lastOverSplitView = useRef<SplitViewType | undefined>();
@@ -51,6 +55,7 @@ export default () => {
         resetSplitViewContainer(splitViewContainerCopyRef.current ?? {} as SplitViewContainerType);
         lastOverSplitView.current = undefined;
         setActiveTarget(null as unknown as Active);
+        activeNodePrevNode.current = null;
         updateTabs();
     };
     const activeTargetType = activeTarget?.data.current?.type;
@@ -137,6 +142,13 @@ export default () => {
                 const overTargetRect = overTargetNode.sortableAttr?.rect.current as ClientRect;
                 const overNodeIndex = overTargetSplitView.tabNodes.findIndex(node => node.name === overTarget.id);
                 const activeNodeIndex = overTargetSplitView.tabNodes.findIndex(node => node.name === activeTarget.id);
+                if (activeTargetNode.isActive) {
+                    // 移动一个active的tabNode，需要在新的splitView中更改isActive的tabNode
+                    // 然后再在原来的splitView中重设一个active的tabNode
+                    overTargetSplitView.tabNodes.forEach(node => setTabNodeAttributes(node.name, {isActive: false}));
+                    setTabNodeAttributes(activeTargetNode.name, {isActive: true});
+                    setTabNodeAttributes(activeNodePrevNode.current.name, {isActive: true});
+                }
                 if (activeTargetNode.splitView.id !== overTargetSplitView.id) {
                     // 如果是从其他splitView进入，并且结束时在最右侧的，不对换位置
                     if (activeNodeIndex === overTargetSplitView.tabNodes.length - 1

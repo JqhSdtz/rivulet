@@ -100,6 +100,8 @@ function matchMenuConfig(menuItems: MenuConfigItem[], node: TabNodeType) {
 interface TabNodeOperations {
     findNode(targetKey: string | undefined): TabNodeType | undefined;
 
+    getPrevNode(targetKey: string | undefined): TabNodeType | undefined;
+
     activeNode(targetKey: string | undefined): void;
 
     removeNode(targetKey: string | undefined): void;
@@ -236,11 +238,11 @@ export default (props) => {
         const splitView = targetNode.splitView;
         const oriIndex = splitView.tabNodes.findIndex(node => node.name === targetNode.name);
         splitView.tabNodes = splitView.tabNodes.filter(node => node.name !== targetNode.name);
-        if (splitView.tabNodes.length === 0) {
+        if (splitView.tabNodes.filter(node => !node.isRemoving).length === 0) {
             removeSplitView(targetNode.splitView.id);
         } else if (targetNode.isActive) {
             // 如果原有的splitView仍然保留，但是active的tab被移到其他splitView，则active前一个tab
-            if (oriIndex === 0 && splitView.tabNodes.length > 1) {
+            if (oriIndex === 0 && splitView.tabNodes.filter(node => !node.isRemoving).length > 1) {
                 setTabNodeAttributes(splitView.tabNodes[1].name, {
                     isActive: true
                 });
@@ -297,17 +299,20 @@ export default (props) => {
         setActiveSplitView(targetNode.splitView);
         navigate(targetKey);
     };
-    const activePrevNode = (targetKey) => {
+    const getPrevNode = (targetKey) => {
         const splitView = findNode(targetKey)?.splitView;
         if (!splitView) return;
         const curIdx = splitView.tabNodes.findIndex(
             node => node.name === targetKey
         );
         if (curIdx === 0) {
-            activeNode(splitView.tabNodes[1].name ?? '');
+            return splitView.tabNodes[1];
         } else if (curIdx > 0) {
-            activeNode(splitView.tabNodes[curIdx - 1].name ?? '');
+            return splitView.tabNodes[curIdx - 1];
         }
+    };
+    const activePrevNode = (targetKey) => {
+        activeNode(getPrevNode(targetKey).name ?? '');
     };
     const activeStartPage = () => activeNode(defaultStartPage);
     const dropNode = async (targetKey, dropSync = false, fromCallback = false) => {
@@ -325,6 +330,10 @@ export default (props) => {
             }
             // 将tabNode从原来的splitView中移除
             removeTabNodeFromSplitView(targetNode);
+            setTabNodeAttributes(targetKey, {
+                isRemoving: true
+            });
+            refreshTabNode(targetNode);
         };
         if (fromCallback) {
             await doDrop();
@@ -374,9 +383,9 @@ export default (props) => {
                 if (!shouldClose) {
                     return;
                 }
-                if (tabNodesRef.current.length === 1) {
+                if (tabNodesRef.current.filter(node => !node.isRemoving).length === 1) {
                     activeStartPage();
-                } else if (targetNode.splitView.tabNodes.length === 1) {
+                } else if (targetNode.splitView.tabNodes.filter(node => !node.isRemoving).length === 0) {
                     removeSplitView(targetNode.splitView.id);
                 } else {
                     activePrevNode(targetKey);
@@ -384,11 +393,12 @@ export default (props) => {
             });
         } else {
             dropNode(targetKey, false, fromCallback).then(() => {
-                if (targetNode.splitView.tabNodes.length === 1) {
+                if (targetNode.splitView.tabNodes.filter(node => !node.isRemoving).length === 1) {
                     removeSplitView(targetNode.splitView.id);
                 }
             });
         }
+        updateTabs();
     };
     const refreshNode = (targetKey) => {
         if (!targetKey) return;
@@ -494,6 +504,7 @@ export default (props) => {
         currentTabNode,
         findNode,
         activeNode,
+        getPrevNode,
         removeNode,
         refreshNode,
         removeAllNodes,
