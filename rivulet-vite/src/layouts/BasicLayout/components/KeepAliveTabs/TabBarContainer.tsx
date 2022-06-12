@@ -142,14 +142,17 @@ export default () => {
                 const overTargetRect = overTargetNode.sortableAttr?.rect.current as ClientRect;
                 const overNodeIndex = overTargetSplitView.tabNodes.findIndex(node => node.name === overTarget.id);
                 const activeNodeIndex = overTargetSplitView.tabNodes.findIndex(node => node.name === activeTarget.id);
-                if (activeTargetNode.isActive) {
-                    // 移动一个active的tabNode，需要在新的splitView中更改isActive的tabNode
-                    // 然后再在原来的splitView中重设一个active的tabNode
-                    overTargetSplitView.tabNodes.forEach(node => setTabNodeAttributes(node.name, {isActive: false}));
-                    setTabNodeAttributes(activeTargetNode.name, {isActive: true});
-                    setTabNodeAttributes(activeNodePrevNode.current.name, {isActive: true});
-                }
+                // 跨越splitView的移动
                 if (activeTargetNode.splitView.id !== overTargetSplitView.id) {
+                    if (activeTargetNode.isActive) {
+                        // 移动一个active的tabNode，需要在新的splitView中更改isActive的tabNode
+                        // 然后再在原来的splitView中重设一个active的tabNode
+                        overTargetSplitView.tabNodes.forEach(node => setTabNodeAttributes(node.name, {isActive: false}));
+                        setTabNodeAttributes(activeTargetNode.name, {isActive: true});
+                        if (activeNodePrevNode.current) {
+                            setTabNodeAttributes(activeNodePrevNode.current.name, {isActive: true});
+                        }
+                    }
                     // 如果是从其他splitView进入，并且结束时在最右侧的，不对换位置
                     if (activeNodeIndex === overTargetSplitView.tabNodes.length - 1
                         && activeTargetRect.left > overTargetRect.right - overTargetRect.width / 2) {

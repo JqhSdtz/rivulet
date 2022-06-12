@@ -282,7 +282,7 @@ export default (props) => {
         setTabNodeAttributes(targetNode.name, {
             splitView: splitViews[index]
         });
-        setActiveSplitView(targetNode.splitView);
+        setActiveSplitView(splitViews[index]);
         updateTabs();
     };
     const activeNode = (targetKey) => {
@@ -393,7 +393,7 @@ export default (props) => {
             });
         } else {
             dropNode(targetKey, false, fromCallback).then(() => {
-                if (targetNode.splitView.tabNodes.filter(node => !node.isRemoving).length === 1) {
+                if (targetNode.splitView.tabNodes.filter(node => !node.isRemoving).length === 0) {
                     removeSplitView(targetNode.splitView.id);
                 }
             });

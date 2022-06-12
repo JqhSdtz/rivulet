@@ -8,6 +8,7 @@ export interface MenuConfigItem extends MenuDataItem {
 }
 
 function testPath(this: MenuConfigItem, path) {
+    if (!path) path = '/';
     if (!this.path) {
         return false;
     }
@@ -36,6 +37,8 @@ const config: MenuConfigItem[] = [
     },
     {
         name: '测试子目录',
+        // 父目录也要有path，不然会出错
+        path: '/test_child',
         icon: SmileOutlined,
         children: [
             {
@@ -47,6 +50,7 @@ const config: MenuConfigItem[] = [
             {
                 name: '测试子子目录',
                 icon: SmileOutlined,
+                path: '/test_child',
                 children: [
                     {
                         name: '测试4',

@@ -2,7 +2,7 @@ import './index.less';
 import Icon, {createFromIconfontCN} from '@ant-design/icons';
 import type {MenuProps, MenuTheme} from 'antd';
 import {Menu, Skeleton} from 'antd';
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import React, {useContext, useEffect, useMemo, useRef, useState} from 'react';
 import classNames from 'classnames';
 import {isImg, isUrl, useMountMergeState} from '@ant-design/pro-utils';
 import type {PureSettings} from '../../configs/defaultSettings';
@@ -13,6 +13,7 @@ import type {MenuDataItem, MessageDescriptor, Route, RouterTypes, WithFalse} fro
 import MenuCounter from './Counter';
 import type {PrivateSiderMenuProps} from './SiderMenu';
 import type {ItemType} from 'antd/lib/menu/hooks/useItems';
+import {TabsContext, TabsContextType} from '@/layouts/BasicLayout';
 
 // todo
 export type MenuMode =
@@ -280,6 +281,10 @@ const BaseMenu: React.FC<BaseMenuProps & PrivateSiderMenuProps> = props => {
         openKeys: propsOpenKeys
     } = props;
 
+    const {
+        splitViewContainer
+    } = useContext<TabsContextType>(TabsContext);
+
     // 用于减少 defaultOpenKeys 计算的组件
     const defaultOpenKeysRef = useRef<string[]>([]);
 
@@ -325,10 +330,22 @@ const BaseMenu: React.FC<BaseMenuProps & PrivateSiderMenuProps> = props => {
         }
         if (matchMenuKeys) {
             setOpenKeys(matchMenuKeys);
-            setSelectedKeys(matchMenuKeys);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [matchMenuKeys.join('-')]);
+
+    const activeSplitView = splitViewContainer.splitViews.find(splitView => splitView.isActive);
+
+    useEffect(() => {
+        const selectedKeys = [];
+        if (!activeSplitView) return;
+        activeSplitView.tabNodes.forEach(node => {
+            if (node.isActive) {
+                selectedKeys.push(node.targetMenu?.path ?? '');
+            }
+        });
+        setSelectedKeys(selectedKeys);
+    }, [activeSplitView]);
 
     useEffect(() => {
         // reset IconFont
