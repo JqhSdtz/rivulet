@@ -25,10 +25,9 @@ import {SiderMenuProps} from '@/layouts/BasicLayout/components/SiderMenu/SiderMe
 import UserCenterMenu from '@/layouts/BasicLayout/customs/UserCenterMenu';
 import {Link, Outlet, useLocation} from 'react-router-dom';
 
-const loopMenuItem = (menus: any) =>
-    menus.map(({icon, children, ...item}: any) => ({
+const loopMenuItem = (menus: MenuConfigItem[]) =>
+    menus.map(({children, ...item}: MenuConfigItem) => ({
         ...item,
-        icon: createElement(icon),
         children: children && loopMenuItem(children)
     }));
 
@@ -66,7 +65,7 @@ export default () => {
                 minHeight: '100vh'
             }}
             contentStyle={{
-                margin: '0.5rem 1rem'
+                margin: '0'
             }}
             headerHeight=""
             location={{

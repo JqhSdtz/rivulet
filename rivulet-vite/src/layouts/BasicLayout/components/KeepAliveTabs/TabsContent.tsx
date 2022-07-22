@@ -38,7 +38,7 @@ export default () => {
     } = useContext<TabsContextType>(TabsContext);
     return (
         <div className="keep-alive-tab-content" style={{display: 'flex'}}>
-            {splitViewContainer.splitViews.map(splitView => <SplitView splitView={splitView}/>)}
+            {splitViewContainer.splitViews.map(splitView => <SplitView key={splitView.id} splitView={splitView}/>)}
         </div>
     );
 }

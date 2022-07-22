@@ -81,20 +81,27 @@ function preProcessCachingNodes(cachingNodes: CachingNode[], splitViewContainer:
 
 function matchMenuConfig(menuItems: MenuConfigItem[], node: TabNodeType) {
     if (node.targetMenu) {
-        return;
+        return false;
     }
     for (let i = 0; i < menuItems.length; ++i) {
         const menu = menuItems[i];
+        let matchSuccess = false;
+        // 先匹配子菜单，子菜单匹配不上再匹配上级菜单
+        if (menu.routes) {
+            matchSuccess = matchMenuConfig(menu.routes as MenuConfigItem[], node);
+        }
+        if (menu.hiddenChildren) {
+            matchSuccess = matchMenuConfig(menu.hiddenChildren as MenuConfigItem[], node);
+        }
+        if (matchSuccess) return true;
         if (menu.testPath?.(node?.name) ?? false) {
             setTabNodeAttributes(node.name, {
                 targetMenu: menu
             });
-            return;
-        }
-        if (menu.routes) {
-            matchMenuConfig(menu.routes as MenuConfigItem[], node);
+            return true;
         }
     }
+    return false;
 }
 
 interface TabNodeOperations {
@@ -242,8 +249,8 @@ export default (props) => {
             removeSplitView(targetNode.splitView.id);
         } else if (targetNode.isActive) {
             // 如果原有的splitView仍然保留，但是active的tab被移到其他splitView，则active前一个tab
-            if (oriIndex === 0 && splitView.tabNodes.filter(node => !node.isRemoving).length > 1) {
-                setTabNodeAttributes(splitView.tabNodes[1].name, {
+            if (oriIndex === 0 && splitView.tabNodes.filter(node => !node.isRemoving).length >= 1) {
+                setTabNodeAttributes(splitView.tabNodes[0].name, {
                     isActive: true
                 });
             } else if (oriIndex > 0) {

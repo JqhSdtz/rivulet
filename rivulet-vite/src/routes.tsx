@@ -10,6 +10,7 @@ import Login from '@/pages/Login';
 import loginRouteWrapper from '@/wrappers/loginRouteWrapper';
 import InitApp from '@/pages/InitApp';
 import initAppRouteWrapper from '@/wrappers/initAppRouteWrapper';
+import ModelDetail from '@/pages/DataModel/ModelDetail';
 
 export interface RouteConfig {
     children?: RouteConfig[];
@@ -31,19 +32,25 @@ const routesConfig: RouteObject[] = [
         component: BasicLayout,
         children: menuRouteWrapper([
             {
-                path: '/dashboard',
+                path: 'dashboard',
                 component: Dashboard
             },
             {
-                path: '/data_model',
+                path: 'data_model',
+                component: DataModel,
+                subMenu: [
+                    {
+                        path: 'detail',
+                        component: ModelDetail
+                    }
+                ]
+            },
+            {
+                path: 'test',
                 component: DataModel
             },
             {
-                path: '/test',
-                component: DataModel
-            },
-            {
-                path: '/',
+                path: '',
                 component: Home
             }
         ])

@@ -24,7 +24,7 @@ import java.util.Objects;
 @DynamicInsert
 @DynamicUpdate
 @Table(name = "rv_table")
-public class RvTable extends RvEntity {
+public class RvTable extends RvEntity<String> {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")

@@ -2,6 +2,7 @@ plugins {
     id 'org.springframework.boot' version '2.6.3'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
+    id "org.graalvm.plugin.compiler" version "0.1.0-alpha2"
 }
 
 group = 'org.laputa'
@@ -13,22 +14,44 @@ configurations {
     }
 }
 
+apply plugin: 'idea'
+
+idea {
+    module {
+        // Javadoc
+        downloadJavadoc = true
+
+        // sources
+        downloadSources = true
+    }
+}
+
 repositories {
     maven{ url 'https://maven.aliyun.com/nexus/content/groups/public/'}
     mavenCentral()
+}
+
+ext.graalVersion = '22.1.0.1'
+
+graal {
+    version "$graalVersion"
 }
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.session:spring-session-core:2.6.2'
-    implementation 'org.springframework.session:spring-session-data-redis:2.6.2'
-    implementation 'com.alibaba:druid-spring-boot-starter:1.2.8'
-    implementation 'org.redisson:redisson-spring-boot-starter:3.17.0'
-    implementation 'org.liquibase:liquibase-core:4.9.0'
-    implementation 'cn.hutool:hutool-core:5.7.22'
-    implementation 'cn.hutool:hutool-crypto:5.7.22'
+    implementation 'org.springframework.session:spring-session-core:2.7.0'
+    implementation 'org.springframework.session:spring-session-data-redis:2.7.0'
+    implementation 'com.alibaba:druid-spring-boot-starter:1.2.11'
+    implementation 'org.redisson:redisson-spring-boot-starter:3.17.3'
+    implementation 'org.liquibase:liquibase-core:4.11.0'
+    implementation 'cn.hutool:hutool-core:5.8.3'
+    implementation 'cn.hutool:hutool-crypto:5.8.3'
+    implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'org.apache.commons:commons-pool2:2.11.1'
+    implementation "org.graalvm.sdk:graal-sdk:$graalVersion"
+    implementation "org.graalvm.js:js:$graalVersion"
     compileOnly 'org.projectlombok:lombok'
     // 用于jpa自动生成MetaModel类，例如RvUser_
     compileOnly 'org.hibernate:hibernate-jpamodelgen'

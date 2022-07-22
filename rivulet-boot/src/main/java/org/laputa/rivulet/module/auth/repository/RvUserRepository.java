@@ -10,7 +10,7 @@ import java.util.Optional;
  * @author dell
  */
 @Repository
-public interface UserRepository extends JpaRepository<RvUser, String> {
+public interface RvUserRepository extends JpaRepository<RvUser, String> {
     /**
      * 根据用户名查找用户
      * @param username

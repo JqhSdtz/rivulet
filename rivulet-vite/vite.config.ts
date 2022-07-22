@@ -3,6 +3,12 @@ import react from '@vitejs/plugin-react';
 import vitePluginImp from 'vite-plugin-imp';
 import * as path from 'path';
 import reactNodeKey from 'react-node-key/vite';
+import {autoFixContext} from 'react-activation';
+
+autoFixContext(
+    [require('react/jsx-runtime'), 'jsx', 'jsxs', 'jsxDEV'],
+    [require('react/jsx-dev-runtime'), 'jsx', 'jsxs', 'jsxDEV']
+);
 
 export default defineConfig({
     build: {

@@ -2,7 +2,7 @@ package org.laputa.rivulet.module.auth.service;
 
 import org.laputa.rivulet.common.model.Result;
 import org.laputa.rivulet.module.auth.entity.RvUser;
-import org.laputa.rivulet.module.auth.repository.UserRepository;
+import org.laputa.rivulet.module.auth.repository.RvUserRepository;
 import org.laputa.rivulet.module.auth.session.AuthSessionAccessor;
 import org.laputa.rivulet.module.auth.util.PasswordUtil;
 import org.springframework.stereotype.Service;
@@ -17,15 +17,15 @@ import java.util.Optional;
 @Service
 public class AuthService {
     @Resource
-    private UserRepository userRepository;
+    private RvUserRepository rvUserRepository;
 
     @Resource
     private AuthSessionAccessor authSessionAccessor;
 
     public Result<RvUser> login(RvUser paramUser) {
-        Optional<RvUser> optionalRvUser = userRepository.findByUsername(paramUser.getUsername());
+        Optional<RvUser> optionalRvUser = rvUserRepository.findByUsername(paramUser.getUsername());
         if (optionalRvUser.isEmpty()) {
-            return Result.fail(RvUser.class, "NoUserFound", "未找到用户名为、\"" + paramUser.getUsername() + "\"的用户");
+            return Result.fail(RvUser.class, "NoUserFound", "未找到用户名为\"" + paramUser.getUsername() + "\"的用户");
         }
         RvUser rvUser = optionalRvUser.get();
         if (!PasswordUtil.verify(paramUser.getPassword(), rvUser.getPassword())) {

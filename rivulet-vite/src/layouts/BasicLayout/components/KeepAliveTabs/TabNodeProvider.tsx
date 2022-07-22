@@ -46,6 +46,7 @@ interface TabNodeCallbacksSetter {
 
 export type TabNodeContextType = {
     tabKey: string;
+    tabNode: TabNodeType;
     closeTab: () => void;
 } & TabNodeCallbacksSetter;
 
@@ -56,6 +57,7 @@ export default (props: { tabKey: string; children: any }) => {
     const tabKey = props.tabKey;
     const {
         removeNode,
+        findNode,
         setTabNodeCallbacks
     } = useContext<TabsContextType>(TabsContext);
     const closeTab = () => {
@@ -68,6 +70,7 @@ export default (props: { tabKey: string; children: any }) => {
     };
     const value = {
         tabKey,
+        tabNode: findNode(tabKey),
         closeTab,
         beforeClose
     };

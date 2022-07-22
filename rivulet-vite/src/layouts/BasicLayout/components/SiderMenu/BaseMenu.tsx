@@ -205,7 +205,7 @@ class MenuUtil {
         // if local is true formatMessage all name。
         const name = this.getIntlName(item);
         const {prefixCls} = this.props;
-        const icon = isChildren ? null : getIcon(item.icon, iconPrefixes);
+        const icon = getIcon(item.icon, iconPrefixes);
         const isHttpUrl = isUrl(itemPath);
         const defaultItem = (
             <span
@@ -213,9 +213,9 @@ class MenuUtil {
                     [`${prefixCls}-menu-item-link`]: isHttpUrl
                 })}
             >
-        {icon}
+                {icon}
                 <span className={`${prefixCls}-menu-item-title`}>{name}</span>
-      </span>
+            </span>
         );
 
         if (menuItemRender) {
@@ -341,7 +341,11 @@ const BaseMenu: React.FC<BaseMenuProps & PrivateSiderMenuProps> = props => {
         if (!activeSplitView) return;
         activeSplitView.tabNodes.forEach(node => {
             if (node.isActive) {
-                selectedKeys.push(node.targetMenu?.path ?? '');
+                let menu = node.targetMenu;
+                while (menu && menu.isHidden && menu.parent) {
+                    menu = menu.parent;
+                }
+                selectedKeys.push(menu?.path ?? '');
             }
         });
         setSelectedKeys(selectedKeys);

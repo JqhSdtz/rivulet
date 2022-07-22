@@ -4,7 +4,10 @@ import {MenuDataItem} from '@/layouts/BasicLayout';
 export interface MenuConfigItem extends MenuDataItem {
     isStartPage?: boolean;
     testPath?: (path: string | undefined) => boolean;
+    parent?: MenuConfigItem;
     children?: MenuConfigItem[];
+    isHidden?: boolean;
+    hiddenChildren?: MenuConfigItem[];
 }
 
 function testPath(this: MenuConfigItem, path) {
@@ -32,30 +35,30 @@ const config: MenuConfigItem[] = [
     {
         name: '首页',
         path: '/',
-        icon: SmileOutlined,
+        icon: <SmileOutlined/>,
         testPath
     },
     {
         name: '测试子目录',
         // 父目录也要有path，不然会出错
         path: '/test_child',
-        icon: SmileOutlined,
+        icon: <SmileFilled/>,
         children: [
             {
                 name: '测试2',
                 path: '/test?v=2',
-                icon: SmileFilled,
+                icon: <SmileFilled/>,
                 testPath
             },
             {
                 name: '测试子子目录',
-                icon: SmileOutlined,
-                path: '/test_child',
+                icon: <SmileOutlined/>,
+                path: '/test_child_child',
                 children: [
                     {
                         name: '测试4',
                         path: '/test?v=4',
-                        icon: SmileFilled,
+                        icon: <SmileFilled/>,
                         testPath
                     }
                 ]
@@ -65,25 +68,33 @@ const config: MenuConfigItem[] = [
     {
         name: '仪表盘',
         path: '/dashboard',
-        icon: SmileOutlined,
+        icon: <SmileOutlined/>,
         testPath
     },
     {
         name: '数据模型',
         path: '/data_model',
-        icon: SmileOutlined,
-        testPath
+        icon: <SmileOutlined/>,
+        testPath,
+        hiddenChildren: [
+            {
+                name: '数据模型编辑',
+                path: 'detail',
+                icon: <SmileOutlined/>,
+                testPath
+            }
+        ]
     },
     {
         name: '测试5',
         path: '/test?v=5',
-        icon: SmileOutlined,
+        icon: <SmileOutlined/>,
         testPath
     },
     {
         name: '测试6',
         path: '/test?v=6',
-        icon: SmileOutlined,
+        icon: <SmileOutlined/>,
         testPath
     }
 ];
@@ -93,7 +104,18 @@ function doProcess(targetConfig: MenuConfigItem[]) {
         configItem.key = configItem.path;
         configItem.isStartPage = configItem.path === defaultStartPage;
         if (configItem.children) {
+            configItem.children.forEach(childItem => {
+                childItem.parent = configItem;
+            });
             doProcess(configItem.children);
+        }
+        if (configItem.hiddenChildren) {
+            configItem.hiddenChildren.forEach(childItem => {
+                childItem.parent = configItem;
+                childItem.path = configItem.path + '/' + childItem.path;
+                childItem.isHidden = true;
+            });
+            doProcess(configItem.hiddenChildren);
         }
     });
 }

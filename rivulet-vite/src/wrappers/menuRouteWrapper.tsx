@@ -4,6 +4,10 @@ import {RouteObject} from 'react-router/lib/router';
 import {useContext} from 'react';
 import {useLocation} from 'react-router-dom';
 
+type MenuRouteConfig = {
+    subMenu?: MenuRouteConfig[]
+} & RouteConfig;
+
 const WrappedComponent = (config: RouteConfig) => {
     const {pathname, search} = useLocation();
     const path = pathname + search;
@@ -25,11 +29,22 @@ const WrappedComponent = (config: RouteConfig) => {
     return <TabsContent/>;
 };
 
-export default function (routeConfigs: RouteConfig[]): RouteObject[] {
-    const routeObjects = routeConfigs.map(routeConfig => {
-        const routeObject = {...routeConfig} as RouteObject;
-        routeObject.element = <WrappedComponent {...routeConfig}/>;
-        return routeObject;
+const processRouteConfig = (routeObjects:RouteObject[], config: MenuRouteConfig) => {
+    const routeObject = {...config} as RouteObject;
+    routeObject.element = <WrappedComponent {...config}/>;
+    if (config.subMenu) {
+        config.subMenu.forEach(subMenuConfig => {
+            subMenuConfig.path = config.path + '/' + subMenuConfig.path;
+            processRouteConfig(routeObjects, subMenuConfig);
+        });
+    }
+    routeObjects.push(routeObject);
+}
+
+export default function (routeConfigs: MenuRouteConfig[]): RouteObject[] {
+    const routeObjects: RouteObject[] = [];
+    routeConfigs.forEach(routeConfig => {
+        processRouteConfig(routeObjects, routeConfig);
     });
     return routeObjects;
 }

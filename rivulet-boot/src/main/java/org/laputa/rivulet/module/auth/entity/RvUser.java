@@ -45,7 +45,7 @@ public class RvUser extends RvEntity {
     @NotNull(groups = {Persist.class, Login.class})
     @Length(min = 2, max = 32)
     @Comment("用户名")
-    @Column(name = "username", nullable = false, length = 32)
+    @Column(name = "username", nullable = false, length = 32, unique = true)
     private String username;
 
     @NotNull(groups = {Persist.class, Login.class})
