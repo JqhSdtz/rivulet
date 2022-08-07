@@ -1,7 +1,7 @@
 package org.laputa.rivulet.module.datamodel.controller;
 
 import org.laputa.rivulet.common.model.Result;
-import org.laputa.rivulet.module.datamodel.entity.RvTable;
+import org.laputa.rivulet.module.datamodel.entity.RvPrototype;
 import org.laputa.rivulet.module.datamodel.service.DataModelService;
 import org.laputa.rivulet.module.datamodel.service.FormSchemaService;
 import org.springframework.validation.annotation.Validated;
@@ -23,8 +23,8 @@ public class DataModelController {
     private FormSchemaService formSchemaService;
 
     @PostMapping
-    public Result<Void> createDataModel(@RequestBody @Validated RvTable rvTable) {
-        return dataModelService.createDataModel(rvTable);
+    public Result<Void> createDataModel(@RequestBody @Validated RvPrototype rvPrototype) {
+        return dataModelService.createDataModel(rvPrototype);
     }
 
     @GetMapping("/form_schema")

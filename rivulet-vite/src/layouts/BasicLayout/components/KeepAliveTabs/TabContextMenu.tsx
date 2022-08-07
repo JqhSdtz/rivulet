@@ -29,14 +29,11 @@ export default (props: {
     } = useContext<TabsContextType>(TabsContext);
     const menuItems = [] as ItemType[];
     const notSinglePage = tabNodes.length > 1;
-    const isStartPage = tabNode.targetMenu?.isStartPage;
-    if (notSinglePage || !isStartPage) {
-        menuItems.push({
-            key: 'closeTab',
-            label: '关闭',
-            onClick: () => removeNode(tabNode.name)
-        });
-    }
+    menuItems.push({
+        key: 'closeTab',
+        label: '关闭',
+        onClick: () => removeNode(tabNode.name)
+    });
     menuItems.push({
         key: 'refreshTab',
         label: '刷新',
@@ -76,13 +73,11 @@ export default (props: {
         label: '关闭其他',
         onClick: () => removeOtherNodes(tabNode.name)
     });
-    if (!isStartPage) {
-        batchCloseTabsChildren.push({
-            key: 'closeAllTabs',
-            label: '关闭全部',
-            onClick: () => removeAllNodes()
-        });
-    }
+    batchCloseTabsChildren.push({
+        key: 'closeAllTabs',
+        label: '关闭全部',
+        onClick: () => removeAllNodes()
+    });
     if (splitViewContainer.splitViews.length > 1) {
         batchCloseTabsChildren.push({
             key: 'removeNodesOfSplitView',

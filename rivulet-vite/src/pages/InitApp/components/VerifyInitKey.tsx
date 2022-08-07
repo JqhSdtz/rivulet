@@ -5,7 +5,7 @@ import {Form, FormItem, Input, Password, Submit} from '@formily/antd';
 import {Card} from 'antd';
 import * as ICONS from '@ant-design/icons';
 import {FormProps} from '@formily/antd/esm/form';
-import RvModal from '@/components/Common/RvModal';
+import RvModal from '@/components/common/RvModal';
 import axios from 'axios';
 
 const form = createForm();

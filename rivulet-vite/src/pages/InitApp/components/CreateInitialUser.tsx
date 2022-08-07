@@ -6,7 +6,7 @@ import {Card} from 'antd';
 import * as ICONS from '@ant-design/icons';
 import {FormProps} from '@formily/antd/esm/form';
 import md5 from 'md5';
-import RvModal from '@/components/Common/RvModal';
+import RvModal from '@/components/common/RvModal';
 import store from '@/store';
 import axios from 'axios';
 

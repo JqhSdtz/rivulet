@@ -1,209 +1,177 @@
-import {EllipsisOutlined, PlusOutlined} from '@ant-design/icons';
-import type {ActionType, ProColumns} from '@ant-design/pro-table';
-import {ProTable, TableDropdown} from '@ant-design/pro-table';
-import {Button, Dropdown, Menu, Space, Tag} from 'antd';
-import {useContext, useRef} from 'react';
-import {Link} from 'react-router-dom';
-import {TabNodeContext} from '@/layouts/BasicLayout';
+import React from 'react';
+import {createForm} from '@formily/core';
+import {createSchemaField, FormProvider} from '@formily/react';
+import {antdComponents} from '@/utils/formilyUtil';
 
-type GithubIssueItem = {
-    url: string;
-    id: number;
-    number: number;
-    title: string;
-    labels: {
-        name: string;
-        color: string;
-    }[];
-    state: string;
-    comments: number;
-    created_at: string;
-    updated_at: string;
-    closed_at?: string;
-};
+const SchemaField = createSchemaField({
+    components: antdComponents
+});
 
-const columns: ProColumns<GithubIssueItem>[] = [
-    {
-        dataIndex: 'index',
-        valueType: 'indexBorder',
-        width: 48
-    },
-    {
-        title: '标题',
-        dataIndex: 'title',
-        copyable: true,
-        ellipsis: true,
-        tip: '标题过长会自动收缩',
-        formItemProps: {
-            rules: [
-                {
-                    required: true,
-                    message: '此项为必填项'
+const form = createForm();
+const schema = {
+    type: 'object',
+    properties: {
+        toolbar: {
+            type: 'void',
+            'x-component': 'FormGrid',
+            'x-component-props': {
+                // 有了固定宽度或最小宽度才会自动调整列数量
+                minWidth: 175,
+                minColumns: 1,
+                maxColumns: 3,
+                style: {
+                    margin: '1rem'
                 }
-            ]
-        }
-    },
-    {
-        disable: true,
-        title: '状态',
-        dataIndex: 'state',
-        filters: true,
-        onFilter: true,
-        valueType: 'select',
-        valueEnum: {
-            all: {text: '全部', status: 'Default'},
-            open: {
-                text: '未解决',
-                status: 'Error'
             },
-            closed: {
-                text: '已解决',
-                status: 'Success',
-                disabled: true
-            },
-            processing: {
-                text: '解决中',
-                status: 'Processing'
+            properties: {
+                name: {
+                    type: 'string',
+                    title: '名称',
+                    required: true,
+                    'x-decorator': 'FormItem',
+                    'x-component': 'Input'
+                },
+                code: {
+                    type: 'string',
+                    title: '编码',
+                    required: true,
+                    'x-decorator': 'FormItem',
+                    'x-component': 'Input'
+                },
+                description: {
+                    type: 'string',
+                    title: '描述',
+                    'x-decorator': 'FormItem',
+                    'x-component': 'Input'
+                },
+                addButton: {
+                    type: 'void',
+                    'x-component': 'RvLinkButton',
+                    'x-component-props': {
+                        to: './detail'
+                    }
+                }
             }
-        }
-    },
-    {
-        disable: true,
-        title: '标签',
-        dataIndex: 'labels',
-        search: false,
-        renderFormItem: (_, {defaultRender}) => {
-            return defaultRender(_);
         },
-        render: (_, record) => (
-            <Space>
-                {record.labels.map(({name, color}) => (
-                    <Tag color={color} key={name}>
-                        {name}
-                    </Tag>
-                ))}
-            </Space>
-        )
-    },
-    {
-        title: '创建时间',
-        key: 'showTime',
-        dataIndex: 'created_at',
-        valueType: 'dateTime',
-        sorter: true,
-        hideInSearch: true
-    },
-    {
-        title: '创建时间',
-        dataIndex: 'created_at',
-        valueType: 'dateRange',
-        hideInTable: true,
-        search: {
-            transform: (value) => {
-                return {
-                    startTime: value[0],
-                    endTime: value[1]
-                };
+        table: {
+            type: 'array',
+            'x-decorator': 'FormItem',
+            'x-component': 'RvTable',
+            'x-component-props': {
+                pagination: {pageSize: 10},
+                scroll: {x: '100%'}
+            },
+            items: {
+                type: 'object',
+                properties: {
+                    column1: {
+                        type: 'void',
+                        'x-component': 'ArrayTable.Column',
+                        'x-component-props': {width: 50, title: 'Sort', align: 'center'},
+                        properties: {
+                            sort: {
+                                type: 'void',
+                                'x-component': 'ArrayTable.SortHandle'
+                            }
+                        }
+                    },
+                    column2: {
+                        type: 'void',
+                        'x-component': 'ArrayTable.Column',
+                        'x-component-props': {width: 80, title: 'Index', align: 'center'},
+                        properties: {
+                            index: {
+                                type: 'void',
+                                'x-component': 'ArrayTable.Index'
+                            }
+                        }
+                    },
+                    column3: {
+                        type: 'void',
+                        'x-component': 'ArrayTable.Column',
+                        'x-component-props': {width: 200, title: 'A1'},
+                        properties: {
+                            a1: {
+                                type: 'string',
+                                'x-decorator': 'Editable',
+                                'x-component': 'Input'
+                            }
+                        }
+                    },
+                    column4: {
+                        type: 'void',
+                        'x-component': 'ArrayTable.Column',
+                        'x-component-props': {width: 200, title: 'A2'},
+                        properties: {
+                            a2: {
+                                type: 'string',
+                                'x-decorator': 'FormItem',
+                                'x-component': 'Input'
+                            }
+                        }
+                    },
+                    column5: {
+                        type: 'void',
+                        'x-component': 'ArrayTable.Column',
+                        'x-component-props': {width: 200, title: 'A3'},
+                        properties: {
+                            a3: {
+                                type: 'string',
+                                'x-decorator': 'FormItem',
+                                'x-component': 'Input'
+                            }
+                        }
+                    },
+                    column6: {
+                        type: 'void',
+                        'x-component': 'ArrayTable.Column',
+                        'x-component-props': {
+                            title: 'Operations',
+                            dataIndex: 'operations',
+                            width: 200,
+                            fixed: 'right'
+                        },
+                        properties: {
+                            item: {
+                                type: 'void',
+                                'x-component': 'FormItem',
+                                properties: {
+                                    remove: {
+                                        type: 'void',
+                                        'x-component': 'ArrayTable.Remove'
+                                    },
+                                    moveDown: {
+                                        type: 'void',
+                                        'x-component': 'ArrayTable.MoveDown'
+                                    },
+                                    moveUp: {
+                                        type: 'void',
+                                        'x-component': 'ArrayTable.MoveUp'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            properties: {
+                add: {
+                    type: 'void',
+                    'x-component': 'ArrayTable.Addition',
+                    title: '添加条目'
+                }
             }
         }
-    },
-    {
-        title: '操作',
-        valueType: 'option',
-        key: 'option',
-        render: (text, record, _, action) => [
-            <a
-                key="editable"
-                onClick={() => {
-                    action?.startEditable?.(record.id);
-                }}
-            >
-                编辑
-            </a>,
-            <a href={record.url} target="_blank" rel="noopener noreferrer" key="view">
-                查看
-            </a>,
-            <TableDropdown
-                key="actionGroup"
-                onSelect={() => action?.reload()}
-                menus={[
-                    {key: 'copy', name: '复制'},
-                    {key: 'delete', name: '删除'}
-                ]}
-            />
-        ]
     }
-];
-
-const menu = (
-    <Menu>
-        <Menu.Item key="1">1st item</Menu.Item>
-        <Menu.Item key="2">2nd item</Menu.Item>
-        <Menu.Item key="3">3rd item</Menu.Item>
-    </Menu>
-);
+};
 
 export default () => {
-    const actionRef = useRef<ActionType>();
-    const {
-        tabNode
-    } = useContext(TabNodeContext);
     return (
-        <ProTable<GithubIssueItem>
-            columns={columns}
-            actionRef={actionRef}
-            cardBordered
-            request={async (params = {}, sort, filter) => {
-                // console.log(sort, filter);
-                return {
-                    data: [],
-                    success: true
-                }
-            }}
-            editable={{
-                type: 'multiple'
-            }}
-            columnsState={{
-                persistenceKey: 'pro-table-singe-demos',
-                persistenceType: 'localStorage',
-                onChange(value) {
-                    console.log('value: ', value);
-                }
-            }}
-            rowKey="id"
-            search={{
-                labelWidth: 'auto'
-            }}
-            form={{
-                // 由于配置了 transform，提交的参与与定义的不同这里需要转化一下
-                syncToUrl: (values, type) => {
-                    if (type === 'get') {
-                        return {
-                            ...values,
-                            created_at: [values.startTime, values.endTime]
-                        };
-                    }
-                    return values;
-                }
-            }}
-            pagination={{
-                pageSize: 5,
-                onChange: (page) => console.log(page)
-            }}
-            dateFormatter="string"
-            headerTitle="高级表格"
-            toolBarRender={() => [
-                <Link to={tabNode.targetMenu?.path + '/detail'}>
-                    <Button key="button" icon={<PlusOutlined/>} type="primary">
-                        新建
-                    </Button>
-                </Link>,
-                <Dropdown key="menu" overlay={menu}>
-                    <Button>
-                        <EllipsisOutlined/>
-                    </Button>
-                </Dropdown>
-            ]}
-        />
+        <FormProvider form={form}>
+            <SchemaField schema={schema}/>
+            <antdComponents.FormButtonGroup>
+                <antdComponents.Submit onSubmit={console.log}>提交</antdComponents.Submit>
+            </antdComponents.FormButtonGroup>
+        </FormProvider>
     );
-};
+}

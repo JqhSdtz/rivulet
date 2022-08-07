@@ -9,63 +9,87 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.LiquibaseException;
+import lombok.SneakyThrows;
+import org.laputa.rivulet.module.datamodel.entity.RvField;
+import org.laputa.rivulet.module.datamodel.entity.RvPrototype;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Nullable;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
 
 /**
  * @author JQH
  * @since 下午 8:14 22/02/08
  */
-public class LiquibaseDdlExecutor {
-    private Liquibase liquibase;
 
-    public LiquibaseDdlExecutor() {
-        String url = "jdbc:mysql://localhost:3306/rivulet?useSSL=false&characterEncoding=utf8&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai";
-        String username = "rivulet_dev";
-        String password = "9iULadbEOudrLimc2FyXjGM1acmAH9ZH";
-        Database database = null;
+@Component
+public class LiquibaseDdlExecutor implements DisposableBean {
+
+    private final Database database;
+
+    public LiquibaseDdlExecutor(DataSource dataSource) {
         try {
-            database = DatabaseFactory.getInstance().openDatabase(url, username, password, null, null);
-            DatabaseChangeLog changeLog = new DatabaseChangeLog();
-            this.liquibase = new Liquibase(changeLog, null, database);
-            this.addTable();
-            this.doUpdate();
-        } catch (DatabaseException e) {
-            e.printStackTrace();
-        } finally {
-            if (database != null) {
-                try {
-                    database.close();
-                } catch (DatabaseException e) {
-                    e.printStackTrace();
-                }
+            Connection connection = dataSource.getConnection();
+            database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
+        } catch (SQLException | DatabaseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void destroy() {
+        if (database != null) {
+            try {
+                database.close();
+            } catch (DatabaseException e) {
+                e.printStackTrace();
             }
         }
     }
 
-    public void addTable() {
-        try {
-            DatabaseChangeLog changeLog = this.liquibase.getDatabaseChangeLog();
-            changeLog.setChangeLogId(UUID.randomUUID().toString(true));
-            ChangeSet changeSet = new ChangeSet(changeLog);
-            changeLog.addChangeSet(changeSet);
-            CreateTableChange createTableChange = new CreateTableChange();
-            createTableChange.setTableName("rv_test0");
-            ColumnConfig idColumn = new ColumnConfig();
-            idColumn.setName("id").setType("varchar(64)");
-            createTableChange.addColumn(idColumn);
-            changeSet.addChange(createTableChange);
-        } catch (LiquibaseException e) {
-            e.printStackTrace();
-        }
+    private ChangeSet getChangeSet(DatabaseChangeLog changeLog) {
+        String uuid = UUID.randomUUID().toString(true);
+        // dbmsList为空表示不限制dbms类型
+        return new ChangeSet(uuid, "admin", false, false, "", null, null, changeLog);
     }
 
-    public void doUpdate() {
-        try {
-            this.liquibase.update((Contexts) null);
-        } catch (LiquibaseException e) {
-            e.printStackTrace();
+    private Liquibase getLiquibase() {
+        // changeLog不要设置id，否则在update的时候会提示有id但没有配置liquibase hub api
+        DatabaseChangeLog changeLog = new DatabaseChangeLog();
+        return new Liquibase(changeLog, null, this.database);
+    }
+
+    @SneakyThrows
+    public Liquibase addTable(RvPrototype rvPrototype, @Nullable Liquibase liquibase) {
+        if (liquibase == null) {
+            liquibase = getLiquibase();
         }
+        DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog();
+        ChangeSet changeSet = getChangeSet(changeLog);
+        changeLog.addChangeSet(changeSet);
+        CreateTableChange createTableChange = new CreateTableChange();
+        createTableChange.setTableName(rvPrototype.getCode());
+        List<RvField> fields = rvPrototype.getFields();
+        if (fields != null && fields.size() > 0) {
+            fields.forEach(field -> {
+                ColumnConfig column = new ColumnConfig();
+                column.setName(field.getCode()).setType(field.getDataType());
+                createTableChange.addColumn(column);
+            });
+        }
+        changeSet.addChange(createTableChange);
+        return liquibase;
+    }
+
+    @SneakyThrows
+    public void doUpdate(Liquibase liquibase) {
+        liquibase.update(new Contexts());
     }
 
 }

@@ -2,7 +2,6 @@ import {SmileFilled, SmileOutlined} from '@ant-design/icons';
 import {MenuDataItem} from '@/layouts/BasicLayout';
 
 export interface MenuConfigItem extends MenuDataItem {
-    isStartPage?: boolean;
     testPath?: (path: string | undefined) => boolean;
     parent?: MenuConfigItem;
     children?: MenuConfigItem[];
@@ -28,8 +27,6 @@ function testPath(this: MenuConfigItem, path) {
         return ch === '?' || ch === '&' || ch === '/' || ch === '\\';
     }
 }
-
-export const defaultStartPage = '/';
 
 const config: MenuConfigItem[] = [
     {
@@ -102,7 +99,6 @@ const config: MenuConfigItem[] = [
 function doProcess(targetConfig: MenuConfigItem[]) {
     targetConfig.forEach(configItem => {
         configItem.key = configItem.path;
-        configItem.isStartPage = configItem.path === defaultStartPage;
         if (configItem.children) {
             configItem.children.forEach(childItem => {
                 childItem.parent = configItem;

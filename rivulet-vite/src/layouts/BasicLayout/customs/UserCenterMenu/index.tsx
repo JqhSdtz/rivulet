@@ -3,7 +3,7 @@ import {Menu} from 'antd';
 import {PoweroffOutlined as PowerOffOutlined} from '@ant-design/icons/lib/icons';
 import {UserOutlined} from '@ant-design/icons';
 import './index.less';
-import RvModal from '@/components/Common/RvModal';
+import RvModal from '@/components/common/RvModal';
 import store from '@/store';
 import axios from 'axios';
 

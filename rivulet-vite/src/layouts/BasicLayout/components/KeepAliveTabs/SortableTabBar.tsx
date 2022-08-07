@@ -1,5 +1,5 @@
 import {SplitViewType, TabsContext, TabsContextType} from '@/layouts/BasicLayout';
-import MouseOver from '@/components/Common/MouseOver';
+import MouseOver from '@/components/common/MouseOver';
 import {CloseCircleFilled, CloseOutlined} from '@ant-design/icons';
 import {CSSProperties, ReactElement, useContext, useRef, useState} from 'react';
 import {MenuConfigItem} from '@/menuConfig';

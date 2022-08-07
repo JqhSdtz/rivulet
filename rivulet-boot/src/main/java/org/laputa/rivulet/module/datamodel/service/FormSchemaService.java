@@ -20,7 +20,6 @@ public class FormSchemaService {
     public Result<Object> getFormSchema() {
         String scriptText = ResourceUtil.readUtf8Str("file:D:\\WORKSPACE\\laputa\\rivulet\\rivulet-boot\\src\\main\\resources\\static\\scripts\\ModelDetail.js");
         Value result = jsRunner.run(scriptText);
-        String resultStr = result.asString();
-        return Result.succeed(resultStr);
+        return Result.succeed(result.asString());
     }
 }

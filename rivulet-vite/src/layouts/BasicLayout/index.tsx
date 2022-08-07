@@ -45,11 +45,9 @@ const menuItemRender = (item: MenuConfigItem, defaultDom: any) => {
         return defaultDom;
     }
     let path = item.path;
-    if (!item.isStartPage) {
-        const separator = item.path.indexOf('?') > -1 ? '&' : '?';
-        // 加时间戳和随机数以保证每次点击菜单都生成一个新的页面
-        path += separator + '_timestamp=' + Date.now();
-    }
+    const separator = item.path.indexOf('?') > -1 ? '&' : '?';
+    // 加时间戳和随机数以保证每次点击菜单都生成一个新的页面
+    path += separator + '_timestamp=' + Date.now();
     return <Link to={path}>{defaultDom}</Link>;
 };
 

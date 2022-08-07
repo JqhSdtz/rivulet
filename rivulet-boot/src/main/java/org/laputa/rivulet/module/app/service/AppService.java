@@ -9,7 +9,6 @@ import org.laputa.rivulet.module.app.model.AppState;
 import org.laputa.rivulet.module.app.property.InitKeyProperty;
 import org.laputa.rivulet.module.app.session.AppSessionAccessor;
 import org.laputa.rivulet.module.auth.entity.RvUser;
-import org.laputa.rivulet.module.auth.entity.RvUser_;
 import org.laputa.rivulet.module.auth.entity.dict.UserType;
 import org.laputa.rivulet.module.auth.session.AuthSessionAccessor;
 import org.laputa.rivulet.module.auth.util.PasswordUtil;
@@ -26,10 +25,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import java.util.List;
+import javax.persistence.Query;
 
 /**
  * @author JQH
@@ -157,12 +153,11 @@ public class AppService implements ApplicationRunner {
      * @return
      */
     private boolean testAppInitialized() {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<RvUser> query = criteriaBuilder.createQuery(RvUser.class);
-        Root<RvUser> rvUserRoot = query.from(RvUser.class);
-        query.where(criteriaBuilder.equal(rvUserRoot.get(RvUser_.userType), UserType.INITIAL_USER));
-        List<RvUser> initialUserList = entityManager.createQuery(query).getResultList();
-        return initialUserList.size() > 0;
+        Query query = entityManager
+                .createQuery("select count(id) from RvUser where userType = :userType")
+                .setParameter("userType", UserType.INITIAL_USER);
+        long count = (Long) query.getSingleResult();
+        return count > 0;
     }
 
     /**

@@ -4,7 +4,7 @@ import {useCreation, useEventEmitter, useLatest, useUpdate} from 'ahooks';
 import {EventEmitter} from 'ahooks/lib/useEventEmitter';
 import {nanoid} from 'nanoid';
 import {RouteContext} from '@/layouts/BasicLayout';
-import {defaultStartPage, MenuConfigItem} from '@/menuConfig';
+import {MenuConfigItem} from '@/menuConfig';
 import RvUtil from '@/utils/rvUtil';
 import {TabNodeAttributes, TabNodeCallbacks, TabNodeType} from './TabNodeProvider';
 import {useLocation, useNavigate} from 'react-router-dom';
@@ -221,7 +221,7 @@ export default (props) => {
         return node1.isNewTab;
     });
     const currentTabNode = findNode(currentTabKey) ?? {} as TabNodeType;
-    const curSplitView = currentTabNode.splitView;
+    const curSplitView = currentTabNode.splitView || splitViewContainer.splitViews[0];
     if (newTabNodes.length > 0) {
         curSplitView.tabNodes.forEach(node => setTabNodeAttributes(node.name, {isActive: false}));
         newTabNodes.forEach(tabNode => {
@@ -321,7 +321,6 @@ export default (props) => {
     const activePrevNode = (targetKey) => {
         activeNode(getPrevNode(targetKey).name ?? '');
     };
-    const activeStartPage = () => activeNode(defaultStartPage);
     const dropNode = async (targetKey, dropSync = false, fromCallback = false) => {
         const targetNode = findNode(targetKey);
         if (!targetNode) return;
@@ -369,14 +368,23 @@ export default (props) => {
         return true;
     };
     const removeSplitView = (splitViewId: string, shouldUpdateTabs: boolean = true) => {
-        splitViewContainer.splitViews = splitViewContainer.splitViews.filter(view => view.id !== splitViewId);
         const curSplitViewIndex = splitViewContainer.splitViews.findIndex(view => view.id === splitViewId);
-        const prevSplitViewIndex = curSplitViewIndex === 0 ? 1 : curSplitViewIndex - 1;
-        const prevSplitView = splitViewContainer.splitViews[prevSplitViewIndex];
-        const curSplitView = splitViewContainer.splitViews[curSplitViewIndex];
-        if (curSplitView && prevSplitView) {
-            curSplitView.isActive = false;
-            prevSplitView.isActive = true;
+        splitViewContainer.splitViews = splitViewContainer.splitViews.filter(view => view.id !== splitViewId);
+        if (splitViewContainer.splitViews.length === 0) {
+            // splitView不能一个都没有，如果都清空了，再创建一个
+            splitViewContainer.splitViews.push({
+                tabNodes: [],
+                id: nanoid(),
+                isActive: true
+            });
+        } else {
+            const prevSplitViewIndex = curSplitViewIndex === 0 ? 1 : curSplitViewIndex - 1;
+            const prevSplitView = splitViewContainer.splitViews[prevSplitViewIndex];
+            const curSplitView = splitViewContainer.splitViews[curSplitViewIndex];
+            if (curSplitView && prevSplitView) {
+                curSplitView.isActive = false;
+                prevSplitView.isActive = true;
+            }
         }
         if (shouldUpdateTabs) {
             updateTabs();
@@ -390,9 +398,7 @@ export default (props) => {
                 if (!shouldClose) {
                     return;
                 }
-                if (tabNodesRef.current.filter(node => !node.isRemoving).length === 1) {
-                    activeStartPage();
-                } else if (targetNode.splitView.tabNodes.filter(node => !node.isRemoving).length === 0) {
+                if (targetNode.splitView.tabNodes.filter(node => !node.isRemoving).length === 0) {
                     removeSplitView(targetNode.splitView.id);
                 } else {
                     activePrevNode(targetKey);
@@ -412,13 +418,10 @@ export default (props) => {
         refresh(targetKey).then(() => {
         });
     };
-    const removeMultiNodes = (tabNodes: TabNodeType[], onAllSuccess: () => void) => {
+    const removeMultiNodes = (tabNodes: TabNodeType[], onAllSuccess?: () => void) => {
         let dropCount = 0;
         let isCurrentTabDropFail = false;
         const dropPromiseList = tabNodes.map(node => {
-            if (node.targetMenu?.isStartPage) {
-                return Promise.resolve();
-            }
             return dropNode(node.name ?? '').then((shouldClose) => {
                 dropCount += shouldClose ? 1 : 0;
                 if (!shouldClose && node.isActive) {
@@ -429,7 +432,7 @@ export default (props) => {
         Promise.all(dropPromiseList).then(() => {
             if (dropCount === tabNodes.length) {
                 // 全部关闭成功
-                onAllSuccess();
+                onAllSuccess?.();
             } else if (!isCurrentTabDropFail) {
                 // 没有全部关闭成功，但当前页面关闭成功，则退回上一个未关闭成功的页面
                 activePrevNode(currentTabKey);
@@ -437,7 +440,7 @@ export default (props) => {
         });
     };
     const removeAllNodes = () => {
-        removeMultiNodes(tabNodesRef.current, activeStartPage);
+        removeMultiNodes(tabNodesRef.current);
     };
     const removeNodesOfSplitView = (targetKey: string, isMerge: boolean) => {
         const targetNode = findNode(targetKey);
