@@ -1,5 +1,6 @@
 package org.laputa.rivulet.module.datamodel.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -35,11 +36,12 @@ public class RvField extends RvEntity<String> {
     /**
      * 这里的@JoinColumn的nullable属性不能设为false，否则无法正确插入数据
      */
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "prototype_id")
     private RvPrototype prototype;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, columnDefinition = "java.sql.Types.VARCHAR(77)")
     private String name;
 
     @Column(name = "code", nullable = false)

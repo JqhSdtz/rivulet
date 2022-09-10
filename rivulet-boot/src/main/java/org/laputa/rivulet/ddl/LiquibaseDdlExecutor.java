@@ -10,6 +10,8 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.datatype.DataTypeFactory;
+import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.DatabaseException;
 import lombok.SneakyThrows;
 import org.laputa.rivulet.module.datamodel.entity.RvField;
@@ -90,6 +92,12 @@ public class LiquibaseDdlExecutor implements DisposableBean {
     @SneakyThrows
     public void doUpdate(Liquibase liquibase) {
         liquibase.update(new Contexts());
+    }
+
+    public String convertDataTypeToSqlType(String dataType, boolean isAutoIncrement) {
+        String definition = dataType + (isAutoIncrement ? "{autoIncrement:true}" : "");
+        DatabaseDataType columnType = DataTypeFactory.getInstance().fromDescription(definition, this.database).toDatabaseDataType(this.database);
+        return columnType.toSql();
     }
 
 }

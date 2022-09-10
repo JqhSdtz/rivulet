@@ -14,6 +14,14 @@ export default defineConfig({
     build: {
         sourcemap: true
     },
+    server: {
+        port: 3000,
+        proxy: {
+            '/api': {
+                target: 'http://127.0.0.1:8081'
+            }
+        }
+    },
     resolve: {
         alias: [
             {
@@ -37,12 +45,8 @@ export default defineConfig({
             }
         }
     },
-    server: {
-        proxy: {
-            '/api': {
-                target: 'http://127.0.0.1:8081'
-            }
-        }
+    esbuild: {
+        logOverride: {'this-is-undefined-in-esm': 'silent'}
     },
     plugins: [
         react(),

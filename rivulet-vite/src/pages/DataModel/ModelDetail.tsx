@@ -1,27 +1,35 @@
 import {FormTab} from '@formily/antd';
 import {createSchemaField, FormProvider} from '@formily/react';
-import {createForm} from '@formily/core';
 import axios from 'axios';
 import {useRequest} from 'ahooks';
 import {PageLoading} from '@/layouts/BasicLayout';
-import {antdComponents} from '@/utils/formilyUtil';
+import {allComponents} from '@/utils/formilyUtil';
+import {useFormInstance} from '@/components/formily/hooks';
+import {useEffect} from 'react';
+import useUrlState from '@ahooksjs/use-url-state';
 
 const SchemaField = createSchemaField({
-    components: antdComponents
+    components: allComponents as any
 });
 
-const form = createForm();
 const formTab = FormTab.createFormTab();
 
-export default () => {
-    const {data, loading} = useRequest(() => axios.get('/data_model/form_schema'));
-    if (loading) {
-        return <PageLoading/>;
-    }
-    const schema = JSON.parse(data.data.payload);
+const FormComponent = (props) => {
+    const form = useFormInstance();
+    useEffect(() => {
+        form.setValues(props.values);
+    }, [props.values]);
     return (
         <FormProvider form={form}>
-            <SchemaField schema={schema} scope={{formTab}}/>
+            <SchemaField schema={props.schema} scope={{formTab}}/>
         </FormProvider>
     );
+};
+
+export default () => {
+    const [urlState] = useUrlState();
+    const {data, loading} = useRequest(() => axios.get('/data_model/form_schema', {
+        params: urlState
+    }));
+    return loading ? <PageLoading/> : <FormComponent {...JSON.parse(data.data.payload)}/>;
 }

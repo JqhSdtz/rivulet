@@ -12,20 +12,28 @@ rivulet:
             length: 32
             timeout: 30
             time-unit: minutes
+        git:
+            repo-url: https://gitee.com/jqhsdtz/rivulet-functions.git
+            local-dir: D:/WORKSPACE/laputa/rivulet-functions
+            username: username
+            password: password
+
 spring:
     profiles:
         include: key
     redis:
         redisson:
-          file: classpath:redisson.yml
+            file: classpath:redisson.yml
     liquibase:
         enabled: false # 禁止springboot自动调用liquibase
         database-change-log-table: rv_db_change_log
         database-change-log-lock-table: rv_db_change_log_lock
+        change-log: src/main/resources/changelog/master.yml
     jpa:
         show-sql: false
+        open-in-view: true
         hibernate:
-            ddl-auto: update
+            ddl-auto: none
         properties:
             hibernate:
                 dialect: org.hibernate.dialect.MySQL8Dialect # 使用MySQL8Dialect自动创建的表为InnoDB引擎

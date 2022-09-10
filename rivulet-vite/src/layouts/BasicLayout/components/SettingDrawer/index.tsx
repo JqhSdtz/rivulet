@@ -368,7 +368,7 @@ const SettingDrawer: React.FC<SettingDrawerProps> = props => {
             onClose={() => setShow(false)}
             placement="right"
             getContainer={getContainer}
-            handler={
+            closeIcon={
                 <div
                     className={`${baseClassName}-drawer-handle`}
                     onClick={() => setShow(!show)}

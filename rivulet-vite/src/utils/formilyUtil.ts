@@ -1,34 +1,46 @@
-import {
-    FormGrid,
-    FormItem,
-    FormLayout,
-    FormTab,
-    Input,
-    ArrayTable,
-    ArrayItems,
-    Space,
-    Submit,
-    FormButtonGroup
-} from '@formily/antd';
+import * as AntdComponents from '@formily/antd';
+import * as RvComponents from '@/components/formily';
+import * as AntdIcons from '@ant-design/icons';
 
-import {
-    RvFormTab,
-    RvTable,
-    RvLinkButton
-} from '@/components/formily';
+import {Schema} from '@formily/react';
 
-export const antdComponents = {
-    RvFormTab,
-    RvTable,
-    RvLinkButton,
-    FormItem,
-    FormTab,
-    FormButtonGroup,
-    Input,
-    FormGrid,
-    FormLayout,
-    ArrayItems,
-    ArrayTable,
-    Space,
-    Submit
+export const allComponents = {
+    ...AntdComponents,
+    ...RvComponents,
+    ...AntdIcons
+};
+
+export const wrapObject: (propName: string, schema: any) => Schema =
+    (propName, schema) => {
+        return {
+            type: 'object',
+            properties: {
+                [propName]: schema
+            }
+        } as Schema;
+    };
+
+export const doubleWrapObject: (propName: string, schema: any) => Schema =
+    (propName, schema) => {
+        return wrapObject(propName, wrapObject(propName, schema));
+    };
+
+
+export const filterEmptyString = (data) => {
+    if (typeof data === 'object') {
+        if (data.constructor === Object) {
+            const cloned = {};
+            for (let key in data) {
+                const filtered = filterEmptyString(data[key]);
+                if (typeof filtered !== 'undefined') {
+                    cloned[key] = filtered;
+                }
+            }
+            return cloned;
+        } else if (data.constructor === Array) {
+           return data.map(filterEmptyString);
+        }
+    } else {
+        if (data !== '') return data;
+    }
 }

@@ -10,18 +10,26 @@ import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+
 /**
  * @author JQH
  * @since 下午 9:52 22/07/16
  */
+
 @Component
 public class JsRunner {
-    private final GenericObjectPool<Context> contextPool;
+    @Resource
+    private JsContextFactory jsContextFactory;
 
-    private final Cache<String, Source> sourceCache;
+    private GenericObjectPool<Context> contextPool;
 
-    public JsRunner() {
-        this.contextPool = new GenericObjectPool<>(new JsContextFactory());
+    private Cache<String, Source> sourceCache;
+
+    @PostConstruct
+    public void postConstruct() {
+        this.contextPool = new GenericObjectPool<>(jsContextFactory);
         this.sourceCache = CacheBuilder.newBuilder().build();
     }
 

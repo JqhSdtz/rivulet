@@ -1,65 +1,109 @@
+import org.yaml.snakeyaml.Yaml
+
+buildscript {
+    dependencies {
+        classpath 'org.yaml:snakeyaml:1.31'
+        classpath 'org.liquibase:liquibase-gradle-plugin:2.1.1'
+        classpath 'mysql:mysql-connector-java:8.0.30'
+    }
+}
+
 plugins {
+    id 'java'
+    id 'idea'
     id 'org.springframework.boot' version '2.7.2'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'java'
-    id "org.graalvm.plugin.compiler" version "0.1.0-alpha2"
+    id 'org.graalvm.plugin.compiler' version '0.1.0-alpha2'
+    id 'org.liquibase.gradle' version '2.1.1'
+}
+
+graal {
+    version '22.2.0'
 }
 
 group = 'org.laputa'
 version = '0.0.1-SNAPSHOT'
 
+def app = new Yaml().loadAll(new File("$projectDir/src/main/resources/application.yml").newInputStream()).first()
+def appKeys = new Yaml().loadAll(new File("$projectDir/src/main/resources/application-key.yml").newInputStream()).first()
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
+    liquibaseRuntime.extendsFrom runtime
 }
-
-apply plugin: 'idea'
 
 idea {
     module {
-        // Javadoc
         downloadJavadoc = true
-
-        // sources
         downloadSources = true
     }
 }
 
 repositories {
-    maven{ url 'https://maven.aliyun.com/nexus/content/groups/public/'}
+    maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
     mavenCentral()
 }
 
-ext.graalVersion = '22.1.0.1'
+diff.dependsOn compileJava
+diffChangeLog.dependsOn compileJava
+generateChangelog.dependsOn compileJava
 
-graal {
-    version "$graalVersion"
+def dialect = appKeys.spring.jpa.properties.hibernate.dialect
+def physicalNamingStrategy = '&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy'
+def implicitNamingStrategy = '&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy'
+liquibase {
+    activities {
+        main {
+            changeLogFile app.spring.liquibase['change-log']
+            url appKeys.spring.datasource.url
+            username appKeys.spring.datasource.username
+            password appKeys.spring.datasource.password
+            driver appKeys.spring.datasource['driver-class-name']
+            referenceUrl 'hibernate:spring:org.laputa.rivulet?dialect=' + dialect + physicalNamingStrategy + implicitNamingStrategy
+            referenceDriver 'liquibase.ext.hibernate.database.connection.HibernateDriver'
+        }
+    }
 }
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-hibernate5:2.13.4'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.session:spring-session-core:2.7.0'
     implementation 'org.springframework.session:spring-session-data-redis:2.7.0'
+    implementation 'mysql:mysql-connector-java:8.0.30'
     implementation 'com.alibaba:druid-spring-boot-starter:1.2.11'
-    implementation 'org.redisson:redisson-spring-boot-starter:3.17.3'
-    implementation 'org.liquibase:liquibase-core:4.11.0'
-    implementation 'cn.hutool:hutool-core:5.8.3'
-    implementation 'cn.hutool:hutool-crypto:5.8.3'
+    implementation 'org.redisson:redisson-spring-boot-starter:3.17.6'
+    implementation 'org.liquibase:liquibase-core:4.15.0'
+    implementation 'org.liquibase.ext:liquibase-hibernate5:4.15.0'
+    implementation 'org.eclipse.jgit:org.eclipse.jgit:6.2.0.202206071550-r'
+    implementation 'cn.hutool:hutool-core:5.8.6'
+    implementation 'cn.hutool:hutool-crypto:5.8.6'
     implementation 'com.google.guava:guava:31.1-jre'
     implementation 'org.apache.commons:commons-pool2:2.11.1'
-    implementation "org.graalvm.sdk:graal-sdk:$graalVersion"
-    implementation "org.graalvm.js:js:$graalVersion"
+    implementation "org.graalvm.sdk:graal-sdk:22.2.0"
+    implementation "org.graalvm.js:js:22.2.0"
+    implementation 'org.yaml:snakeyaml:1.31'
     compileOnly 'org.projectlombok:lombok'
     compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    runtimeOnly 'mysql:mysql-connector-java'
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
+    liquibaseRuntime 'org.liquibase:liquibase-core:4.15.0'
+    liquibaseRuntime 'org.springframework.boot:spring-boot-starter-data-jpa'
+    liquibaseRuntime 'mysql:mysql-connector-java:8.0.30'
+    liquibaseRuntime 'org.liquibase:liquibase-groovy-dsl:3.0.2'
+    liquibaseRuntime 'org.hibernate:hibernate-core'
+    liquibaseRuntime 'info.picocli:picocli:4.6.3'
+    liquibaseRuntime('org.liquibase.ext:liquibase-hibernate5:4.15.0') {
+        exclude group: 'org.liquibase', module: 'liquibase-test-harness'
+    }
+    liquibaseRuntime sourceSets.main.output
 }
 
 tasks.named('test') {

@@ -8,6 +8,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author JQH
@@ -25,6 +26,16 @@ public class DataModelController {
     @PostMapping
     public Result<Void> createDataModel(@RequestBody @Validated RvPrototype rvPrototype) {
         return dataModelService.createDataModel(rvPrototype);
+    }
+
+    @GetMapping
+    public Result<List<RvPrototype>> queryDataModel(RvPrototype prototype) {
+        return dataModelService.queryDataModel(prototype);
+    }
+
+    @GetMapping("/single/{id}")
+    public Result<RvPrototype> queryOne(@PathVariable String id) {
+        return dataModelService.queryOne(id);
     }
 
     @GetMapping("/form_schema")

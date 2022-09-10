@@ -1,5 +1,6 @@
 package org.laputa.rivulet;
 
+import org.laputa.rivulet.ddl.LiquibaseDdlExecutor;
 import org.laputa.rivulet.module.auth.entity.RvUser;
 import org.laputa.rivulet.module.auth.repository.RvUserRepository;
 import org.springframework.boot.ApplicationArguments;
@@ -8,6 +9,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
+
 /**
  * @author JQH
  * @since 下午 8:54 22/02/08
@@ -15,27 +18,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Order(2)
 public class ForTest implements ApplicationRunner {
-
-    private final RvUserRepository rvUserRepository;
-
-    public ForTest(RvUserRepository rvUserRepository) {
-        this.rvUserRepository = rvUserRepository;
-    }
+    @Resource
+    private LiquibaseDdlExecutor ddlExecutor;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void run(ApplicationArguments args) {
-//        test();
+//        String type = ddlExecutor.convertDataTypeToSqlType("java.sql.Types.VARCHAR(77)", false);
+//        System.out.println(type);
     }
 
-    public void test() {
-        RvUser user1 = new RvUser();
-        user1.setUsername("user1");
-        user1.setPassword("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-        rvUserRepository.save(user1);
-        RvUser user2 = new RvUser();
-        user2.setUsername("user2");
-        user2.setPassword("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-        rvUserRepository.save(user2);
-    }
 }

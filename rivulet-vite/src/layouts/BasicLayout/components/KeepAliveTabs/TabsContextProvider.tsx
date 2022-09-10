@@ -318,9 +318,6 @@ export default (props) => {
             return splitView.tabNodes[curIdx - 1];
         }
     };
-    const activePrevNode = (targetKey) => {
-        activeNode(getPrevNode(targetKey).name ?? '');
-    };
     const dropNode = async (targetKey, dropSync = false, fromCallback = false) => {
         const targetNode = findNode(targetKey);
         if (!targetNode) return;
@@ -394,6 +391,7 @@ export default (props) => {
         const targetNode = findNode(targetKey);
         if (!targetNode) return;
         if (targetNode.isActive) {
+            const prevNodeKey = getPrevNode(targetKey).name ?? '';
             dropNode(targetKey, false, fromCallback).then(shouldClose => {
                 if (!shouldClose) {
                     return;
@@ -401,7 +399,7 @@ export default (props) => {
                 if (targetNode.splitView.tabNodes.filter(node => !node.isRemoving).length === 0) {
                     removeSplitView(targetNode.splitView.id);
                 } else {
-                    activePrevNode(targetKey);
+                    activeNode(prevNodeKey);
                 }
             });
         } else {
@@ -435,7 +433,10 @@ export default (props) => {
                 onAllSuccess?.();
             } else if (!isCurrentTabDropFail) {
                 // 没有全部关闭成功，但当前页面关闭成功，则退回上一个未关闭成功的页面
-                activePrevNode(currentTabKey);
+                const splitViews = splitViewContainerRef.current.splitViews;
+                const lastSplitView = splitViews[splitViews.length - 1];
+                const lastUnSuccessTabNode = lastSplitView.tabNodes[lastSplitView.tabNodes.length - 1];
+                activeNode(lastUnSuccessTabNode.name ?? '');
             }
         });
     };
@@ -451,6 +452,7 @@ export default (props) => {
             const prevSplitViewIndex = splitViewIndex === 0 ? 1 : splitViewIndex - 1;
             const prevSplitView = splitViewContainer.splitViews[prevSplitViewIndex];
             targetSplitView.tabNodes.forEach(node => setTabNodeAttributes(node.name, {splitView: prevSplitView}));
+            prevSplitView.tabNodes = prevSplitView.tabNodes.concat(targetSplitView.tabNodes);
             removeSplitView(targetSplitView.id);
         } else {
             removeMultiNodes(targetSplitView.tabNodes, () => {

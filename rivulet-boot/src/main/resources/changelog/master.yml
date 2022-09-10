@@ -1,0 +1,125 @@
+databaseChangeLog:
+- changeSet:
+    id: 1662784498885-4
+    author: dell (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: rv_fieldPK
+            name: id
+            type: VARCHAR(64)
+        - column:
+            constraints:
+              nullable: false
+            name: code
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: data_type
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: name
+            type: VARCHAR(77)
+        - column:
+            name: prototype_id
+            type: VARCHAR(64)
+        tableName: rv_field
+- changeSet:
+    id: 1662784498885-5
+    author: dell (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: rv_prototypePK
+            name: id
+            type: VARCHAR(64)
+        - column:
+            constraints:
+              nullable: false
+            name: code
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: db_sync_flag
+            type: BIT
+        - column:
+            constraints:
+              nullable: false
+            name: name
+            type: VARCHAR(77)
+        tableName: rv_prototype
+- changeSet:
+    id: 1662784498885-6
+    author: dell (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: prototype_id
+        indexName: idx_rvfield_prototype_id
+        tableName: rv_field
+- changeSet:
+    id: 1662784498885-7
+    author: dell (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: prototype_id
+        baseTableName: rv_field
+        constraintName: FKtn6fpwbwwljymfif3l3fg9nfq
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: rv_prototype
+        validate: true
+- changeSet:
+    id: 1662784498885-8
+    author: dell (generated)
+    changes:
+    - dropTable:
+        tableName: hibernate_sequence
+- changeSet:
+    id: 1662784498885-9
+    author: dell (generated)
+    changes:
+    - dropTable:
+        tableName: rv_table
+- changeSet:
+    id: 1662784498885-1
+    author: dell (generated)
+    changes:
+    - setColumnRemarks:
+        columnDataType: varchar(64)
+        columnName: password
+        remarks: 用户密码，前端传入时为用户输入密码的MD5值，长度为固定的32位，加盐合并之后，长度为固定的64位，即前端传入值和数据库存储值长度不同
+        tableName: rv_user
+- changeSet:
+    id: 1662784498885-2
+    author: dell (generated)
+    changes:
+    - setColumnRemarks:
+        columnDataType: int
+        columnName: user_type
+        remarks: 用户类别
+        tableName: rv_user
+- changeSet:
+    id: 1662784498885-3
+    author: dell (generated)
+    changes:
+    - setColumnRemarks:
+        columnDataType: varchar(32)
+        columnName: username
+        remarks: 用户名
+        tableName: rv_user
+

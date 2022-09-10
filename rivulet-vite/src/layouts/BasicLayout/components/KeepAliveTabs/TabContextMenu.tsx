@@ -82,12 +82,12 @@ export default (props: {
         batchCloseTabsChildren.push({
             key: 'removeNodesOfSplitView',
             label: '关闭分屏',
-            onClick: () => removeNodesOfSplitView(tabNode.name, true)
+            onClick: () => removeNodesOfSplitView(tabNode.name, false)
         });
         batchCloseTabsChildren.push({
             key: 'removeNodesOfSplitViewMerge',
             label: '关闭分屏(合并)',
-            onClick: () => removeNodesOfSplitView(tabNode.name, false)
+            onClick: () => removeNodesOfSplitView(tabNode.name, true)
         });
     }
     batchCloseTabsChildren.push({
