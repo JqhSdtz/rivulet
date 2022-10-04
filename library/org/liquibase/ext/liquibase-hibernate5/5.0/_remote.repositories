@@ -1,0 +1,6 @@
+#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
+#Tue Oct 04 11:35:06 CST 2022
+liquibase-hibernate5-5.0.pom>=
+liquibase-hibernate5-5.0-sources.jar>=
+liquibase-hibernate5-5.0-javadoc.jar>=
+liquibase-hibernate5-5.0.jar>=

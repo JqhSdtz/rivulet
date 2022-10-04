@@ -14,7 +14,7 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.DatabaseException;
 import lombok.SneakyThrows;
-import org.laputa.rivulet.module.datamodel.entity.RvField;
+import org.laputa.rivulet.module.datamodel.entity.RvColumn;
 import org.laputa.rivulet.module.datamodel.entity.RvPrototype;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
@@ -77,7 +77,7 @@ public class LiquibaseDdlExecutor implements DisposableBean {
         changeLog.addChangeSet(changeSet);
         CreateTableChange createTableChange = new CreateTableChange();
         createTableChange.setTableName(rvPrototype.getCode());
-        List<RvField> fields = rvPrototype.getFields();
+        List<RvColumn> fields = rvPrototype.getColumns();
         if (fields != null && fields.size() > 0) {
             fields.forEach(field -> {
                 ColumnConfig column = new ColumnConfig();

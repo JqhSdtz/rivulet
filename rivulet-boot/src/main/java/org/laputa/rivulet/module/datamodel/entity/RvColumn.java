@@ -5,12 +5,14 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.GenericGenerator;
+import org.checkerframework.checker.units.qual.A;
+import org.hibernate.annotations.*;
 import org.laputa.rivulet.common.entity.RvEntity;
 
 import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Index;
+import javax.persistence.Table;
 
 /**
  * @author JQH
@@ -23,10 +25,10 @@ import javax.persistence.*;
 @RequiredArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "rv_field", indexes = {
-        @Index(name = "idx_rvfield_prototype_id", columnList = "prototype_id")
+@Table(name = "rv_column", indexes = {
+        @Index(name = "idx_rvcolumn_prototype_id", columnList = "prototype_id")
 })
-public class RvField extends RvEntity<String> {
+public class RvColumn extends RvEntity<String> {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")
@@ -37,11 +39,13 @@ public class RvField extends RvEntity<String> {
      * 这里的@JoinColumn的nullable属性不能设为false，否则无法正确插入数据
      */
     @JsonBackReference
+    @ToString.Exclude
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne
     @JoinColumn(name = "prototype_id")
     private RvPrototype prototype;
 
-    @Column(name = "name", nullable = false, columnDefinition = "java.sql.Types.VARCHAR(77)")
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "code", nullable = false)
@@ -49,4 +53,13 @@ public class RvField extends RvEntity<String> {
 
     @Column(name = "data_type", nullable = false)
     private String dataType;
+
+    @Column(name = "default_value")
+    private String defaultValue;
+
+    @Column(name = "remark")
+    private String remark;
+
+    @Column(name = "order")
+    private Integer order;
 }

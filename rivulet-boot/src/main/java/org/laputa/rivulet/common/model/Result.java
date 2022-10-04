@@ -16,6 +16,7 @@ public class Result<ResultType> {
 
     private boolean successful;
     private ResultType payload = null;
+    private Exception rawException = null;
     private String errorCode;
     private String errorMessage;
 
@@ -75,6 +76,10 @@ public class Result<ResultType> {
      */
     public RvException toException() {
         return new RvException(this);
+    }
+
+    public Exception toRawException() {
+        return rawException == null ? toException() : rawException;
     }
 
 }

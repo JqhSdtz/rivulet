@@ -1,10 +1,12 @@
 logging:
     level:
         root: info
+
 server:
     port: 8081
     servlet:
         context-path: /
+
 rivulet:
     app:
         init-key:
@@ -28,22 +30,23 @@ spring:
         enabled: false # 禁止springboot自动调用liquibase
         database-change-log-table: rv_db_change_log
         database-change-log-lock-table: rv_db_change_log_lock
-        change-log: src/main/resources/changelog/master.yml
     jpa:
         show-sql: false
         open-in-view: true
         hibernate:
-            ddl-auto: none
+            ddl-auto: validate
         properties:
             hibernate:
-                dialect: org.hibernate.dialect.MySQL8Dialect # 使用MySQL8Dialect自动创建的表为InnoDB引擎
+                dialect: org.hibernate.dialect.PostgreSQLDialect
                 new_generator_mappings: false
                 format_sql: true
     datasource:
-        url: jdbc:mysql://localhost:3306/example
+        # 因为MySQL和MariaDB无法部分更新Column属性，会导致更新一个属性，丢失另一个属性，所以不用
+        # 详见 https://github.com/liquibase/liquibase/pull/3045
+        url: jdbc:postgresql://localhost:5432/postgres
         username: username
         password: password
-        driver-class-name: com.mysql.cj.jdbc.Driver
+        driver-class-name: org.postgresql.Driver
         druid:
             #initial-size: 5 # 连接池初始化大小
             #min-idle: 10 # 最小空闲连接数

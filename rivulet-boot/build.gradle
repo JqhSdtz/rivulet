@@ -1,10 +1,13 @@
 import org.yaml.snakeyaml.Yaml
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 buildscript {
     dependencies {
         classpath 'org.yaml:snakeyaml:1.31'
         classpath 'org.liquibase:liquibase-gradle-plugin:2.1.1'
-        classpath 'mysql:mysql-connector-java:8.0.30'
+        classpath 'org.postgresql:postgresql:42.5.0'
     }
 }
 
@@ -24,14 +27,14 @@ graal {
 group = 'org.laputa'
 version = '0.0.1-SNAPSHOT'
 
-def app = new Yaml().loadAll(new File("$projectDir/src/main/resources/application.yml").newInputStream()).first()
+//def app = new Yaml().loadAll(new File("$projectDir/src/main/resources/application.yml").newInputStream()).first()
 def appKeys = new Yaml().loadAll(new File("$projectDir/src/main/resources/application-key.yml").newInputStream()).first()
 
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
-    liquibaseRuntime.extendsFrom runtime
+    liquibaseRuntime.extendsFrom runtimeClasspath
 }
 
 idea {
@@ -42,6 +45,7 @@ idea {
 }
 
 repositories {
+    maven { url file('../library') }
     maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
     mavenCentral()
 }
@@ -53,15 +57,20 @@ generateChangelog.dependsOn compileJava
 def dialect = appKeys.spring.jpa.properties.hibernate.dialect
 def physicalNamingStrategy = '&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy'
 def implicitNamingStrategy = '&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy'
+def changeLogFilePath = 'src/main/resources/changelog/master.yml'
+def referenceUrlStr = 'hibernate:spring:org.laputa.rivulet'
+referenceUrlStr += '?hibernate.temp.use_jdbc_metadata_defaults=false'
+referenceUrlStr += '&dialect=' + dialect + physicalNamingStrategy + implicitNamingStrategy
+
 liquibase {
     activities {
         main {
-            changeLogFile app.spring.liquibase['change-log']
+            changeLogFile changeLogFilePath
             url appKeys.spring.datasource.url
             username appKeys.spring.datasource.username
             password appKeys.spring.datasource.password
             driver appKeys.spring.datasource['driver-class-name']
-            referenceUrl 'hibernate:spring:org.laputa.rivulet?dialect=' + dialect + physicalNamingStrategy + implicitNamingStrategy
+            referenceUrl referenceUrlStr
             referenceDriver 'liquibase.ext.hibernate.database.connection.HibernateDriver'
         }
     }
@@ -74,19 +83,19 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.session:spring-session-core:2.7.0'
     implementation 'org.springframework.session:spring-session-data-redis:2.7.0'
-    implementation 'mysql:mysql-connector-java:8.0.30'
-    implementation 'com.alibaba:druid-spring-boot-starter:1.2.11'
+    implementation 'org.postgresql:postgresql:42.5.0'
+    implementation 'com.alibaba:druid-spring-boot-starter:1.2.13-SNSAPSHOT'
     implementation 'org.redisson:redisson-spring-boot-starter:3.17.6'
-    implementation 'org.liquibase:liquibase-core:4.15.0'
-    implementation 'org.liquibase.ext:liquibase-hibernate5:4.15.0'
-    implementation 'org.eclipse.jgit:org.eclipse.jgit:6.2.0.202206071550-r'
-    implementation 'cn.hutool:hutool-core:5.8.6'
-    implementation 'cn.hutool:hutool-crypto:5.8.6'
+    implementation 'org.liquibase:liquibase-core:4.16.1'
+    implementation 'org.liquibase.ext:liquibase-hibernate5:5.0'
+    implementation 'org.eclipse.jgit:org.eclipse.jgit:6.3.0.202209071007-r'
+    implementation 'cn.hutool:hutool-core:5.8.7'
+    implementation 'cn.hutool:hutool-crypto:5.8.7'
     implementation 'com.google.guava:guava:31.1-jre'
     implementation 'org.apache.commons:commons-pool2:2.11.1'
     implementation "org.graalvm.sdk:graal-sdk:22.2.0"
     implementation "org.graalvm.js:js:22.2.0"
-    implementation 'org.yaml:snakeyaml:1.31'
+    implementation 'org.yaml:snakeyaml:1.32'
     compileOnly 'org.projectlombok:lombok'
     compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -94,13 +103,16 @@ dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
-    liquibaseRuntime 'org.liquibase:liquibase-core:4.15.0'
+}
+
+dependencies {
+    liquibaseRuntime 'org.liquibase:liquibase-core:4.16.1'
     liquibaseRuntime 'org.springframework.boot:spring-boot-starter-data-jpa'
-    liquibaseRuntime 'mysql:mysql-connector-java:8.0.30'
+    liquibaseRuntime 'org.postgresql:postgresql:42.5.0'
     liquibaseRuntime 'org.liquibase:liquibase-groovy-dsl:3.0.2'
     liquibaseRuntime 'org.hibernate:hibernate-core'
     liquibaseRuntime 'info.picocli:picocli:4.6.3'
-    liquibaseRuntime('org.liquibase.ext:liquibase-hibernate5:4.15.0') {
+    liquibaseRuntime('org.liquibase.ext:liquibase-hibernate5:5.0') {
         exclude group: 'org.liquibase', module: 'liquibase-test-harness'
     }
     liquibaseRuntime sourceSets.main.output
@@ -108,4 +120,31 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+def currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern('yyyy-MM-dd HH.mm.ss.SSS'))
+
+def targetNames = [ 'diffChangeLog', 'generateChangelog']
+tasks.findAll { it ->
+    if (it.name in targetNames) {
+        return it
+    }
+}.each { it ->
+    // 在生成新的changeLog之前删除旧的changeLog
+    it.doFirst {
+        def changeLogFile = new File(changeLogFilePath)
+        if (changeLogFile.exists()) {
+            changeLogFile.delete()
+        }
+    }
+    // 生成changeLog后，在history目录下复制一份作为记录
+    it.doLast {
+        copy {
+            from changeLogFilePath
+            into 'src/main/resources/changelog/history'
+            rename {
+                currentTime + '.yml'
+            }
+        }
+    }
 }

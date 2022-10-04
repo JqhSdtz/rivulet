@@ -3,6 +3,7 @@ package org.laputa.rivulet.module.app.service;
 import cn.hutool.core.util.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.laputa.rivulet.common.model.Result;
+import org.laputa.rivulet.common.util.RedissonLockUtil;
 import org.laputa.rivulet.common.util.TimeUnitUtil;
 import org.laputa.rivulet.module.app.model.AppInitialData;
 import org.laputa.rivulet.module.app.model.AppState;
@@ -13,7 +14,6 @@ import org.laputa.rivulet.module.auth.entity.dict.UserType;
 import org.laputa.rivulet.module.auth.session.AuthSessionAccessor;
 import org.laputa.rivulet.module.auth.util.PasswordUtil;
 import org.redisson.api.RBucket;
-import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -43,6 +43,9 @@ public class AppInitService implements ApplicationRunner {
     private RedissonClient redissonClient;
 
     @Resource
+    private RedissonLockUtil redissonLockUtil;
+
+    @Resource
     private InitKeyProperty initKeyProperty;
 
     @Resource
@@ -61,15 +64,9 @@ public class AppInitService implements ApplicationRunner {
      */
     private RBucket<String> initKeyBucket;
 
-    /**
-     * 创建初始用户的分布式锁，用于避免创建多个初始用户
-     */
-    private RLock createInitialUserLock;
-
     @PostConstruct
     private void postConstruct() {
         initKeyBucket = redissonClient.getBucket("initKey");
-        createInitialUserLock = redissonClient.getLock("createInitialUser");
     }
 
     @Override
@@ -123,28 +120,22 @@ public class AppInitService implements ApplicationRunner {
         if (!appSessionAccessor.isInitKeyVerified()) {
             return Result.fail("InitKeyHasNotBeenVerified", "非法操作，未校验初始密钥，无法创建初始用户");
         }
-        Result result = null;
+        // 在分布式锁中执行，避免创建多个初始用户
         // 创建初始用户是一次性操作，所以如果已经被锁定则无需再执行任何操作
-        if (createInitialUserLock.tryLock()) {
-            try {
-                if (!testAppInitialized()) {
-                    rvUser.setPassword(PasswordUtil.encode(rvUser.getPassword()));
-                    rvUser.setUserType(UserType.INITIAL_USER);
-                    entityManager.persist(rvUser);
-                    // 更改应用初始化状态
-                    this.isAppInitialized = true;
-                    // 将创建的用户设为当前登录的用户，即实现直接登录
-                    authSessionAccessor.setCurrentUser(rvUser);
-                } else {
-                    result = Result.fail("InitialUserExists", "创建失败，已存在初始用户");
-                }
-            } finally {
-                createInitialUserLock.unlock();
+        return redissonLockUtil.doWithLock("createInitialUser", () -> {
+            if (!testAppInitialized()) {
+                rvUser.setPassword(PasswordUtil.encode(rvUser.getPassword()));
+                rvUser.setUserType(UserType.INITIAL_USER);
+                entityManager.persist(rvUser);
+                // 更改应用初始化状态
+                this.isAppInitialized = true;
+                // 将创建的用户设为当前登录的用户，即实现直接登录
+                authSessionAccessor.setCurrentUser(rvUser);
+                return Result.succeed();
+            } else {
+                return Result.fail("InitialUserExists", "创建失败，已存在初始用户");
             }
-        } else {
-            result = Result.fail("InitialUserIsLocked", "创建失败，其他线程或服务正在创建初始用户");
-        }
-        return result == null ? Result.succeed() : result;
+        }, Result.fail("InitialUserIsLocked", "创建失败，其他线程或服务正在创建初始用户"));
     }
 
     /**

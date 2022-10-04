@@ -1,6 +1,5 @@
 package org.laputa.rivulet.module.datamodel.entity;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import lombok.Getter;
@@ -42,19 +41,35 @@ public class RvPrototype extends RvEntity<String> {
     @Column(name = "code", nullable = false)
     private String code;
 
+    @Column(name = "remark")
+    private String remark;
+
     @Column(name = "db_sync_flag", nullable = false)
     private boolean dbSyncFlag;
 
     @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "prototype")
-    private List<RvField> fields;
+    private List<RvColumn> columns;
 
-    @JsonSetter("fields")
-    public void setFields(List<RvField> fields) {
-        this.fields = fields;
-        if (fields == null) {
+    @JsonSetter("columns")
+    public void setColumns(List<RvColumn> columns) {
+        this.columns = columns;
+        if (columns == null) {
             return;
         }
-        fields.forEach(field -> field.setPrototype(this));
+        columns.forEach(column -> column.setPrototype(this));
+    }
+
+    @JsonManagedReference
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "prototype")
+    private List<RvIndex> indexes;
+
+    @JsonSetter("indexes")
+    public void setIndexes(List<RvIndex> indexes) {
+        this.indexes = indexes;
+        if (indexes == null) {
+            return;
+        }
+        indexes.forEach(index -> index.setPrototype(this));
     }
 }
