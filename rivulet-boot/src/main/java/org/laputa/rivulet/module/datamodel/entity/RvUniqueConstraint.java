@@ -10,12 +10,13 @@ import lombok.ToString;
 import org.hibernate.annotations.*;
 import org.laputa.rivulet.common.entity.RvEntity;
 import org.laputa.rivulet.module.datamodel.entity.column_relation.RvIndexColumn;
+import org.laputa.rivulet.module.datamodel.entity.column_relation.RvUniqueConstraintColumn;
 
-import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.List;
 
 /**
@@ -29,10 +30,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "rv_index", indexes = {
-        @Index(name = "idx_rvindex_prototype_id", columnList = "prototype_id")
+@Table(name = "rv_unique_constraint", indexes = {
+        @Index(name = "idx_rvuniqueconstraint_prototype_id", columnList = "prototype_id")
 })
-public class RvIndex extends RvEntity<String> {
+public class RvUniqueConstraint extends RvEntity<String> {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")
@@ -55,20 +56,21 @@ public class RvIndex extends RvEntity<String> {
     @Column(name = "code", nullable = false)
     private String code;
 
-    @Column(name = "unique_index")
-    private Boolean uniqueIndex;
+    @OneToOne
+    @JoinColumn(name = "backing_index_id")
+    private RvIndex backingIndex;
 
     @JsonManagedReference
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "index")
-    private List<RvIndexColumn> indexColumns;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "uniqueConstraint")
+    private List<RvUniqueConstraintColumn> uniqueConstraintColumns;
 
-    @JsonSetter("indexColumns")
-    public void setIndexColumns(List<RvIndexColumn> indexColumns) {
-        this.indexColumns = indexColumns;
-        if (indexColumns == null) {
+    @JsonSetter("uniqueConstraintColumns")
+    public void setUniqueConstraintColumns(List<RvUniqueConstraintColumn> uniqueConstraintColumns) {
+        this.uniqueConstraintColumns = uniqueConstraintColumns;
+        if (uniqueConstraintColumns == null) {
             return;
         }
-        indexColumns.forEach(indexColumn -> indexColumn.setIndex(this));
+        uniqueConstraintColumns.forEach(uniqueConstraintColumn -> uniqueConstraintColumn.setUniqueConstraint(this));
     }
 
     @Column(name = "remark")

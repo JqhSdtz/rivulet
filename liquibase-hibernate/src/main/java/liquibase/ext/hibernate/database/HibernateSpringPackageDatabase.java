@@ -72,8 +72,6 @@ public class HibernateSpringPackageDatabase extends JpaPersistenceDatabase {
 
     @Override
     protected EntityManagerFactoryBuilderImpl createEntityManagerFactoryBuilder() {
-        Logger logger = Scope.getCurrentScope().getLog(getClass());
-        logger.info("ssssssssssss2");
         DefaultPersistenceUnitManager internalPersistenceUnitManager = new DefaultPersistenceUnitManager();
         internalPersistenceUnitManager.setResourceLoader(new DefaultResourceLoader(Scope.getCurrentScope().getClassLoader()));
         String[] packagesToScan = getHibernateConnection().getPath().split(",");

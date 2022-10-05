@@ -1,18 +1,19 @@
-package org.laputa.rivulet.module.datamodel.entity;
+package org.laputa.rivulet.module.datamodel.entity.column_relation;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.checkerframework.checker.units.qual.A;
 import org.hibernate.annotations.*;
 import org.laputa.rivulet.common.entity.RvEntity;
+import org.laputa.rivulet.module.datamodel.entity.RvColumn;
+import org.laputa.rivulet.module.datamodel.entity.RvPrimaryKey;
 
-import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  * @author JQH
@@ -25,10 +26,11 @@ import javax.persistence.Table;
 @RequiredArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "rv_column", indexes = {
-        @Index(name = "idx_rvcolumn_prototype_id", columnList = "prototype_id")
+@Table(name = "rv_primary_key_column", indexes = {
+        @Index(name = "idx_rvprimarykeycolumn_primary_key_id", columnList = "primary_key_id"),
+        @Index(name = "idx_rvprimarykeycolumn_column_id", columnList = "column_id")
 })
-public class RvColumn extends RvEntity<String> {
+public class RvPrimaryKeyColumn extends RvEntity<String> {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")
@@ -42,23 +44,12 @@ public class RvColumn extends RvEntity<String> {
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne
-    @JoinColumn(name = "prototype_id")
-    private RvPrototype prototype;
+    @JoinColumn(name = "primary_key_id")
+    private RvPrimaryKey primaryKey;
 
-    @Column(name = "name", nullable = false)
-    private String name;
-
-    @Column(name = "code", nullable = false)
-    private String code;
-
-    @Column(name = "data_type", nullable = false)
-    private String dataType;
-
-    @Column(name = "is_nullable")
-    private Boolean isNullable;
-
-    @Column(name = "default_value")
-    private String defaultValue;
+    @OneToOne
+    @JoinColumn(name = "column_id")
+    private RvColumn column;
 
     @Column(name = "remark")
     private String remark;

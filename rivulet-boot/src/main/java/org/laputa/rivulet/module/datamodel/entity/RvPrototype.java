@@ -72,4 +72,42 @@ public class RvPrototype extends RvEntity<String> {
         }
         indexes.forEach(index -> index.setPrototype(this));
     }
+
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "prototype")
+    private RvPrimaryKey primaryKey;
+
+    @JsonSetter("primaryKey")
+    public void setPrimaryKey(RvPrimaryKey primaryKey) {
+        this.primaryKey = primaryKey;
+        if (primaryKey == null) {
+            return;
+        }
+        primaryKey.setPrototype(this);
+    }
+
+    @JsonManagedReference
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "prototype")
+    private List<RvForeignKey> foreignKeys;
+
+    @JsonSetter("foreignKeys")
+    public void setForeignKeys(List<RvForeignKey> foreignKeys) {
+        this.foreignKeys = foreignKeys;
+        if (foreignKeys == null) {
+            return;
+        }
+        foreignKeys.forEach(foreignKey -> foreignKey.setPrototype(this));
+    }
+
+    @JsonManagedReference
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "prototype")
+    private List<RvUniqueConstraint> uniqueConstraints;
+
+    @JsonSetter("uniqueConstraints")
+    public void setUniqueConstraints(List<RvUniqueConstraint> uniqueConstraints) {
+        this.uniqueConstraints = uniqueConstraints;
+        if (uniqueConstraints == null) {
+            return;
+        }
+        uniqueConstraints.forEach(uniqueConstraint -> uniqueConstraint.setPrototype(this));
+    }
 }

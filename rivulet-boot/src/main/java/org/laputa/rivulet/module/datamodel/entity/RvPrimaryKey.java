@@ -9,13 +9,13 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.*;
 import org.laputa.rivulet.common.entity.RvEntity;
-import org.laputa.rivulet.module.datamodel.entity.column_relation.RvIndexColumn;
+import org.laputa.rivulet.module.datamodel.entity.column_relation.RvPrimaryKeyColumn;
 
-import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.List;
 
 /**
@@ -29,10 +29,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "rv_index", indexes = {
-        @Index(name = "idx_rvindex_prototype_id", columnList = "prototype_id")
+@Table(name = "rv_primary_key", indexes = {
+        @Index(name = "idx_rvprimarykey_prototype_id", columnList = "prototype_id")
 })
-public class RvIndex extends RvEntity<String> {
+public class RvPrimaryKey extends RvEntity<String> {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")
@@ -45,7 +45,7 @@ public class RvIndex extends RvEntity<String> {
     @JsonBackReference
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "prototype_id")
     private RvPrototype prototype;
 
@@ -55,25 +55,26 @@ public class RvIndex extends RvEntity<String> {
     @Column(name = "code", nullable = false)
     private String code;
 
-    @Column(name = "unique_index")
-    private Boolean uniqueIndex;
-
     @JsonManagedReference
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "index")
-    private List<RvIndexColumn> indexColumns;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "primaryKey")
+    private List<RvPrimaryKeyColumn> primaryKeyColumns;
 
-    @JsonSetter("indexColumns")
-    public void setIndexColumns(List<RvIndexColumn> indexColumns) {
-        this.indexColumns = indexColumns;
-        if (indexColumns == null) {
-            return;
-        }
-        indexColumns.forEach(indexColumn -> indexColumn.setIndex(this));
-    }
+    @OneToOne
+    @JoinColumn(name = "backing_index_id")
+    private RvIndex backingIndex;
 
     @Column(name = "remark")
     private String remark;
 
     @Column(name = "order_num")
     private Integer orderNum;
+
+    @JsonSetter("primaryKeyColumns")
+    public void setPrimaryKeyColumns(List<RvPrimaryKeyColumn> primaryKeyColumns) {
+        this.primaryKeyColumns = primaryKeyColumns;
+        if (primaryKeyColumns == null) {
+            return;
+        }
+        primaryKeyColumns.forEach(primaryKeyColumn -> primaryKeyColumn.setPrimaryKey(this));
+    }
 }

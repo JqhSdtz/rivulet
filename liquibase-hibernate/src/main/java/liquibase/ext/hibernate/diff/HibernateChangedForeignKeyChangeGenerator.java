@@ -41,21 +41,14 @@ public class HibernateChangedForeignKeyChangeGenerator extends ChangedForeignKey
 
     @Override
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
-        Logger logger = Scope.getCurrentScope().getLog(getClass());
-        logger.info("xxxxxxxxxxx");
         if (referenceDatabase instanceof HibernateDatabase || comparisonDatabase instanceof HibernateDatabase) {
             Change[] changes = super.fixChanged(changedObject, differences, control, referenceDatabase, comparisonDatabase, chain);
-            logger.info("abcdefghijklmn");
-            logger.info(String.valueOf(changes));
-            logger.info(String.valueOf(changes.length));
             if (changes != null && changes.length == 2) {
                 AddForeignKeyConstraintChange addFkChange = (AddForeignKeyConstraintChange) changes[1];
                 if (differences.isDifferent("deleteRule")) {
-                    logger.info("aaa");
                     Difference deleteRule = differences.getDifference("deleteRule");
                     ForeignKeyConstraintType hibernateDeleteAction = (ForeignKeyConstraintType) deleteRule.getReferenceValue();
                     ForeignKeyConstraintType actualDeleteAction = (ForeignKeyConstraintType) deleteRule.getComparedValue();
-                    logger.info(String.valueOf(hibernateDeleteAction));
                     if (hibernateDeleteAction == null || hibernateDeleteAction == ForeignKeyConstraintType.importedKeyNoAction) {
                         if (actualDeleteAction != null && actualDeleteAction != ForeignKeyConstraintType.importedKeyNoAction) {
                             // changed from onDelete to doNothing, most likely added ondelete by hand
@@ -65,7 +58,6 @@ public class HibernateChangedForeignKeyChangeGenerator extends ChangedForeignKey
                             differences.removeDifference("deleteRule");
                         }
                     } else {
-                        logger.info("bbb");
                         addFkChange.setOnDelete(hibernateDeleteAction);
                     }
                 }

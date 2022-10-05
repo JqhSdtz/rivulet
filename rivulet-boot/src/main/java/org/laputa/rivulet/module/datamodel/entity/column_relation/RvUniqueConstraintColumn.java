@@ -1,18 +1,19 @@
-package org.laputa.rivulet.module.datamodel.entity;
+package org.laputa.rivulet.module.datamodel.entity.column_relation;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.checkerframework.checker.units.qual.A;
 import org.hibernate.annotations.*;
 import org.laputa.rivulet.common.entity.RvEntity;
+import org.laputa.rivulet.module.datamodel.entity.RvColumn;
+import org.laputa.rivulet.module.datamodel.entity.RvIndex;
+import org.laputa.rivulet.module.datamodel.entity.RvUniqueConstraint;
 
-import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  * @author JQH
@@ -25,10 +26,11 @@ import javax.persistence.Table;
 @RequiredArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "rv_column", indexes = {
-        @Index(name = "idx_rvcolumn_prototype_id", columnList = "prototype_id")
+@Table(name = "rv_unique_constraint_column", indexes = {
+        @Index(name = "idx_rvuniqueconstraintcolumn_constraint_id", columnList = "unique_constraint_id"),
+        @Index(name = "idx_rvuniqueconstraintcolumn_column_id", columnList = "column_id")
 })
-public class RvColumn extends RvEntity<String> {
+public class RvUniqueConstraintColumn extends RvEntity<String> {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")
@@ -38,27 +40,15 @@ public class RvColumn extends RvEntity<String> {
     /**
      * 这里的@JoinColumn的nullable属性不能设为false，否则无法正确插入数据
      */
-    @JsonBackReference
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne
-    @JoinColumn(name = "prototype_id")
-    private RvPrototype prototype;
+    @JoinColumn(name = "unique_constraint_id")
+    private RvUniqueConstraint uniqueConstraint;
 
-    @Column(name = "name", nullable = false)
-    private String name;
-
-    @Column(name = "code", nullable = false)
-    private String code;
-
-    @Column(name = "data_type", nullable = false)
-    private String dataType;
-
-    @Column(name = "is_nullable")
-    private Boolean isNullable;
-
-    @Column(name = "default_value")
-    private String defaultValue;
+    @OneToOne
+    @JoinColumn(name = "column_id")
+    private RvColumn column;
 
     @Column(name = "remark")
     private String remark;
