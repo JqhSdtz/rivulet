@@ -57,6 +57,7 @@ public class RvUniqueConstraint extends RvEntity<String> {
     private String code;
 
     @OneToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "backing_index_id")
     private RvIndex backingIndex;
 

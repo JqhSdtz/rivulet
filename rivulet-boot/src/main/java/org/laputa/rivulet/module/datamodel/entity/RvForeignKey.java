@@ -61,6 +61,7 @@ public class RvForeignKey extends RvEntity<String> {
     private Boolean cascadeDelete;
 
     @OneToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "backing_index_id")
     private RvIndex backingIndex;
 

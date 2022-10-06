@@ -35,7 +35,7 @@ public class RvPrototype extends RvEntity<String> {
     @Column(name = "id", nullable = false, length = 64)
     private String id;
 
-    @Column(name = "name", nullable = false, columnDefinition = "java.sql.Types.VARCHAR(77)")
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "code", nullable = false)

@@ -47,6 +47,7 @@ public class RvUniqueConstraintColumn extends RvEntity<String> {
     private RvUniqueConstraint uniqueConstraint;
 
     @OneToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "column_id")
     private RvColumn column;
 

@@ -60,6 +60,7 @@ public class RvPrimaryKey extends RvEntity<String> {
     private List<RvPrimaryKeyColumn> primaryKeyColumns;
 
     @OneToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "backing_index_id")
     private RvIndex backingIndex;
 

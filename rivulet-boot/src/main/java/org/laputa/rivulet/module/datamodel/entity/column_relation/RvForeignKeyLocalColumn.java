@@ -49,6 +49,7 @@ public class RvForeignKeyLocalColumn extends RvEntity<String> {
     private RvForeignKey foreignKey;
 
     @OneToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "column_id")
     private RvColumn column;
 

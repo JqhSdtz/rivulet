@@ -47,6 +47,7 @@ public class RvIndexColumn extends RvEntity<String> {
     private RvIndex index;
 
     @OneToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "column_id")
     private RvColumn column;
 

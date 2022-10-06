@@ -48,6 +48,7 @@ public class RvPrimaryKeyColumn extends RvEntity<String> {
     private RvPrimaryKey primaryKey;
 
     @OneToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "column_id")
     private RvColumn column;
 

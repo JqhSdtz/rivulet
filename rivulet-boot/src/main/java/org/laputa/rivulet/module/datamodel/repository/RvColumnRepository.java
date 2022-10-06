@@ -1,15 +1,13 @@
 package org.laputa.rivulet.module.datamodel.repository;
 
+import org.laputa.rivulet.module.datamodel.entity.RvColumn;
 import org.laputa.rivulet.module.datamodel.entity.RvPrototype;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.List;
 
 /**
  * @author JQH
  * @since 下午 9:45 22/06/26
  */
-public interface RvPrototypeRepository extends JpaRepository<RvPrototype, String> {
-    @Override
-    List<RvPrototype> findAll();
+public interface RvColumnRepository extends JpaRepository<RvColumn, String> {
+
 }

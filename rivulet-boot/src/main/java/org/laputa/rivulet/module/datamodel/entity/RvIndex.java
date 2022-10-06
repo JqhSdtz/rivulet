@@ -71,7 +71,7 @@ public class RvIndex extends RvEntity<String> {
         indexColumns.forEach(indexColumn -> indexColumn.setIndex(this));
     }
 
-    @Column(name = "remark")
+    @Column(name = "remark", length = 77)
     private String remark;
 
     @Column(name = "order_num")

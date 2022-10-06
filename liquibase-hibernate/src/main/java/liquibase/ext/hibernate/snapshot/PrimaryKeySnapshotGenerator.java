@@ -2,6 +2,7 @@ package liquibase.ext.hibernate.snapshot;
 
 import liquibase.Scope;
 import liquibase.exception.DatabaseException;
+import liquibase.ext.hibernate.GlobalSetting;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
@@ -54,7 +55,9 @@ public class PrimaryKeySnapshotGenerator extends HibernateSnapshotGenerator {
                     pk.getColumns().add(new Column(hibernateColumn.getName()).setRelation(table));
                 }
 
-                Scope.getCurrentScope().getLog(getClass()).info("Found primary key " + pk.getName());
+                if (GlobalSetting.isShowFoundInfo()) {
+                    Scope.getCurrentScope().getLog(getClass()).info("Found primary key " + pk.getName());
+                }
                 table.setPrimaryKey(pk);
                 Index index = new Index();
                 index.setName("IX_" + pk.getName());

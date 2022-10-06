@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.core.UnknownType;
 import liquibase.exception.DatabaseException;
+import liquibase.ext.hibernate.GlobalSetting;
 import liquibase.ext.hibernate.database.HibernateDatabase;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
@@ -115,7 +116,9 @@ public class ColumnSnapshotGenerator extends HibernateSnapshotGenerator {
                 }
 
                 column.setType(dataType);
-                Scope.getCurrentScope().getLog(getClass()).info("Found column " + column.getName() + " " + column.getType().toString());
+                if (GlobalSetting.isShowFoundInfo()) {
+                    Scope.getCurrentScope().getLog(getClass()).info("Found column " + column.getName() + " " + column.getType().toString());
+                }
 
                 column.setRemarks(hibernateColumn.getComment());
                 if (hibernateColumn.getValue() instanceof SimpleValue) {

@@ -2,6 +2,7 @@ package liquibase.ext.hibernate.snapshot;
 
 import liquibase.Scope;
 import liquibase.exception.DatabaseException;
+import liquibase.ext.hibernate.GlobalSetting;
 import liquibase.ext.hibernate.database.HibernateDatabase;
 import liquibase.ext.hibernate.snapshot.extension.ExtendedSnapshotGenerator;
 import liquibase.ext.hibernate.snapshot.extension.MultipleHiLoPerTableSnapshotGenerator;
@@ -42,7 +43,9 @@ public class TableSnapshotGenerator extends HibernateSnapshotGenerator {
         }
 
         Table table = new Table().setName(hibernateTable.getName());
-        Scope.getCurrentScope().getLog(getClass()).info("Found table " + table.getName());
+        if (GlobalSetting.isShowFoundInfo()) {
+            Scope.getCurrentScope().getLog(getClass()).info("Found table " + table.getName());
+        }
         table.setSchema(example.getSchema());
         if (hibernateTable.getComment() != null && !hibernateTable.getComment().isEmpty()) {
             table.setRemarks(hibernateTable.getComment());
@@ -73,7 +76,9 @@ public class TableSnapshotGenerator extends HibernateSnapshotGenerator {
                 if (hibernateTable.isPhysicalTable()) {
                     Table table = new Table().setName(hibernateTable.getName());
                     table.setSchema(schema);
-                    Scope.getCurrentScope().getLog(getClass()).info("Found table " + table.getName());
+                    if (GlobalSetting.isShowFoundInfo()) {
+                        Scope.getCurrentScope().getLog(getClass()).info("Found table " + table.getName());
+                    }
                     schema.addDatabaseObject(snapshotObject(table, snapshot));
                 }
             }
@@ -109,7 +114,9 @@ public class TableSnapshotGenerator extends HibernateSnapshotGenerator {
                 if (hTable.isPhysicalTable()) {
                     Table table = new Table().setName(hTable.getName());
                     table.setSchema(schema);
-                    Scope.getCurrentScope().getLog(getClass()).info("Found table " + table.getName());
+                    if (GlobalSetting.isShowFoundInfo()) {
+                        Scope.getCurrentScope().getLog(getClass()).info("Found table " + table.getName());
+                    }
                     schema.addDatabaseObject(snapshotObject(table, snapshot));
                 }
             }
