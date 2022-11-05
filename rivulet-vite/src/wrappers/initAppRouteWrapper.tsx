@@ -1,7 +1,6 @@
 import store from '@/store';
 import {RouteConfig} from '@/routes';
-import {RouteObject} from 'react-router/lib/router';
-import {Navigate} from 'react-router-dom';
+import {Navigate, RouteObject} from 'react-router-dom';
 
 const WrappedComponent = (config: RouteConfig) => {
     const appState = store.useModelState('app');
@@ -15,7 +14,7 @@ const WrappedComponent = (config: RouteConfig) => {
     }
     const Component = config.component;
     return <Component/>;
-}
+};
 
 export default function (routeConfig: RouteConfig): RouteObject {
     const routeObject = {...routeConfig} as RouteObject;

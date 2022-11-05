@@ -3,6 +3,7 @@ import axios from 'axios';
 import {RecursionField, Schema, useFieldSchema, useForm} from '@formily/react';
 import React, {useEffect} from 'react';
 import {filterEmptyString} from '@/utils/formilyUtil';
+import {Result} from '@/types/result';
 
 interface RvTableProps {
     baseUrl: string;

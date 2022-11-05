@@ -22,7 +22,7 @@ public class AppController {
     private AppInitService appService;
 
     @GetMapping("/initialData")
-    public AppInitialData getAppInitialData() {
+    public Result<AppInitialData> getAppInitialData() {
         return appService.getAppInitialData();
     }
 

@@ -1,7 +1,6 @@
 import store from '@/store';
-import {Navigate, useLocation} from 'react-router-dom';
+import {Navigate, RouteObject, useLocation} from 'react-router-dom';
 import {RouteConfig} from '@/routes';
-import {RouteObject} from 'react-router/lib/router';
 
 let beforeLogValidPath = '';
 
@@ -26,10 +25,10 @@ const WrappedComponent = (config: RouteConfig) => {
             return <Component/>;
         }
     }
-}
+};
 
-export default function(routeConfig: RouteConfig): RouteObject {
+export default function (routeConfig: RouteConfig): RouteObject {
     const routeObject = {...routeConfig} as RouteObject;
-    routeObject.element = <WrappedComponent {...routeConfig}/>
+    routeObject.element = <WrappedComponent {...routeConfig}/>;
     return routeObject;
 }

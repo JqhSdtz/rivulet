@@ -4,6 +4,7 @@ import cn.hutool.core.lang.UUID;
 import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.CreateTableChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -14,8 +15,8 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.DatabaseException;
 import lombok.SneakyThrows;
-import org.laputa.rivulet.module.datamodel.entity.RvColumn;
-import org.laputa.rivulet.module.datamodel.entity.RvPrototype;
+import org.laputa.rivulet.module.data_model.entity.RvColumn;
+import org.laputa.rivulet.module.data_model.entity.RvPrototype;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
 
@@ -77,11 +78,15 @@ public class LiquibaseDdlExecutor implements DisposableBean {
         changeLog.addChangeSet(changeSet);
         CreateTableChange createTableChange = new CreateTableChange();
         createTableChange.setTableName(rvPrototype.getCode());
-        List<RvColumn> fields = rvPrototype.getColumns();
-        if (fields != null && fields.size() > 0) {
-            fields.forEach(field -> {
+        List<RvColumn> rvColumns = rvPrototype.getColumns();
+        if (rvColumns != null && rvColumns.size() > 0) {
+            rvColumns.forEach(rvColumn -> {
                 ColumnConfig column = new ColumnConfig();
-                column.setName(field.getCode()).setType(field.getDataType());
+                column.setName(rvColumn.getCode())
+                        .setType(rvColumn.getDataType())
+                        .setDefaultValue(rvColumn.getDefaultValue());
+                ConstraintsConfig constraintsConfig = new ConstraintsConfig();
+                column.setConstraints(constraintsConfig);
                 createTableChange.addColumn(column);
             });
         }

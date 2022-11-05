@@ -5,7 +5,7 @@ import DataModel from '@/pages/DataModel';
 import React from 'react';
 import homeRouteWrapper from '@/wrappers/homeRouteWrapper';
 import menuRouteWrapper from '@/wrappers/menuRouteWrapper';
-import {RouteObject} from 'react-router/lib/router';
+import {RouteObject} from 'react-router-dom';
 import Login from '@/pages/Login';
 import loginRouteWrapper from '@/wrappers/loginRouteWrapper';
 import InitApp from '@/pages/InitApp';
@@ -36,7 +36,7 @@ const routesConfig: RouteObject[] = [
                 component: Dashboard
             },
             {
-                path: 'data_model',
+                path: 'dataModel',
                 component: DataModel,
                 subMenu: [
                     {

@@ -1,5 +1,7 @@
 package liquibase.ext.hibernate;
 
+import liquibase.database.Database;
+
 /**
  * @author JQH
  * @since 下午 8:05 22/10/06

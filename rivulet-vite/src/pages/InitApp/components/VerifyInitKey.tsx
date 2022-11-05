@@ -7,6 +7,7 @@ import * as ICONS from '@ant-design/icons';
 import {FormProps} from '@formily/antd/esm/form';
 import RvModal from '@/components/common/RvModal';
 import axios from 'axios';
+import {Result} from '@/types/result';
 
 const form = createForm();
 

@@ -81,21 +81,24 @@ dependencies {
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-hibernate5:2.13.4'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-freemarker'
     implementation 'org.springframework.session:spring-session-core:2.7.0'
     implementation 'org.springframework.session:spring-session-data-redis:2.7.0'
     implementation 'org.postgresql:postgresql:42.5.0'
     implementation 'com.alibaba:druid-spring-boot-starter:1.2.13-SNSAPSHOT'
-    implementation 'org.redisson:redisson-spring-boot-starter:3.17.6'
-    implementation 'org.liquibase:liquibase-core:4.16.1'
+    implementation 'org.redisson:redisson-spring-boot-starter:3.17.7'
+    implementation 'org.liquibase:liquibase-core:4.17.0'
     implementation 'org.liquibase.ext:liquibase-hibernate5:5.0'
     implementation 'org.eclipse.jgit:org.eclipse.jgit:6.3.0.202209071007-r'
-    implementation 'cn.hutool:hutool-core:5.8.7'
-    implementation 'cn.hutool:hutool-crypto:5.8.7'
+    implementation 'cn.hutool:hutool-core:5.8.8'
+    implementation 'cn.hutool:hutool-crypto:5.8.8'
+    implementation 'cn.hutool:hutool-extra:5.8.8'
     implementation 'com.google.guava:guava:31.1-jre'
     implementation 'org.apache.commons:commons-pool2:2.11.1'
+    implementation 'org.reflections:reflections:0.10.2'
     implementation "org.graalvm.sdk:graal-sdk:22.2.0"
     implementation "org.graalvm.js:js:22.2.0"
-    implementation 'org.yaml:snakeyaml:1.32'
+    implementation 'org.yaml:snakeyaml:1.33'
     compileOnly 'org.projectlombok:lombok'
     compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -106,7 +109,7 @@ dependencies {
 }
 
 dependencies {
-    liquibaseRuntime 'org.liquibase:liquibase-core:4.16.1'
+    liquibaseRuntime 'org.liquibase:liquibase-core:4.17.0'
     liquibaseRuntime 'org.springframework.boot:spring-boot-starter-data-jpa'
     liquibaseRuntime 'org.postgresql:postgresql:42.5.0'
     liquibaseRuntime 'org.liquibase:liquibase-groovy-dsl:3.0.2'

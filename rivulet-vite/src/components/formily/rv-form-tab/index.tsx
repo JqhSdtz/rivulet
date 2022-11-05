@@ -10,7 +10,7 @@ const Submit = () => {
     const onClick = () => {
         form.validate().then(() => {
             setLoading(true);
-            form.submit((data) => axios.post('/data_model', data))
+            form.submit((data) => axios.post('/dataModel', data))
                 .then(() => setLoading(false));
         }).catch(() => {
         });

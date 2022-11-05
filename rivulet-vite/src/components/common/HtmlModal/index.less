@@ -1,0 +1,24 @@
+@root-entry-name: 'default';
+@import (reference) '~antd/es/style/themes/index.less';
+
+.@{ant-prefix}-modal.html-modal {
+    height: 90%;
+    top: 5%;
+    padding: 0;
+
+    .@{ant-prefix}-modal-header {
+        padding: 8px 12px;
+    }
+
+    .@{ant-prefix}-modal-content {
+        height: 100%;
+
+        .@{ant-prefix}-modal-body {
+            padding: 0;
+
+            iframe {
+                border: 0;
+            }
+        }
+    }
+}

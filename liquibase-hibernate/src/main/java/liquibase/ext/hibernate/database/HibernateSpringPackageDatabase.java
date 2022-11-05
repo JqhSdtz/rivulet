@@ -1,13 +1,11 @@
 package liquibase.ext.hibernate.database;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.persistence.spi.PersistenceUnitInfo;
-
 import liquibase.Scope;
-import liquibase.logging.Logger;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.DatabaseException;
+import liquibase.ext.hibernate.GlobalSetting;
+import liquibase.ext.hibernate.database.connection.HibernateConnection;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.envers.configuration.EnversSettings;
 import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
@@ -18,10 +16,10 @@ import org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager
 import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
-import liquibase.database.DatabaseConnection;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.DatabaseException;
-import liquibase.ext.hibernate.database.connection.HibernateConnection;
+import javax.persistence.spi.PersistenceUnitInfo;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Database implementation for "spring" hibernate configurations that scans packages. If specifying a bean, {@link HibernateSpringBeanDatabase} is used.
@@ -89,6 +87,9 @@ public class HibernateSpringPackageDatabase extends JpaPersistenceDatabase {
         getHibernateConnection().getProperties().forEach((key, value) -> {
             map.put(key.toString(), value.toString());
         });
+        if ("false".equalsIgnoreCase(map.get("liquibase.show_found_info"))) {
+            GlobalSetting.setShowFoundInfo(false);
+        }
         map.put(AvailableSettings.DIALECT, getProperty(AvailableSettings.DIALECT));
         map.put(AvailableSettings.USE_SECOND_LEVEL_CACHE, Boolean.FALSE.toString());
         map.put(AvailableSettings.PHYSICAL_NAMING_STRATEGY, getHibernateConnection().getProperties().getProperty(AvailableSettings.PHYSICAL_NAMING_STRATEGY));

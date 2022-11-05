@@ -1,18 +1,20 @@
 import {BrowserRouter, useRoutes} from 'react-router-dom';
 import routesConfig from '@/routes';
 import {useState} from 'react';
-import {useAsyncEffect, useMount} from 'ahooks';
+import {useAsyncEffect} from 'ahooks';
 import {PageLoading} from '@/layouts/BasicLayout';
 import axios from 'axios';
 import store from '@/store';
+import RvRequest from '@/utils/rvRequest';
+import {Result} from '@/types/result';
 
 let storeInitialized = false;
 
 const AppRoutes = () => useRoutes(routesConfig);
 
 const getInitialData = async () => {
-    const response = await axios.get('/app/initialData');
-    const appInitialData = response.data;
+    const result: Result = await RvRequest.do(() => axios.get('/app/initialData'));
+    const appInitialData = result.payload;
     const currentUser = appInitialData.currentUser;
     const initialStates = {
         app: appInitialData.appState,

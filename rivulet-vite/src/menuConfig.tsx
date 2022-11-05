@@ -70,7 +70,7 @@ const config: MenuConfigItem[] = [
     },
     {
         name: '数据模型',
-        path: '/data_model',
+        path: '/dataModel',
         icon: <SmileOutlined/>,
         testPath,
         hiddenChildren: [

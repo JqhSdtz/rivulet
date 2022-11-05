@@ -9,6 +9,7 @@ import md5 from 'md5';
 import RvModal from '@/components/common/RvModal';
 import store from '@/store';
 import axios from 'axios';
+import {Result} from '@/types/result';
 
 const form = createForm({
     validateFirst: true

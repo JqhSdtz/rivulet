@@ -1,6 +1,7 @@
 package org.laputa.rivulet.module.app.model;
 
 import lombok.Data;
+import org.laputa.rivulet.common.state.AppState;
 import org.laputa.rivulet.module.auth.entity.RvUser;
 
 /**

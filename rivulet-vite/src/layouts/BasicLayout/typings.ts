@@ -1,7 +1,4 @@
-import type * as H from 'history';
-
 import type React from 'react';
-import {RouteObject} from 'react-router/lib/router';
 import {To} from 'react-router-dom';
 
 export type LinkProps = {

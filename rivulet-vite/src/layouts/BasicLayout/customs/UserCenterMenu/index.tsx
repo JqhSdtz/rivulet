@@ -6,6 +6,7 @@ import './index.less';
 import RvModal from '@/components/common/RvModal';
 import store from '@/store';
 import axios from 'axios';
+import {Result} from '@/types/result';
 
 export default (props: SiderMenuProps) => {
     const {prefixCls} = props;

@@ -4,10 +4,11 @@ import cn.hutool.core.util.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.laputa.rivulet.common.model.Result;
 import org.laputa.rivulet.common.util.RedissonLockUtil;
+import org.laputa.rivulet.common.util.TerminalKeyUtil;
 import org.laputa.rivulet.common.util.TimeUnitUtil;
 import org.laputa.rivulet.module.app.model.AppInitialData;
-import org.laputa.rivulet.module.app.model.AppState;
-import org.laputa.rivulet.module.app.property.InitKeyProperty;
+import org.laputa.rivulet.common.state.AppState;
+import org.laputa.rivulet.module.app.property.TerminalKeyProperty;
 import org.laputa.rivulet.module.app.session.AppSessionAccessor;
 import org.laputa.rivulet.module.auth.entity.RvUser;
 import org.laputa.rivulet.module.auth.entity.dict.UserType;
@@ -32,32 +33,26 @@ import javax.persistence.Query;
  * @since 下午 8:48 22/03/31
  */
 @Service
-@Order(1)
+@Order(2)
 @Slf4j
 public class AppInitService implements ApplicationRunner {
 
     @PersistenceContext
     private EntityManager entityManager;
-
     @Resource
     private RedissonClient redissonClient;
-
     @Resource
     private RedissonLockUtil redissonLockUtil;
-
-    @Resource
-    private InitKeyProperty initKeyProperty;
-
     @Resource
     private AppSessionAccessor appSessionAccessor;
-
     @Resource
     private AuthSessionAccessor authSessionAccessor;
-
-    /**
-     * 应用是否初始化的标志
-     */
-    private boolean isAppInitialized = false;
+    @Resource
+    private TerminalKeyProperty terminalKeyProperty;
+    @Resource
+    private AppState appState;
+    @Resource
+    private TerminalKeyUtil terminalKeyUtil;
 
     /**
      * 初始密钥的Redisson对象桶
@@ -71,13 +66,16 @@ public class AppInitService implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        // 启动后先判断应用是否已经初始化
-        isAppInitialized = testAppInitialized();
-        // 若应用未初始化，则启动后获取一个初始化密钥
-        if (!isAppInitialized) {
-            String timeStr = TimeUnitUtil.format(initKeyProperty.getTimeout(), initKeyProperty.getTimeUnit());
-            log.info("应用的初始化密钥为: {}，请在{}内进行初始化操作", generateInitKey(), timeStr);
-        }
+        appState.registerStateChangeCallback("builtInDataModelSynced", state -> {
+            if (state.getCurrentValue().equals(false)) return;
+            // 启动后先判断应用是否已经初始化
+            appState.setAppInitialized(testAppInitialized());
+            // 若应用未初始化，则启动后获取一个初始化密钥
+            if (!appState.isAppInitialized()) {
+                String timeStr = TimeUnitUtil.format(terminalKeyProperty.getTimeout(), terminalKeyProperty.getTimeUnit());
+                log.info("应用的初始化密钥为: {}，请在{}内进行初始化操作", terminalKeyUtil.generateTerminalKey(initKeyBucket), timeStr);
+            }
+        });
     }
 
     /**
@@ -85,13 +83,11 @@ public class AppInitService implements ApplicationRunner {
      *
      * @return
      */
-    public AppInitialData getAppInitialData() {
+    public Result<AppInitialData> getAppInitialData() {
         AppInitialData appInitialData = new AppInitialData();
-        AppState appState = new AppState();
-        appState.setAppInitialized(isAppInitialized);
-        appInitialData.setAppState(appState);
+        appInitialData.setAppState(this.appState);
         appInitialData.setCurrentUser(authSessionAccessor.getCurrentUser());
-        return appInitialData;
+        return Result.succeed(appInitialData);
     }
 
     /**
@@ -128,7 +124,7 @@ public class AppInitService implements ApplicationRunner {
                 rvUser.setUserType(UserType.INITIAL_USER);
                 entityManager.persist(rvUser);
                 // 更改应用初始化状态
-                this.isAppInitialized = true;
+                this.appState.setAppInitialized(true);
                 // 将创建的用户设为当前登录的用户，即实现直接登录
                 authSessionAccessor.setCurrentUser(rvUser);
                 return Result.succeed();
@@ -150,28 +146,4 @@ public class AppInitService implements ApplicationRunner {
         long count = (Long) query.getSingleResult();
         return count > 0;
     }
-
-    /**
-     * 创建一个初始密钥，并同步更新redis
-     *
-     * @return
-     */
-    private String generateInitKey() {
-        // 获取Redis中的初始密钥
-        String initKey = initKeyBucket.get();
-        // 如果没有，则创建一个初始密钥，并尝试设置Redis中的对应值
-        if (initKey == null) {
-            String tmpKey = RandomUtil.randomString(initKeyProperty.getRandomBase(), initKeyProperty.getLength());
-            // 可能存在并发问题，所以使用trySet
-            if (!initKeyBucket.trySet(tmpKey, initKeyProperty.getTimeout(), initKeyProperty.getTimeUnit())) {
-                tmpKey = initKeyBucket.get();
-            }
-            initKey = tmpKey;
-        } else {
-            // 如果有了，则刷新过期时间
-            initKeyBucket.expire(TimeUnitUtil.toDuration(initKeyProperty.getTimeout(), initKeyProperty.getTimeUnit()));
-        }
-        return initKey;
-    }
-
 }

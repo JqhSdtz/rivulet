@@ -16,9 +16,10 @@ public class Result<ResultType> {
 
     private boolean successful;
     private ResultType payload = null;
-    private Exception rawException = null;
+    private String returnMessage;
     private String errorCode;
     private String errorMessage;
+    private Exception rawException = null;
 
     /**
      * 创建一个空白的成功或失败的对象
@@ -38,16 +39,30 @@ public class Result<ResultType> {
     }
 
     public static <T> Result<T> succeed(T payload) {
+        return succeed(payload, null);
+    }
+
+    public static <T> Result<T> succeed(String returnMessage) {
+        return succeed(null, returnMessage);
+    }
+
+    public static <T> Result<T> succeed(T payload, String returnMessage) {
         Result result = new Result(true);
+        result.setPayload(payload);
+        result.setReturnMessage(returnMessage);
+        return result;
+    }
+
+    public static <T> Result<T> fail(Class<T> clazz, String errorCode, String errorMessage, T payload) {
+        Result result = new Result<>(false);
+        result.setErrorCode(errorCode);
+        result.setErrorMessage(errorMessage);
         result.setPayload(payload);
         return result;
     }
 
     public static <T> Result<T> fail(Class<T> clazz, String errorCode, String errorMessage) {
-        Result result = new Result<>(false);
-        result.setErrorCode(errorCode);
-        result.setErrorMessage(errorMessage);
-        return result;
+        return fail(clazz, errorCode, errorMessage, null);
     }
 
     public static Result<Void> fail(String errorCode, String errorMessage) {
@@ -66,12 +81,13 @@ public class Result<ResultType> {
         if (this.successful) {
             return succeed((T) this.payload);
         } else {
-            return fail(clazz, this.errorCode, this.errorMessage);
+            return fail(clazz, this.errorCode, this.errorMessage, (T) this.payload);
         }
     }
 
     /**
      * 获取一个以当前Result对象为负载的RvException对象
+     *
      * @return
      */
     public RvException toException() {

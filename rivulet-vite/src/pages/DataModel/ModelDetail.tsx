@@ -28,7 +28,7 @@ const FormComponent = (props) => {
 
 export default () => {
     const [urlState] = useUrlState();
-    const {data, loading} = useRequest(() => axios.get('/data_model/form_schema', {
+    const {data, loading} = useRequest(() => axios.get('/dataModel/form_schema', {
         params: urlState
     }));
     return loading ? <PageLoading/> : <FormComponent {...JSON.parse(data.data.payload)}/>;

@@ -3,6 +3,7 @@ package liquibase.ext.hibernate.snapshot;
 import liquibase.Scope;
 import liquibase.exception.DatabaseException;
 import liquibase.ext.hibernate.GlobalSetting;
+import liquibase.ext.hibernate.annotation.TableComment;
 import liquibase.ext.hibernate.database.HibernateDatabase;
 import liquibase.ext.hibernate.snapshot.extension.ExtendedSnapshotGenerator;
 import liquibase.ext.hibernate.snapshot.extension.MultipleHiLoPerTableSnapshotGenerator;
@@ -49,6 +50,19 @@ public class TableSnapshotGenerator extends HibernateSnapshotGenerator {
         table.setSchema(example.getSchema());
         if (hibernateTable.getComment() != null && !hibernateTable.getComment().isEmpty()) {
             table.setRemarks(hibernateTable.getComment());
+        }
+        // !!!原本要给表加注释的话，需要用@org.hibernate.annotations.Table(appliesTo = "表名",comment="注释")
+        // 的方式，太麻烦了，所以增加了一个注解，直接在这里添加注释
+        Class tableClass = getTableClass(hibernateTable.getName());
+        if (tableClass != null && tableClass.isAnnotationPresent(TableComment.class)) {
+            TableComment tableComment = (TableComment) tableClass.getAnnotation(TableComment.class);
+            String oriComment = table.getRemarks();
+            // 如果原来在metadata中有注释，就在原来的后面追加@TableComment中定义的注释
+            if (oriComment == null) {
+                table.setRemarks(tableComment.value());
+            } else {
+                table.setRemarks(oriComment + " " + tableComment.value());
+            }
         }
 
         return table;

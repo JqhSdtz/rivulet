@@ -4,7 +4,6 @@ import React, {useCallback, useContext, useEffect, useMemo, useState} from 'reac
 import type {BreadcrumbProps as AntdBreadcrumbProps} from 'antd/lib/breadcrumb';
 import {ConfigProvider, Layout} from 'antd';
 import classNames from 'classnames';
-import warning from 'warning';
 import useMergedState from 'rc-util/lib/hooks/useMergedState';
 import useAntdMediaQuery from 'use-media-antd-query';
 import {isBrowser, useDocumentTitle, useMountMergeState} from '@ant-design/pro-utils';
@@ -36,6 +35,7 @@ import {AliveScope} from 'react-activation';
 import {TabsContextProvider} from './components/KeepAliveTabs';
 import getMatchMenu from './utils/getMatchMenu/getMatchMenu';
 import {useLocation} from 'react-router-dom';
+import {warning} from '@ant-design/icons/lib/utils';
 import Omit from 'omit.js';
 
 let layoutIndex = 0;

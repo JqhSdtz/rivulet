@@ -1,3 +1,4 @@
+// @ts-ignore
 import type H from 'history';
 import type {BreadcrumbProps as AntdBreadcrumbProps} from 'antd';
 import pathToRegexp from 'path-to-regexp';

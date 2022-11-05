@@ -16,7 +16,7 @@ public abstract class RvEntity<PkType> implements Serializable {
      *
      * @return 实体对象的ID
      */
-    protected abstract PkType getId();
+    public abstract PkType getId();
 
     @Override
     public boolean equals(Object obj) {

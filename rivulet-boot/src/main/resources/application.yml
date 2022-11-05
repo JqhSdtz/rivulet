@@ -9,7 +9,7 @@ server:
 
 rivulet:
     app:
-        init-key:
+        terminal-key:
             random-base: 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
             length: 32
             timeout: 30
@@ -28,8 +28,6 @@ spring:
             file: classpath:redisson.yml
     liquibase:
         enabled: false # 禁止springboot自动调用liquibase
-        database-change-log-table: rv_db_change_log
-        database-change-log-lock-table: rv_db_change_log_lock
     jpa:
         show-sql: false
         open-in-view: true
@@ -37,7 +35,7 @@ spring:
             ddl-auto: validate
         properties:
             hibernate:
-                dialect: org.hibernate.dialect.PostgreSQLDialect
+                dialect: org.laputa.rivulet.common.database.dialect.PostgreSQL14Dialect
                 new_generator_mappings: false
                 format_sql: true
     datasource:

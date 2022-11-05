@@ -29,11 +29,7 @@ export default () => {
     return (
         <div style={{width: '100%', height: '100%', position: 'fixed', backgroundColor: '#eee'}}>
             <div style={{width: '80%', marginLeft: '10%', marginTop: '1.5rem'}}>
-                <Steps current={current}>
-                    {steps.map(item => (
-                        <Step key={item.title} title={item.title}/>
-                    ))}
-                </Steps>
+                <Steps current={current} items={steps}/>
                 <div className="steps-content" style={{marginTop: '1rem'}}>{steps[current].content}</div>
             </div>
         </div>

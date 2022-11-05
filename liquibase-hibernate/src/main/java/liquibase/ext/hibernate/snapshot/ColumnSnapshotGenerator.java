@@ -5,6 +5,7 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.core.UnknownType;
 import liquibase.exception.DatabaseException;
 import liquibase.ext.hibernate.GlobalSetting;
+import liquibase.ext.hibernate.annotation.DefaultValue;
 import liquibase.ext.hibernate.database.HibernateDatabase;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
@@ -22,6 +23,7 @@ import org.hibernate.dialect.PostgreSQL81Dialect;
 import org.hibernate.id.ExportableColumn;
 import org.hibernate.mapping.SimpleValue;
 
+import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -74,6 +76,7 @@ public class ColumnSnapshotGenerator extends HibernateSnapshotGenerator {
             while (columnIterator.hasNext()) {
                 org.hibernate.mapping.Column hibernateColumn = (org.hibernate.mapping.Column) columnIterator.next();
                 Column column = new Column();
+
                 column.setName(hibernateColumn.getName());
                 column.setRelation((Table) foundObject);
 
@@ -104,6 +107,12 @@ public class ColumnSnapshotGenerator extends HibernateSnapshotGenerator {
 
                 String defaultValue = null;
                 String hibernateType = hibernateColumn.getSqlType(dialect, metadata);
+                // !!!此处增加根据@DefaultValue注解设置默认值的功能
+                Field columnField = getColumnField(hibernateTable.getName(), hibernateColumn.getName());
+                if (columnField != null && columnField.isAnnotationPresent(DefaultValue.class)) {
+                    DefaultValue annotatedDefaultValue = columnField.getAnnotation(DefaultValue.class);
+                    defaultValue = annotatedDefaultValue.value();
+                }
                 Matcher defaultValueMatcher = Pattern.compile("(?i) DEFAULT\\s+(.*)").matcher(hibernateType);
                 if (defaultValueMatcher.find()) {
                     defaultValue = defaultValueMatcher.group(1);
@@ -200,6 +209,8 @@ public class ColumnSnapshotGenerator extends HibernateSnapshotGenerator {
         }
 
         String extra = StringUtil.trimToNull(matcher.group(4));
+        // !!!添加默认的size unit，防止类型比对的时候出现错误
+        dataType.setColumnSizeUnit(DataType.ColumnSizeUnit.BYTE);
         if (extra != null) {
             if (extra.equalsIgnoreCase("char")) {
                 dataType.setColumnSizeUnit(DataType.ColumnSizeUnit.CHAR);

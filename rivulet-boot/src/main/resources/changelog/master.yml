@@ -1,19 +1,884 @@
 databaseChangeLog:
 - changeSet:
-    id: 1664957114203-1
+    id: 1666353825593-1
     author: dell (generated)
     changes:
-    - addColumn:
+    - createTable:
         columns:
         - column:
-            name: unique_index
-            type: boolean
-        tableName: rv_index
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: rv_columnPK
+            name: id
+            type: VARCHAR(64)
+        - column:
+            defaultValueBoolean: false
+            name: auto_increment
+            remarks: 自增标识
+            type: BOOLEAN
+        - column:
+            constraints:
+              nullable: false
+            name: code
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: data_type
+            type: VARCHAR(255)
+        - column:
+            name: default_value
+            remarks: 默认值
+            type: VARCHAR(255)
+        - column:
+            defaultValueNumeric: !!float '1'
+            name: increment_by
+            remarks: 自增步长
+            type: numeric(19, 2)
+        - column:
+            name: name
+            type: VARCHAR(255)
+        - column:
+            defaultValueBoolean: false
+            name: nullable
+            remarks: 是否可以为空值
+            type: BOOLEAN
+        - column:
+            name: order_num
+            remarks: 排序号
+            type: INTEGER
+        - column:
+            defaultValueBoolean: false
+            name: primary_key
+            remarks: 是否主键或属于联合主键
+            type: BOOLEAN
+        - column:
+            name: remark
+            remarks: 字段注释
+            type: VARCHAR(255)
+        - column:
+            defaultValueNumeric: !!float '0'
+            name: start_with
+            remarks: 自增起点
+            type: numeric(19, 2)
+        - column:
+            name: prototype_id
+            type: VARCHAR(64)
+        tableName: rv_column
 - changeSet:
-    id: 1664957114203-2
+    id: 1666353825593-2
     author: dell (generated)
     changes:
-    - dropColumn:
-        columnName: unique
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: rv_dictPK
+            name: id
+            type: VARCHAR(64)
+        - column:
+            constraints:
+              nullable: false
+            name: code
+            remarks: 字典编码
+            type: VARCHAR(255)
+        - column:
+            name: parent_id
+            type: VARCHAR(64)
+        - column:
+            constraints:
+              nullable: false
+            name: text
+            remarks: 字典内容
+            type: VARCHAR(255)
+        tableName: rv_dict
+- changeSet:
+    id: 1666353825593-3
+    author: dell (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: rv_foreign_keyPK
+            name: id
+            type: VARCHAR(64)
+        - column:
+            name: cascade_delete
+            type: BOOLEAN
+        - column:
+            constraints:
+              nullable: false
+            name: code
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: name
+            type: VARCHAR(255)
+        - column:
+            name: order_num
+            type: INTEGER
+        - column:
+            name: remark
+            type: VARCHAR(255)
+        - column:
+            name: backing_index_id
+            type: VARCHAR(64)
+        - column:
+            name: foreign_prototype_id
+            type: VARCHAR(64)
+        - column:
+            name: prototype_id
+            type: VARCHAR(64)
+        tableName: rv_foreign_key
+- changeSet:
+    id: 1666353825593-4
+    author: dell (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: rv_foreign_key_foreign_columnPK
+            name: id
+            type: VARCHAR(64)
+        - column:
+            name: order_num
+            type: INTEGER
+        - column:
+            name: remark
+            type: VARCHAR(255)
+        - column:
+            name: column_id
+            type: VARCHAR(64)
+        - column:
+            name: foreign_key_id
+            type: VARCHAR(64)
+        tableName: rv_foreign_key_foreign_column
+- changeSet:
+    id: 1666353825593-5
+    author: dell (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: rv_foreign_key_local_columnPK
+            name: id
+            type: VARCHAR(64)
+        - column:
+            name: order_num
+            type: INTEGER
+        - column:
+            name: remark
+            type: VARCHAR(255)
+        - column:
+            name: column_id
+            type: VARCHAR(64)
+        - column:
+            name: foreign_key_id
+            type: VARCHAR(64)
+        tableName: rv_foreign_key_local_column
+- changeSet:
+    id: 1666353825593-6
+    author: dell (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: rv_indexPK
+            name: id
+            type: VARCHAR(64)
+        - column:
+            constraints:
+              nullable: false
+            name: code
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: name
+            type: VARCHAR(255)
+        - column:
+            name: order_num
+            type: INTEGER
+        - column:
+            name: remark
+            type: VARCHAR(255)
+        - column:
+            name: unique_index
+            type: BOOLEAN
+        - column:
+            name: prototype_id
+            type: VARCHAR(64)
         tableName: rv_index
+- changeSet:
+    id: 1666353825593-7
+    author: dell (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: rv_index_columnPK
+            name: id
+            type: VARCHAR(64)
+        - column:
+            name: order_num
+            type: INTEGER
+        - column:
+            name: remark
+            type: VARCHAR(255)
+        - column:
+            name: column_id
+            type: VARCHAR(64)
+        - column:
+            name: index_id
+            type: VARCHAR(64)
+        tableName: rv_index_column
+- changeSet:
+    id: 1666353825593-8
+    author: dell (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: rv_primary_keyPK
+            name: id
+            type: VARCHAR(64)
+        - column:
+            constraints:
+              nullable: false
+            name: code
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: name
+            type: VARCHAR(255)
+        - column:
+            name: order_num
+            type: INTEGER
+        - column:
+            name: remark
+            type: VARCHAR(255)
+        - column:
+            name: backing_index_id
+            type: VARCHAR(64)
+        - column:
+            name: prototype_id
+            type: VARCHAR(64)
+        tableName: rv_primary_key
+- changeSet:
+    id: 1666353825593-9
+    author: dell (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: rv_primary_key_columnPK
+            name: id
+            type: VARCHAR(64)
+        - column:
+            name: order_num
+            type: INTEGER
+        - column:
+            name: remark
+            type: VARCHAR(255)
+        - column:
+            name: column_id
+            type: VARCHAR(64)
+        - column:
+            name: primary_key_id
+            type: VARCHAR(64)
+        tableName: rv_primary_key_column
+- changeSet:
+    id: 1666353825593-10
+    author: dell (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: rv_prototypePK
+            name: id
+            type: VARCHAR(64)
+        - column:
+            constraints:
+              nullable: false
+            name: code
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: db_sync_flag
+            type: BOOLEAN
+        - column:
+            constraints:
+              nullable: false
+            name: name
+            type: VARCHAR(255)
+        - column:
+            name: remark
+            type: VARCHAR(255)
+        tableName: rv_prototype
+- changeSet:
+    id: 1666353825593-11
+    author: dell (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: rv_unique_constraintPK
+            name: id
+            type: VARCHAR(64)
+        - column:
+            constraints:
+              nullable: false
+            name: code
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: name
+            type: VARCHAR(255)
+        - column:
+            name: order_num
+            type: INTEGER
+        - column:
+            name: remark
+            type: VARCHAR(255)
+        - column:
+            name: backing_index_id
+            type: VARCHAR(64)
+        - column:
+            name: prototype_id
+            type: VARCHAR(64)
+        tableName: rv_unique_constraint
+- changeSet:
+    id: 1666353825593-12
+    author: dell (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: rv_unique_constraint_columnPK
+            name: id
+            type: VARCHAR(64)
+        - column:
+            name: order_num
+            type: INTEGER
+        - column:
+            name: remark
+            type: VARCHAR(255)
+        - column:
+            name: column_id
+            type: VARCHAR(64)
+        - column:
+            name: unique_constraint_id
+            type: VARCHAR(64)
+        tableName: rv_unique_constraint_column
+- changeSet:
+    id: 1666353825593-13
+    author: dell (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: rv_userPK
+            name: id
+            type: VARCHAR(32)
+        - column:
+            constraints:
+              nullable: false
+            name: password
+            remarks: 用户密码，前端传入时为用户输入密码的MD5值，长度为固定的32位，加盐合并之后，长度为固定的64位，即前端传入值和数据库存储值长度不同
+            type: VARCHAR(64)
+        - column:
+            constraints:
+              nullable: false
+            name: user_type
+            remarks: 用户类别
+            type: INTEGER
+        - column:
+            constraints:
+              nullable: false
+            name: username
+            remarks: 用户名
+            type: VARCHAR(32)
+        tableName: rv_user
+- changeSet:
+    id: 1666353825593-14
+    author: dell (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: code
+        constraintName: UC_RV_DICTCODE_COL
+        tableName: rv_dict
+- changeSet:
+    id: 1666353825593-15
+    author: dell (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: username
+        constraintName: uc_rvuser_username
+        tableName: rv_user
+- changeSet:
+    id: 1666353825593-16
+    author: dell (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: prototype_id
+        indexName: idx_rvcolumn_prototype_id
+        tableName: rv_column
+- changeSet:
+    id: 1666353825593-17
+    author: dell (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: prototype_id
+        indexName: idx_rvforeignkey_prototype_id
+        tableName: rv_foreign_key
+- changeSet:
+    id: 1666353825593-18
+    author: dell (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: column_id
+        indexName: idx_rvforeignkeyforeigncolumn_column_id
+        tableName: rv_foreign_key_foreign_column
+- changeSet:
+    id: 1666353825593-19
+    author: dell (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: foreign_key_id
+        indexName: idx_rvforeignkeyforeigncolumn_foreign_key_id
+        tableName: rv_foreign_key_foreign_column
+- changeSet:
+    id: 1666353825593-20
+    author: dell (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: column_id
+        indexName: idx_rvforeignkeylocalcolumn_column_id
+        tableName: rv_foreign_key_local_column
+- changeSet:
+    id: 1666353825593-21
+    author: dell (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: foreign_key_id
+        indexName: idx_rvforeignkeylocalcolumn_foreign_key_id
+        tableName: rv_foreign_key_local_column
+- changeSet:
+    id: 1666353825593-22
+    author: dell (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: prototype_id
+        indexName: idx_rvindex_prototype_id
+        tableName: rv_index
+- changeSet:
+    id: 1666353825593-23
+    author: dell (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: column_id
+        indexName: idx_rvindexcolumn_column_id
+        tableName: rv_index_column
+- changeSet:
+    id: 1666353825593-24
+    author: dell (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: index_id
+        indexName: idx_rvindexcolumn_index_id
+        tableName: rv_index_column
+- changeSet:
+    id: 1666353825593-25
+    author: dell (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: prototype_id
+        indexName: idx_rvprimarykey_prototype_id
+        tableName: rv_primary_key
+- changeSet:
+    id: 1666353825593-26
+    author: dell (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: column_id
+        indexName: idx_rvprimarykeycolumn_column_id
+        tableName: rv_primary_key_column
+- changeSet:
+    id: 1666353825593-27
+    author: dell (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: primary_key_id
+        indexName: idx_rvprimarykeycolumn_primary_key_id
+        tableName: rv_primary_key_column
+- changeSet:
+    id: 1666353825593-28
+    author: dell (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: prototype_id
+        indexName: idx_rvuniqueconstraint_prototype_id
+        tableName: rv_unique_constraint
+- changeSet:
+    id: 1666353825593-29
+    author: dell (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: column_id
+        indexName: idx_rvuniqueconstraintcolumn_column_id
+        tableName: rv_unique_constraint_column
+- changeSet:
+    id: 1666353825593-30
+    author: dell (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: unique_constraint_id
+        indexName: idx_rvuniqueconstraintcolumn_constraint_id
+        tableName: rv_unique_constraint_column
+- changeSet:
+    id: 1666353825593-31
+    author: dell (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: user_type
+        indexName: idx_rvuser_usertype
+        tableName: rv_user
+- changeSet:
+    id: 1666353825593-32
+    author: dell (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: backing_index_id
+        baseTableName: rv_primary_key
+        constraintName: FK10unxnvr0knq3196th7notxdp
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        referencedColumnNames: id
+        referencedTableName: rv_index
+        validate: true
+- changeSet:
+    id: 1666353825593-33
+    author: dell (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: foreign_key_id
+        baseTableName: rv_foreign_key_foreign_column
+        constraintName: FK37gn64chyi9aqgy2c34g76ki4
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        referencedColumnNames: id
+        referencedTableName: rv_foreign_key
+        validate: true
+- changeSet:
+    id: 1666353825593-34
+    author: dell (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: column_id
+        baseTableName: rv_foreign_key_local_column
+        constraintName: FK3k85n1nrf7lttir2f1n16fja1
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        referencedColumnNames: id
+        referencedTableName: rv_column
+        validate: true
+- changeSet:
+    id: 1666353825593-35
+    author: dell (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: column_id
+        baseTableName: rv_unique_constraint_column
+        constraintName: FK9k1dkgcu9c819obhqp05o194h
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        referencedColumnNames: id
+        referencedTableName: rv_column
+        validate: true
+- changeSet:
+    id: 1666353825593-36
+    author: dell (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: column_id
+        baseTableName: rv_index_column
+        constraintName: FK9ubcpdn01a3npjpltmre3ag0e
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        referencedColumnNames: id
+        referencedTableName: rv_column
+        validate: true
+- changeSet:
+    id: 1666353825593-37
+    author: dell (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: foreign_key_id
+        baseTableName: rv_foreign_key_local_column
+        constraintName: FKb2vwjffji7n6m830pg1ulegwt
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        referencedColumnNames: id
+        referencedTableName: rv_foreign_key
+        validate: true
+- changeSet:
+    id: 1666353825593-38
+    author: dell (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: primary_key_id
+        baseTableName: rv_primary_key_column
+        constraintName: FKcblxsabn3sxwi6pqxappit3dr
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        referencedColumnNames: id
+        referencedTableName: rv_primary_key
+        validate: true
+- changeSet:
+    id: 1666353825593-39
+    author: dell (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: column_id
+        baseTableName: rv_primary_key_column
+        constraintName: FKdyvn2oinu5ep9eon6qls144k3
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        referencedColumnNames: id
+        referencedTableName: rv_column
+        validate: true
+- changeSet:
+    id: 1666353825593-40
+    author: dell (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: foreign_prototype_id
+        baseTableName: rv_foreign_key
+        constraintName: FKiq2i5n2xd39o4yemqn5eat6h4
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        referencedColumnNames: id
+        referencedTableName: rv_prototype
+        validate: true
+- changeSet:
+    id: 1666353825593-41
+    author: dell (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: backing_index_id
+        baseTableName: rv_foreign_key
+        constraintName: FKoe0neny8iecs4h31h6gyba1kj
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        referencedColumnNames: id
+        referencedTableName: rv_index
+        validate: true
+- changeSet:
+    id: 1666353825593-42
+    author: dell (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: backing_index_id
+        baseTableName: rv_unique_constraint
+        constraintName: FKpdq7sbo7qi2orswd3c40m6cau
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        referencedColumnNames: id
+        referencedTableName: rv_index
+        validate: true
+- changeSet:
+    id: 1666353825593-43
+    author: dell (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: prototype_id
+        baseTableName: rv_foreign_key
+        constraintName: FKpqhilq5um60qfvy1f6218s78w
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        referencedColumnNames: id
+        referencedTableName: rv_prototype
+        validate: true
+- changeSet:
+    id: 1666353825593-44
+    author: dell (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: prototype_id
+        baseTableName: rv_column
+        constraintName: FKqulwkf5x87owbygbwfqn6guni
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        referencedColumnNames: id
+        referencedTableName: rv_prototype
+        validate: true
+- changeSet:
+    id: 1666353825593-45
+    author: dell (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: prototype_id
+        baseTableName: rv_index
+        constraintName: FKqy0p7q78h1l735r17xj56grq3
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        referencedColumnNames: id
+        referencedTableName: rv_prototype
+        validate: true
+- changeSet:
+    id: 1666353825593-46
+    author: dell (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: column_id
+        baseTableName: rv_foreign_key_foreign_column
+        constraintName: FKrn9dv3n01gbsvtif7idv7us39
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        referencedColumnNames: id
+        referencedTableName: rv_column
+        validate: true
+- changeSet:
+    id: 1666353825593-47
+    author: dell (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: index_id
+        baseTableName: rv_index_column
+        constraintName: FKs900s7dyr1vv64xefnxismplh
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        referencedColumnNames: id
+        referencedTableName: rv_index
+        validate: true
+- changeSet:
+    id: 1666353825593-48
+    author: dell (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: prototype_id
+        baseTableName: rv_unique_constraint
+        constraintName: FKse08mhl44p25u8yxiscei6mqp
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        referencedColumnNames: id
+        referencedTableName: rv_prototype
+        validate: true
+- changeSet:
+    id: 1666353825593-49
+    author: dell (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: prototype_id
+        baseTableName: rv_primary_key
+        constraintName: FKsketedxttbtdrlic8wx3uolf2
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        referencedColumnNames: id
+        referencedTableName: rv_prototype
+        validate: true
+- changeSet:
+    id: 1666353825593-50
+    author: dell (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: unique_constraint_id
+        baseTableName: rv_unique_constraint_column
+        constraintName: FKsploy2o91vlxmof7exwvpfsji
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        referencedColumnNames: id
+        referencedTableName: rv_unique_constraint
+        validate: true
 

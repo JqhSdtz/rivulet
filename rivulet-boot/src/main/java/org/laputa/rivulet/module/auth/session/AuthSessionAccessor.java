@@ -18,11 +18,9 @@ public class AuthSessionAccessor {
     public void setCurrentUser(RvUser rvUser) {
         httpSession.setAttribute("currentUser", rvUser);
     }
-
     public RvUser getCurrentUser() {
         return (RvUser) httpSession.getAttribute("currentUser");
     }
-
     public void invalidate() {
         httpSession.invalidate();
     }

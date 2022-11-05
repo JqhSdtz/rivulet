@@ -1,8 +1,7 @@
 import {TabsContent, TabsContext, TabsContextType} from '@/layouts/BasicLayout';
 import {RouteConfig} from '@/routes';
-import {RouteObject} from 'react-router/lib/router';
 import {useContext} from 'react';
-import {useLocation} from 'react-router-dom';
+import {useLocation, RouteObject} from 'react-router-dom';
 
 type MenuRouteConfig = {
     subMenu?: MenuRouteConfig[]
@@ -29,7 +28,7 @@ const WrappedComponent = (config: RouteConfig) => {
     return <TabsContent/>;
 };
 
-const processRouteConfig = (routeObjects:RouteObject[], config: MenuRouteConfig) => {
+const processRouteConfig = (routeObjects: RouteObject[], config: MenuRouteConfig) => {
     const routeObject = {...config} as RouteObject;
     routeObject.element = <WrappedComponent {...config}/>;
     if (config.subMenu) {
@@ -39,7 +38,7 @@ const processRouteConfig = (routeObjects:RouteObject[], config: MenuRouteConfig)
         });
     }
     routeObjects.push(routeObject);
-}
+};
 
 export default function (routeConfigs: MenuRouteConfig[]): RouteObject[] {
     const routeObjects: RouteObject[] = [];

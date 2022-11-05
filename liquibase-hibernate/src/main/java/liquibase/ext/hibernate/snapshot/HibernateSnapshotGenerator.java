@@ -11,11 +11,18 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGenerator;
 import liquibase.snapshot.SnapshotGeneratorChain;
 import liquibase.structure.DatabaseObject;
+import org.hibernate.MappingException;
+import org.hibernate.boot.internal.MetadataImpl;
 import org.hibernate.boot.spi.MetadataImplementor;
+import org.hibernate.mapping.PersistentClass;
+import org.hibernate.mapping.Property;
 import org.hibernate.mapping.Table;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Base class for all Hibernate SnapshotGenerators
@@ -27,6 +34,11 @@ public abstract class HibernateSnapshotGenerator implements SnapshotGenerator {
 
     private Class<? extends DatabaseObject> defaultFor = null;
     private Class<? extends DatabaseObject>[] addsTo = null;
+
+    // !!!为了获取字段上的注解，提前保存字段和Field对象的映射关系
+    private Map<String, Field> columnFieldMap = new HashMap<>();
+    // !!!为了方便设置表的注释，提前保存表名和实体类的映射关系
+    private Map<String, Class> tableClassMap = new HashMap<>();
 
     protected HibernateSnapshotGenerator(Class<? extends DatabaseObject> defaultFor) {
         this.defaultFor = defaultFor;
@@ -94,7 +106,27 @@ public abstract class HibernateSnapshotGenerator implements SnapshotGenerator {
 
     protected org.hibernate.mapping.Table findHibernateTable(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
         HibernateDatabase database = (HibernateDatabase) snapshot.getDatabase();
-        MetadataImplementor metadata = (MetadataImplementor) database.getMetadata();
+
+        // !!!此处有修改和增加，为了获取字段的注解
+        MetadataImpl metadata = (MetadataImpl) database.getMetadata();
+        Map<String, PersistentClass> entityBindingMap = metadata.getEntityBindingMap();
+        entityBindingMap.values().forEach(entity -> {
+            Class entityClass = entity.getMappedClass();
+            if (entityClass == null) return;
+            this.tableClassMap.put(entity.getTable().getName(), entityClass);
+            for (Field field: entityClass.getDeclaredFields()) {
+                Property property;
+                try {
+                    property = entity.getProperty(field.getName());;
+                } catch (MappingException exception) {
+                    continue;
+                }
+                String tableName = entity.getTable().getName();
+                if (!property.getValue().getColumnIterator().hasNext()) continue;;
+                String columnName = property.getValue().getColumnIterator().next().getText();
+                this.columnFieldMap.put(tableName + "." + columnName, field);
+            }
+        });
 
         Collection<Table> tmapp = metadata.collectTableMappings();
         Iterator<Table> tableMappings = tmapp.iterator();
@@ -106,5 +138,13 @@ public abstract class HibernateSnapshotGenerator implements SnapshotGenerator {
             }
         }
         return null;
+    }
+
+    protected Field getColumnField(String tableName, String columnName) {
+        return this.columnFieldMap.get(tableName + "." + columnName);
+    }
+
+    protected Class getTableClass(String tableName) {
+        return this.tableClassMap.get(tableName);
     }
 }

@@ -14,7 +14,7 @@ const schema = {
             type: 'void',
             'x-component': 'RvTable',
             'x-component-props': {
-                baseUrl: '/data_model'
+                baseUrl: '/dataModel'
             },
             properties: {
                 toolbar: doubleWrapObject('toolbar', {
