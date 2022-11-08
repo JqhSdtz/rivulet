@@ -88,6 +88,10 @@ async function onRequireConfirmUpdateSql(result: Result, doRequest: () => Promis
 }
 
 export default {
+    async doRaw(requestFunc: () => Promise<AxiosResponse>): Promise<AxiosResponse> {
+        const result = await this.do(requestFunc);
+        return result.rawResponse;
+    },
     async do(requestFunc: () => Promise<AxiosResponse>): Promise<Result> {
         const doRvRequest = wrapRequestFunction(requestFunc);
         let result = await doRvRequest();

@@ -1,8 +1,9 @@
 import {FormTab} from '@formily/antd';
 import React, {useState} from 'react';
 import {Button, TabsProps} from 'antd';
-import {useParentForm} from '@formily/react';
+import {RecursionField, Schema, useParentForm} from '@formily/react';
 import axios from 'axios';
+import RvRequest from '@/utils/rvRequest';
 
 const Submit = () => {
     const form = useParentForm();
@@ -10,7 +11,7 @@ const Submit = () => {
     const onClick = () => {
         form.validate().then(() => {
             setLoading(true);
-            form.submit((data) => axios.post('/dataModel', data))
+            form.submit((data) => RvRequest.do(() => axios.post('/dataModel', data)))
                 .then(() => setLoading(false));
         }).catch(() => {
         });
@@ -21,5 +22,8 @@ const Submit = () => {
 export const RvFormTab: React.FC<TabsProps> = (props) => {
     const tabProps = {...props};
     tabProps.tabBarExtraContent = <Submit/>;
+    tabProps.items.forEach(item => {
+        item.children = <RecursionField schema={item.children as Schema}/>;
+    });
     return <FormTab {...tabProps}/>;
 };

@@ -7,6 +7,7 @@ import RvModal from '@/components/common/RvModal';
 import store from '@/store';
 import axios from 'axios';
 import {Result} from '@/types/result';
+import RvRequest from '@/utils/rvRequest';
 
 export default (props: SiderMenuProps) => {
     const {prefixCls} = props;
@@ -17,8 +18,7 @@ export default (props: SiderMenuProps) => {
         RvModal.confirm({
             title: '确认退出登录？',
             onOk: async () => {
-                const response = await axios.post('/auth/logout');
-                const result: Result = response.data;
+                const result = await RvRequest.do(() => axios.post('/auth/logout'));
                 if (result.successful) {
                     authDispatchers.setState({
                         hasLoggedIn: false

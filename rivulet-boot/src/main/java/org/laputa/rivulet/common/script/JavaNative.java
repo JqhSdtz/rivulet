@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
  * @since 下午 6:33 22/08/27
  */
 @Component
-public class JsGlobal {
+public class JavaNative {
     @Resource
     private EntityManager entityManager;
 

@@ -1,5 +1,6 @@
 package org.laputa.rivulet.module.data_model.entity.column_relation;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -39,6 +40,7 @@ public class RvIndexColumn extends RvEntity<String> {
     /**
      * 这里的@JoinColumn的nullable属性不能设为false，否则无法正确插入数据
      */
+    @JsonBackReference
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne

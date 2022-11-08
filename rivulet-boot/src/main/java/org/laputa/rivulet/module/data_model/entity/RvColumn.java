@@ -61,7 +61,7 @@ public class RvColumn extends RvEntity<String> {
     @Column(name = "auto_increment")
     @Comment("自增标识")
     @DefaultValue(Strings.FALSE)
-    private boolean autoIncrement;
+    private Boolean autoIncrement;
 
     @Column(name = "start_with")
     @Comment("自增起点")
@@ -88,5 +88,5 @@ public class RvColumn extends RvEntity<String> {
     @Column(name = "nullable")
     @Comment("是否可以为空值")
     @DefaultValue(Strings.FALSE)
-    private boolean nullable;
+    private Boolean nullable;
 }

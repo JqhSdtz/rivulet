@@ -1,11 +1,118 @@
 import RvUtil from '@/utils/rvUtil';
 import {TabNodeType} from './TabNodeProvider';
-import {Dispatch, MouseEvent, MutableRefObject, ReactElement, SetStateAction, useContext, useState} from 'react';
+import {
+    Dispatch,
+    MouseEvent,
+    MutableRefObject,
+    ReactElement,
+    SetStateAction,
+    useContext,
+    useRef,
+    useState
+} from 'react';
 import {CSS} from '@dnd-kit/utilities';
 import {TabsContext, TabsContextType} from './TabsContextProvider';
-import TabContextMenu from './TabContextMenu';
 import {Dropdown} from 'antd';
 import {useSortable} from '@dnd-kit/sortable';
+import {ItemType} from 'antd/lib/menu/hooks/useItems';
+import {useClickAway} from 'ahooks';
+
+function getDropdownMenuItems(tabNode: TabNodeType, tabsContext: TabsContextType) {
+    const {
+        splitViewContainer,
+        tabNodes,
+        removeNode,
+        refreshNode,
+        setSplitViewOfTab,
+        removeAllNodes,
+        removeNodesOfSplitView,
+        removeOtherNodes,
+        removeLeftSideNodes,
+        removeRightSideNodes
+    } = tabsContext;
+    const menuItems = [] as ItemType[];
+    const notSinglePage = tabNodes.length > 1;
+    menuItems.push({
+        key: 'closeTab',
+        label: '关闭',
+        onClick: () => removeNode(tabNode.name)
+    });
+    menuItems.push({
+        key: 'refreshTab',
+        label: '刷新',
+        onClick: () => refreshNode(tabNode.name)
+    });
+    if (notSinglePage) {
+        if (splitViewContainer.splitViews.length === 1) {
+            menuItems.push({
+                key: 'splitView',
+                label: '分屏',
+                onClick: () => setSplitViewOfTab(tabNode.name, 1)
+            });
+        } else {
+            const splitViewMenuItems = [] as ItemType[];
+            for (let i = 0; i < splitViewContainer.splitViews.length; ++i) {
+                splitViewMenuItems.push({
+                    key: 'splitView' + i,
+                    label: '分屏' + (i + 1),
+                    onClick: () => setSplitViewOfTab(tabNode.name, i)
+                });
+            }
+            splitViewMenuItems.push({
+                key: 'splitViewNew',
+                label: '新的分屏',
+                onClick: () => setSplitViewOfTab(tabNode.name, splitViewContainer.splitViews.length)
+            });
+            menuItems.push({
+                key: 'splitView',
+                label: '分屏',
+                children: splitViewMenuItems
+            });
+        }
+    }
+    const batchCloseTabsChildren = [] as ItemType[];
+    batchCloseTabsChildren.push({
+        key: 'closeOtherTabs',
+        label: '关闭其他',
+        onClick: () => removeOtherNodes(tabNode.name)
+    });
+    batchCloseTabsChildren.push({
+        key: 'closeAllTabs',
+        label: '关闭全部',
+        onClick: () => removeAllNodes()
+    });
+    if (splitViewContainer.splitViews.length > 1) {
+        batchCloseTabsChildren.push({
+            key: 'removeNodesOfSplitView',
+            label: '关闭分屏',
+            onClick: () => removeNodesOfSplitView(tabNode.name, false)
+        });
+        batchCloseTabsChildren.push({
+            key: 'removeNodesOfSplitViewMerge',
+            label: '关闭分屏(合并)',
+            onClick: () => removeNodesOfSplitView(tabNode.name, true)
+        });
+    }
+    batchCloseTabsChildren.push({
+        key: 'closeLeftSideTabs',
+        label: '关闭左侧',
+        onClick: () => removeLeftSideNodes(tabNode.name)
+    });
+    batchCloseTabsChildren.push({
+        key: 'closeRightSideTabs',
+        label: '关闭右侧',
+        onClick: () => removeRightSideNodes(tabNode.name)
+    });
+    if (notSinglePage) {
+        menuItems.push({
+            key: 'batchCloseTabs',
+            label: '批量关闭',
+            children: batchCloseTabsChildren
+        });
+    }
+    return menuItems;
+}
+
 
 interface TabDividerProps {
     isShow: boolean;
@@ -43,16 +150,17 @@ const SortableTabNode = (props: {
             type: 'tabNode'
         }
     };
+    const tabsContext = useContext<TabsContextType>(TabsContext);
     const {
         tabsEvent,
         setTabNodeAttributes,
         refreshTabNode
-    } = useContext<TabsContextType>(TabsContext);
+    } = tabsContext;
     const sortableAttr = useSortable(sortableProps);
     const {
         attributes,
         listeners,
-        node,
+        node: tabElemRef,
         setNodeRef,
         transform,
         isDragging
@@ -79,13 +187,6 @@ const SortableTabNode = (props: {
             setContextMenuVisible(false);
         }
     });
-    const tabContextMenu = (
-        <TabContextMenu
-            tabNode={tabNode}
-            tabElemRef={node}
-            setContextMenuVisible={setContextMenuVisible}
-        />
-    );
     // 没有找到antd的dropdown组件禁用关闭时的过渡效果的方法，应该是通过js控制的，
     // 所以采用直接添加class，直接设置display为none的方式实现立即关闭右键菜单
     let overlayClassName = 'keep-alive-tab-context-menu';
@@ -95,12 +196,14 @@ const SortableTabNode = (props: {
         transform: CSS.Transform.toString(transform),
         transition: 'transform 0.3s cubic-bezier(0.645, 0.045, 0.355, 1)'
     };
+    const tabContextMenuItems = getDropdownMenuItems(tabNode, tabsContext);
     return (
         <Dropdown
-            overlay={tabContextMenu}
+            menu={{items: tabContextMenuItems, onClick: () => setContextMenuVisible(false)}}
             trigger={['contextMenu']}
             overlayClassName={overlayClassName}
-            visible={contextMenuVisible}
+            open={contextMenuVisible}
+            onOpenChange={setContextMenuVisible}
             destroyPopupOnHide
         >
             <div className={className + sortableClassName}

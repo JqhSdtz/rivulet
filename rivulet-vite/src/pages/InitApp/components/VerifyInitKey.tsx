@@ -8,6 +8,7 @@ import {FormProps} from '@formily/antd/esm/form';
 import RvModal from '@/components/common/RvModal';
 import axios from 'axios';
 import {Result} from '@/types/result';
+import RvRequest from '@/utils/rvRequest';
 
 const form = createForm();
 
@@ -74,7 +75,7 @@ export default (props: IVerifyInitKeyProps) => {
                     form={form}
                     {...formLayout}
                     onAutoSubmit={async (data) => {
-                        const result: Result = await axios.post('/app/verifyInitKey', data);
+                        const result: Result = await RvRequest.do(() => axios.post('/app/verifyInitKey', data));
                         if (result.successful) {
                             RvModal.success({
                                 content: '密钥验证成功！',

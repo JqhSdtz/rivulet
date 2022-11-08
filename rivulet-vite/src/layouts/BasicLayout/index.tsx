@@ -10,8 +10,6 @@ import TopNavHeader from './components/TopNavHeader';
 import type {SettingDrawerProps, SettingDrawerState} from './components/SettingDrawer';
 import SettingDrawer from './components/SettingDrawer';
 import GridContent from './components/GridContent';
-import type {PageContainerProps} from './components/PageContainer';
-import PageContainer, {ProBreadcrumb, ProPageHeader} from './components/PageContainer';
 import type {RouteContextType} from './contexts/RouteContext';
 import RouteContext from './contexts/RouteContext';
 import getMenuData from './utils/getMenuData';
@@ -117,18 +115,14 @@ export {
     SettingDrawer,
     getPageTitle,
     getMenuData,
-    PageContainer,
     FooterToolbar,
-    WaterMark,
-    ProPageHeader,
-    ProBreadcrumb
+    WaterMark
 };
 
 export * from './components/KeepAliveTabs';
 
 export type {
     FooterProps,
-    PageContainerProps,
     TopNavHeaderProps,
     BasicLayoutProps,
     RouteContextType,

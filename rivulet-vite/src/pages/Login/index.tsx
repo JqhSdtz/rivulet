@@ -10,6 +10,7 @@ import md5 from 'md5';
 import RvModal from '@/components/common/RvModal';
 import axios from 'axios';
 import {Result} from '@/types/result';
+import RvRequest from '@/utils/rvRequest';
 
 const form = createForm({
     validateFirst: true
@@ -66,8 +67,7 @@ export default () => {
 
     async function onSubmit(data) {
         data.password = md5(data.password);
-        const response = await axios.post('/auth/login', data);
-        const result: Result = response.data;
+        const result = await RvRequest.do(() => axios.post('/auth/login', data));
         if (result.successful) {
             userDispatchers.setState(result.payload);
             RvModal.success({

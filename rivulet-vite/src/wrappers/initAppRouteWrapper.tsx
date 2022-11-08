@@ -4,8 +4,8 @@ import {Navigate, RouteObject} from 'react-router-dom';
 
 const WrappedComponent = (config: RouteConfig) => {
     const appState = store.useModelState('app');
+    const authState = store.useModelState('auth');
     if (appState.appInitialized) {
-        const authState = store.useModelState('auth');
         if (authState.hasLoggedIn) {
             return <Navigate to="/"/>;
         } else {

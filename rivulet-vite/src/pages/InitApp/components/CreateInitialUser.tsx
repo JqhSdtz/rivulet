@@ -10,6 +10,7 @@ import RvModal from '@/components/common/RvModal';
 import store from '@/store';
 import axios from 'axios';
 import {Result} from '@/types/result';
+import RvRequest from '@/utils/rvRequest';
 
 const form = createForm({
     validateFirst: true
@@ -80,7 +81,7 @@ export default (props: ICreateInitialUserProps) => {
 
     async function onSubmit(data) {
         data.password = md5(data.password);
-        const result: Result = await axios.post('/app/initialUser', data);
+        const result: Result = await RvRequest.do(() => axios.post('/app/initialUser', data));
         if (result.successful) {
             RvModal.success({
                 content: '创建初始用户成功！',

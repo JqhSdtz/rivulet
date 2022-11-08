@@ -1,6 +1,5 @@
 package org.laputa.rivulet.common.script;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
@@ -9,7 +8,6 @@ import org.graalvm.polyglot.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import javax.persistence.EntityManager;
 
 /**
  * @author JQH
@@ -18,16 +16,15 @@ import javax.persistence.EntityManager;
 @Component
 public class JsContextFactory extends BasePooledObjectFactory<Context> {
     @Resource
-    private JsGlobal jsGlobal;
+    private JavaNative javaNative;
 
     @Override
     public Context create() {
         Context context = Context.newBuilder("js")
                 .allowAllAccess(true)
-                .option("engine.WarnInterpreterOnly", "false")
                 .build();
         Value bindings = context.getBindings("js");
-        bindings.putMember("jsGlobal", jsGlobal);
+        bindings.putMember("javaNative", javaNative);
         return context;
     }
 

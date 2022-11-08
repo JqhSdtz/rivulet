@@ -1,9 +1,9 @@
 package org.laputa.rivulet.module.data_model.controller;
 
 import org.laputa.rivulet.common.model.Result;
+import org.laputa.rivulet.common.script.JsRunner;
 import org.laputa.rivulet.module.data_model.entity.RvPrototype;
 import org.laputa.rivulet.module.data_model.service.DataModelService;
-import org.laputa.rivulet.module.data_model.service.FormSchemaService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +21,7 @@ public class DataModelController {
     private DataModelService dataModelService;
 
     @Resource
-    private FormSchemaService formSchemaService;
+    private JsRunner jsRunner;
 
     @PostMapping
     public Result<Void> createDataModel(@RequestBody @Validated RvPrototype rvPrototype) {
@@ -38,8 +38,18 @@ public class DataModelController {
         return dataModelService.queryOne(id);
     }
 
-    @GetMapping("/form_schema")
+    @GetMapping("/ModelDetailSchema")
+    public Result<Object> getModelDetailSchema() {
+        return jsRunner.runScript("/src/schemas/ModelDetail.mjs");
+    }
+
+    @GetMapping("/DataModelIndexSchema")
     public Result<Object> getFormSchema() {
-        return formSchemaService.getFormSchema();
+        return jsRunner.runScript("/src/schemas/DataModelIndex.mjs");
+    }
+
+    @PostMapping("/clearScriptCache")
+    public Result<Void> clearScriptCache() {
+        return jsRunner.clearCache();
     }
 }

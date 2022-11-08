@@ -24,7 +24,7 @@ public class DataModelService {
     private LiquibaseDdlExecutor ddlExecutor;
 
     public Result<Void> createDataModel(RvPrototype rvPrototype) {
-        rvPrototype.setDbSyncFlag(false);
+        rvPrototype.setSyncFlag(false);
         rvPrototypeRepository.save(rvPrototype);
         ddlExecutor.doUpdate(ddlExecutor.addTable(rvPrototype, null));
         return Result.succeed();

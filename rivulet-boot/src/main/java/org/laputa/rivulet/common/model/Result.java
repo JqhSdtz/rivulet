@@ -42,7 +42,7 @@ public class Result<ResultType> {
         return succeed(payload, null);
     }
 
-    public static <T> Result<T> succeed(String returnMessage) {
+    public static <T> Result<T> succeedWithMessage(String returnMessage) {
         return succeed(null, returnMessage);
     }
 

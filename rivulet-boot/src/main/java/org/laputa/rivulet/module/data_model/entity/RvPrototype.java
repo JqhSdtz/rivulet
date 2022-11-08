@@ -50,11 +50,11 @@ public class RvPrototype extends RvEntity<String> {
 
     @Column(name = "db_sync_flag", nullable = false)
     @DefaultValue(Strings.FALSE)
-    private boolean dbSyncFlag;
+    private Boolean syncFlag;
 
     @Column(name = "built_in", nullable = false)
     @DefaultValue(Strings.FALSE)
-    private boolean builtIn;
+    private Boolean builtIn;
 
     @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "prototype")

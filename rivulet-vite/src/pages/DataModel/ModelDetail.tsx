@@ -7,6 +7,7 @@ import {allComponents} from '@/utils/formilyUtil';
 import {useFormInstance} from '@/components/formily/hooks';
 import {useEffect} from 'react';
 import useUrlState from '@ahooksjs/use-url-state';
+import RvRequest from '@/utils/rvRequest';
 
 const SchemaField = createSchemaField({
     components: allComponents as any
@@ -28,8 +29,8 @@ const FormComponent = (props) => {
 
 export default () => {
     const [urlState] = useUrlState();
-    const {data, loading} = useRequest(() => axios.get('/dataModel/form_schema', {
+    const {data, loading} = useRequest(() => RvRequest.doRaw(() => axios.get('/dataModel/ModelDetailSchema', {
         params: urlState
-    }));
+    })));
     return loading ? <PageLoading/> : <FormComponent {...JSON.parse(data.data.payload)}/>;
 }

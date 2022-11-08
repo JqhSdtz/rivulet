@@ -1,9 +1,10 @@
 import {useRequest} from 'ahooks';
 import axios from 'axios';
-import {RecursionField, Schema, useFieldSchema, useForm} from '@formily/react';
+import {RecursionField, useFieldSchema, useForm} from '@formily/react';
 import React, {useEffect} from 'react';
 import {filterEmptyString} from '@/utils/formilyUtil';
 import {Result} from '@/types/result';
+import RvRequest from '@/utils/rvRequest';
 
 interface RvTableProps {
     baseUrl: string;
@@ -19,9 +20,9 @@ export const RvTableContext = React.createContext({} as RvTableContextType);
 
 export const RvTable: React.FC<RvTableProps> = (props) => {
     const queryRequest = (params) => {
-        return axios.get(props.baseUrl, {
+        return RvRequest.doRaw(() => axios.get(props.baseUrl, {
             params
-        });
+        }));
     };
     const {data, loading, run} = useRequest<any, any[]>(queryRequest);
     const result = data?.data as any as Result;

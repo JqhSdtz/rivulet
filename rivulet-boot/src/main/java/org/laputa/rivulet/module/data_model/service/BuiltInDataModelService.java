@@ -12,7 +12,6 @@ import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.ext.hibernate.database.HibernateDatabase;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -47,9 +46,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.sql.DataSource;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
@@ -141,7 +137,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
             return Result.fail("WrongConfirmKey", "确认密钥不正确");
         }
         doStructureUpdate();
-        return Result.succeed("内部数据模型更新成功");
+        return Result.succeedWithMessage("内部数据模型更新成功");
     }
 
     public synchronized void refreshStructureUpdateSql() throws LiquibaseException, SQLException {
@@ -251,7 +247,6 @@ public class BuiltInDataModelService implements ApplicationRunner {
             if (tableSet.stream().filter(table -> table.getName().equals(prototype.getCode())).findAny().isPresent()) {
                 rvPrototypeMap.put(prototype.getCode(), prototype);
             } else {
-                log.info("删除表 " + prototype.getCode());
                 toDeletePrototypeList.add(prototype);
             }
         });
@@ -277,7 +272,6 @@ public class BuiltInDataModelService implements ApplicationRunner {
         rvPrototype.setCode(table.getName());
         rvPrototype.setBuiltIn(true);
         if (isNew) {
-            log.info("新增表 " + table.getName());
             rvPrototype.setName(table.getName());
         }
         if (rvPrototype.getRemark() == null) {
@@ -291,7 +285,6 @@ public class BuiltInDataModelService implements ApplicationRunner {
                 if (table.getColumns().stream().filter(column -> column.getName().equals(rvColumn.getCode())).findAny().isPresent()) {
                     rvColumnMap.put(rvColumn.getCode(), rvColumn);
                 } else {
-                    log.info("表 " + table.getName() + " 删除字段 " + rvColumn.getCode());
                     deletedColumnIdList.add(rvColumn.getId());
                 }
             });
@@ -310,7 +303,6 @@ public class BuiltInDataModelService implements ApplicationRunner {
                 if (table.getIndexes().stream().filter(index -> index.getName().equals(rvIndex.getCode())).findAny().isPresent()) {
                     rvIndexMap.put(rvIndex.getCode(), rvIndex);
                 } else {
-                    log.info("表 " + table.getName() + " 删除索引 " + rvIndex.getCode());
                     deletedIndexIdList.add(rvIndex.getId());
                 }
             });
@@ -332,7 +324,6 @@ public class BuiltInDataModelService implements ApplicationRunner {
                 if (table.getOutgoingForeignKeys().stream().filter(foreignKey -> foreignKey.getName().equals(rvForeignKey.getCode())).findAny().isPresent()) {
                     rvForeignKeyMap.put(rvForeignKey.getCode(), rvForeignKey);
                 } else {
-                    log.info("表 " + table.getName() + " 删除外键 " + rvForeignKey.getCode());
                     deletedForeignKeyIdList.add(rvForeignKey.getId());
                 }
             });
@@ -352,7 +343,6 @@ public class BuiltInDataModelService implements ApplicationRunner {
                 if (table.getUniqueConstraints().stream().filter(uniqueConstraint -> uniqueConstraint.getName().equals(rvUniqueConstraint.getCode())).findAny().isPresent()) {
                     rvUniqueConstraintMap.put(rvUniqueConstraint.getCode(), rvUniqueConstraint);
                 } else {
-                    log.info("表 " + table.getName() + " 删除唯一性约束 " + rvUniqueConstraint.getCode());
                     deletedUniqueConstraintIdList.add(rvUniqueConstraint.getId());
                 }
             });
@@ -364,7 +354,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
             rvUniqueConstraint.setPrototype(rvPrototype);
             return rvUniqueConstraint;
         }).collect(Collectors.toList()));
-        rvPrototype.setDbSyncFlag(true);
+        rvPrototype.setSyncFlag(true);
         return rvPrototype;
     }
 
@@ -373,7 +363,6 @@ public class BuiltInDataModelService implements ApplicationRunner {
         boolean isNew = rvColumn == null;
         if (isNew) {
             rvColumn = new RvColumn();
-            log.info("表 " + column.getRelation().getName() + " 新增字段 " + column.getName());
             rvColumnMap.put(column.getName(), rvColumn);
             rvColumn.setName(column.getName());
         }
@@ -400,7 +389,6 @@ public class BuiltInDataModelService implements ApplicationRunner {
         boolean isNew = rvIndex == null;
         if (isNew) {
             rvIndex = new RvIndex();
-            log.info("表 " + index.getRelation().getName() + " 新增索引 " + index.getName());
             rvIndexMap.put(index.getName(), rvIndex);
             rvIndex.setName(index.getName());
         }
@@ -422,7 +410,6 @@ public class BuiltInDataModelService implements ApplicationRunner {
         boolean isNew = rvPrimaryKey == null;
         if (isNew) {
             rvPrimaryKey = new RvPrimaryKey();
-            log.info("表 " + primaryKey.getTable().getName() + " 新增主键 " + primaryKey.getName());
             rvPrimaryKey.setName(primaryKey.getName());
         }
         rvPrimaryKey.setCode(primaryKey.getName());
@@ -445,7 +432,6 @@ public class BuiltInDataModelService implements ApplicationRunner {
         boolean isNew = rvForeignKey == null;
         if (isNew) {
             rvForeignKey = new RvForeignKey();
-            log.info("表 " + foreignKey.getPrimaryKeyTable().getName() + " 新增外键 " + foreignKey.getName());
             rvForeignKeyMap.put(foreignKey.getName(), rvForeignKey);
             rvForeignKey.setName(foreignKey.getName());
         }
@@ -479,7 +465,6 @@ public class BuiltInDataModelService implements ApplicationRunner {
         boolean isNew = rvUniqueConstraint == null;
         if (isNew) {
             rvUniqueConstraint = new RvUniqueConstraint();
-            log.info("表 " + uniqueConstraint.getRelation().getName() + " 新增唯一性约束 " + uniqueConstraint.getName());
             rvUniqueConstraintMap.put(uniqueConstraint.getName(), rvUniqueConstraint);
             rvUniqueConstraint.setName(uniqueConstraint.getName());
         }

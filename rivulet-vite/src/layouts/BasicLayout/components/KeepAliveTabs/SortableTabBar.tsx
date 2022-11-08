@@ -10,8 +10,6 @@ import {Handle} from '@/layouts/BasicLayout/components/KeepAliveTabs/components'
 import {useCreation} from 'ahooks';
 import TabNodeWrapper from '@/layouts/BasicLayout/components/KeepAliveTabs/TabNodeWrapper';
 
-const {TabPane} = Tabs;
-
 type SortableTabsProps = {
     className: string;
     splitView: SplitViewType;
@@ -66,9 +64,8 @@ const TabBar = (props) => {
               onEdit={onEdit}
               animated={{inkBar: true, tabPane: false}}
               hideAdd
-        >
-            {props.children}
-        </Tabs>
+              items={props.items}
+        />
     );
 };
 
@@ -96,9 +93,12 @@ export default (props: SortableTabsProps) => {
                 {tabTitle}
             </span>
         );
-        return (
-            <TabPane tab={tabElem} key={tabKey} closable closeIcon={closeIcon}/>
-        );
+        return {
+            label: tabElem,
+            key: tabKey,
+            closable: true,
+            closeIcon
+        };
     });
     const splitNum = splitViewContainer.splitViews.length;
     const sortableProps = {
@@ -127,7 +127,7 @@ export default (props: SortableTabsProps) => {
     splitView.tabBarElement = (
         <div style={{display: 'inline-flex', width: '100%'}}>
             {splitViewIndex > 0 && <Handle {...attributes} {...listeners}/>}
-            <TabBar {...props}>{tabNodes}</TabBar>
+            <TabBar {...props} items={tabNodes}/>
         </div>
     );
     return (
