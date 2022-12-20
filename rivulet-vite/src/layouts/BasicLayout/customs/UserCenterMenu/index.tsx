@@ -3,19 +3,20 @@ import {Menu} from 'antd';
 import {PoweroffOutlined as PowerOffOutlined} from '@ant-design/icons/lib/icons';
 import {UserOutlined} from '@ant-design/icons';
 import './index.less';
-import RvModal from '@/components/common/RvModal';
+import {useRvModal} from '@/components/common/RvModal';
 import store from '@/store';
 import axios from 'axios';
 import {Result} from '@/types/result';
 import RvRequest from '@/utils/rvRequest';
 
 export default (props: SiderMenuProps) => {
+    const rvModal = useRvModal();
     const {prefixCls} = props;
     const authDispatchers = store.useModelDispatchers('auth');
     const userState = store.useModelState('user');
 
     function logout() {
-        RvModal.confirm({
+        rvModal.confirm({
             title: '确认退出登录？',
             onOk: async () => {
                 const result = await RvRequest.do(() => axios.post('/auth/logout'));
@@ -24,7 +25,7 @@ export default (props: SiderMenuProps) => {
                         hasLoggedIn: false
                     });
                 } else {
-                    RvModal.error({
+                    rvModal.error({
                         content: '退出登录失败！' + result.errorMessage
                     });
                 }

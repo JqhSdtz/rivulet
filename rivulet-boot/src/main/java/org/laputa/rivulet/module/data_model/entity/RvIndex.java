@@ -44,23 +44,23 @@ public class RvIndex extends RvEntity<String> {
     /**
      * 这里的@JoinColumn的nullable属性不能设为false，否则无法正确插入数据
      */
-    @JsonBackReference
+    @JsonBackReference("indexes")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne
     @JoinColumn(name = "prototype_id")
     private RvPrototype prototype;
 
+    @Column(name = "title", nullable = false)
+    private String title;
+
     @Column(name = "name", nullable = false)
     private String name;
-
-    @Column(name = "code", nullable = false)
-    private String code;
 
     @Column(name = "unique_index")
     private Boolean uniqueIndex;
 
-    @JsonManagedReference
+    @JsonManagedReference("indexColumns")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "index")
     private List<RvIndexColumn> indexColumns;
 

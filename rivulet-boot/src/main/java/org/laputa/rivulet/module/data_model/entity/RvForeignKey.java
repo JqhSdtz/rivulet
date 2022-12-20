@@ -10,7 +10,7 @@ import lombok.ToString;
 import org.hibernate.annotations.*;
 import org.laputa.rivulet.common.entity.RvEntity;
 import org.laputa.rivulet.module.data_model.entity.column_relation.RvForeignKeyForeignColumn;
-import org.laputa.rivulet.module.data_model.entity.column_relation.RvForeignKeyLocalColumn;
+import org.laputa.rivulet.module.data_model.entity.column_relation.RvForeignKeyTargetColumn;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -43,18 +43,18 @@ public class RvForeignKey extends RvEntity<String> {
     /**
      * 这里的@JoinColumn的nullable属性不能设为false，否则无法正确插入数据
      */
-    @JsonBackReference
+    @JsonBackReference("foreignKeys")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne
     @JoinColumn(name = "prototype_id")
     private RvPrototype prototype;
 
+    @Column(name = "title", nullable = false)
+    private String title;
+
     @Column(name = "name", nullable = false)
     private String name;
-
-    @Column(name = "code", nullable = false)
-    private String code;
 
     @Column(name = "cascade_delete")
     private Boolean cascadeDelete;
@@ -64,27 +64,26 @@ public class RvForeignKey extends RvEntity<String> {
     @JoinColumn(name = "backing_index_id")
     private RvIndex backingIndex;
 
-    @JsonBackReference
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     @OneToOne
-    @JoinColumn(name = "foreign_prototype_id")
-    private RvPrototype foreignPrototype;
+    @JoinColumn(name = "target_prototype_id")
+    private RvPrototype targetPrototype;
 
-    @JsonManagedReference
+    @JsonManagedReference("foreignKeyTargetColumns")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "foreignKey")
-    private List<RvForeignKeyLocalColumn> foreignKeyLocalColumns;
+    private List<RvForeignKeyTargetColumn> foreignKeyTargetColumns;
 
-    @JsonSetter("foreignKeyLocalColumns")
-    public void setForeignKeyLocalColumns(List<RvForeignKeyLocalColumn> foreignKeyLocalColumns) {
-        this.foreignKeyLocalColumns = foreignKeyLocalColumns;
-        if (foreignKeyLocalColumns == null) {
+    @JsonSetter("foreignKeyTargetColumns")
+    public void setForeignKeyTargetColumns(List<RvForeignKeyTargetColumn> foreignKeyTargetColumns) {
+        this.foreignKeyTargetColumns = foreignKeyTargetColumns;
+        if (foreignKeyTargetColumns == null) {
             return;
         }
-        foreignKeyLocalColumns.forEach(foreignKeyLocalColumn -> foreignKeyLocalColumn.setForeignKey(this));
+        foreignKeyTargetColumns.forEach(foreignKeyTargetColumn -> foreignKeyTargetColumn.setForeignKey(this));
     }
 
-    @JsonManagedReference
+    @JsonManagedReference("foreignKeyForeignColumns")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "foreignKey")
     private List<RvForeignKeyForeignColumn> foreignKeyForeignColumns;
 

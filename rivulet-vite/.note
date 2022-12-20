@@ -1,0 +1,5 @@
+json-schema中不能通过x-component-props传递Schema对象，会导致'a.b'这样的属性名称丢失掉'.'后面的'b'
+FormLayout的名字不要相同
+
+待办：
+tab标签改为超过长度显示省略号

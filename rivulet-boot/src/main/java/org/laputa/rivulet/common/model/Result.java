@@ -11,6 +11,7 @@ import org.laputa.rivulet.common.exception.RvException;
 @Setter
 @Getter
 public class Result<ResultType> {
+    public static final String UNEXPECTED_ERROR = "UnexpectedError";
     public static final Result<Void> SUCCESS = new Result<>(true);
     public static final Result<Void> FAIL = new Result<>(false);
 

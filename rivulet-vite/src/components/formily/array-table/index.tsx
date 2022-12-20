@@ -1,5 +1,5 @@
-import React, {createContext, Fragment, useCallback, useContext, useEffect, useRef, useState} from 'react';
-import {Badge, Pagination, Select, Space, Table} from 'antd';
+import React, {Fragment, useCallback, useContext, useEffect, useRef, useState} from 'react';
+import {Badge, Button, Pagination, Select, Space, Table} from 'antd';
 import {PaginationProps} from 'antd/lib/pagination';
 import {ColumnProps, TableProps} from 'antd/lib/table';
 import {SelectProps} from 'antd/lib/select';
@@ -7,12 +7,14 @@ import cls from 'classnames';
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import {ArrayField, FieldDisplayTypes, GeneralField} from '@formily/core';
 import {observer, ReactFC, RecursionField, useField, useFieldSchema} from '@formily/react';
-import {isArr, isBool, isFn} from '@formily/shared';
+import {isArr} from '@formily/shared';
 import {Schema} from '@formily/json-schema';
 
 import {usePrefixCls} from '@formily/antd/lib/__builtins__';
 import {ArrayBase, ArrayBaseMixins} from '@formily/antd';
-import {RvTableContext, RvTableContextType} from '@/components/formily';
+import {getInitPagination, PaginationType, RvTableContext, RvTableContextType} from '@/components/formily';
+import {useUpdate} from 'ahooks';
+import {PlusOutlined} from '@ant-design/icons';
 
 interface ObservableColumnSource {
     field: GeneralField;
@@ -37,12 +39,6 @@ interface IStatusSelectProps extends SelectProps<any> {
 type ComposedArrayTable = React.FC<React.PropsWithChildren<TableProps<any>>> &
     ArrayBaseMixins & {
     Column?: React.FC<React.PropsWithChildren<ColumnProps<any>>>
-}
-
-interface PaginationAction {
-    totalPage?: number;
-    pageSize?: number;
-    changePage?: (page: number) => void;
 }
 
 const SortableRow = SortableElement((props: any) => <tr {...props} />);
@@ -201,20 +197,19 @@ const StatusSelect: ReactFC<IStatusSelectProps> = observer(
     }
 );
 
-const PaginationContext = createContext<PaginationAction>({});
-const usePagination = () => {
-    return useContext(PaginationContext);
-};
-
 const ArrayTablePagination: ReactFC<IArrayTablePaginationProps> = (props) => {
-    const [current, setCurrent] = useState(1);
-    const prefixCls = usePrefixCls('formily-array-table');
-    const pageSize = props.pageSize || 10;
-    const size = props.size || 'default';
+    const {
+        isDataSourcePageable,
+        query,
+        pagination,
+        setPagination
+    } = useContext(RvTableContext);
     const dataSource = props.dataSource || [];
-    const startIndex = (current - 1) * pageSize;
-    const endIndex = startIndex + pageSize - 1;
-    const total = dataSource?.length || 0;
+    const prefixCls = usePrefixCls('formily-array-table');
+    const pageSize = pagination.pageSize || 10;
+    const pageNumber = pagination.pageNumber + 1;
+    const size = props.size || 'default';
+    const total = (isDataSourcePageable ? pagination.totalNumber : dataSource?.length) ?? 0;
     const totalPage = Math.ceil(total / pageSize);
     const pages = Array.from(new Array(totalPage)).map((_, index) => {
         const page = index + 1;
@@ -223,54 +218,69 @@ const ArrayTablePagination: ReactFC<IArrayTablePaginationProps> = (props) => {
             value: page
         };
     });
-    const handleChange = (current: number) => {
-        setCurrent(current);
-    };
-
-    useEffect(() => {
-        if (totalPage > 0 && totalPage < current) {
-            handleChange(totalPage);
+    const update = useUpdate();
+    const handleChange = (currentPageNumber: number, currentPageSize) => {
+        pagination.pageNumber = currentPageNumber - 1;
+        if (typeof currentPageSize === 'number') {
+            pagination.pageSize = currentPageSize;
         }
-    }, [totalPage, current]);
-
+        if (isDataSourcePageable) {
+            query(pagination).finally(() => setPagination(pagination));
+        } else {
+            setPagination(pagination);
+            update();
+        }
+    };
+    useEffect(() => {
+        if (totalPage > 0 && totalPage < pageNumber) {
+            handleChange(totalPage, pageSize);
+        }
+    }, [totalPage, pageNumber]);
+    const renderTotal = total => {
+        return (
+            <Space>
+                {`共${total}条数据`}
+                {isDataSourcePageable ? null : <StatusSelect
+                    value={pageNumber}
+                    pageSize={pageSize}
+                    onChange={handleChange}
+                    options={pages}
+                    notFoundContent={false}
+                />}
+            </Space>
+        );
+    };
     const renderPagination = () => {
-        if (totalPage <= 1) return;
+        if (!isDataSourcePageable && totalPage <= 1) return;
         // !!这里把showSizeChange由原来的false改为了true，并增设showQuickJumper为true
         return (
             <div className={`${prefixCls}-pagination`}>
                 <Space>
-                    <StatusSelect
-                        value={current}
-                        pageSize={pageSize}
-                        onChange={handleChange}
-                        options={pages}
-                        notFoundContent={false}
-                    />
                     <Pagination
                         {...props}
                         pageSize={pageSize}
-                        current={current}
-                        total={dataSource.length}
+                        current={pageNumber}
+                        total={total}
                         size={size}
                         showSizeChanger={true}
                         showQuickJumper={true}
+                        showTotal={renderTotal}
                         onChange={handleChange}
                     />
                 </Space>
             </div>
         );
     };
+    let tableDataSource = dataSource;
+    if (!isDataSourcePageable) {
+        const startIndex = (pageNumber - 1) * pageSize;
+        const endIndex = startIndex + pageSize - 1;
+        tableDataSource = dataSource?.slice(startIndex, endIndex + 1);
+    }
 
     return (
         <Fragment>
-            <PaginationContext.Provider
-                value={{totalPage, pageSize, changePage: handleChange}}
-            >
-                {props.children?.(
-                    dataSource?.slice(startIndex, endIndex + 1),
-                    renderPagination()
-                )}
-            </PaginationContext.Provider>
+            {props.children?.(tableDataSource, renderPagination())}
         </Fragment>
     );
 };
@@ -279,98 +289,144 @@ const RowComp = (props: any) => {
     return <SortableRow index={props['data-row-key'] || 0} {...props} />;
 };
 
-export const ArrayTable: ComposedArrayTable = observer(
-    (props: TableProps<any>) => {
-        const ref = useRef<HTMLDivElement>();
-        const field = useField<ArrayField>();
-        const prefixCls = usePrefixCls('formily-array-table');
-        const dataSource = Array.isArray(field.value) ? field.value.slice() : [];
-        const sources = useArrayTableSources();
-        const columns = useArrayTableColumns(field, sources);
-        const pagination = isBool(props.pagination) ? {} : props.pagination;
-        const addition = useAddition();
-        const defaultRowKey = (record: any) => {
-            return dataSource.indexOf(record);
-        };
-        const addTdStyles = (node: HTMLElement) => {
-            const helper = document.body.querySelector(`.${prefixCls}-sort-helper`);
-            if (helper) {
-                const tds = node.querySelectorAll('td');
-                requestAnimationFrame(() => {
-                    helper.querySelectorAll('td').forEach((td, index) => {
-                        if (tds[index]) {
-                            td.style.width = getComputedStyle(tds[index]).width;
-                        }
-                    });
+const InnerArrayTable = observer((props: TableProps<any>) => {
+    const ref = useRef<HTMLDivElement>();
+    const field = useField<ArrayField>();
+    const prefixCls = usePrefixCls('formily-array-table');
+    const dataSource = Array.isArray(field.value) ? field.value.slice() : [];
+    const sources = useArrayTableSources();
+    const columns = useArrayTableColumns(field, sources);
+    const addition = useAddition();
+    const defaultRowKey = (record: any) => {
+        return dataSource.indexOf(record);
+    };
+    const addTdStyles = (node: HTMLElement) => {
+        const helper = document.body.querySelector(`.${prefixCls}-sort-helper`);
+        if (helper) {
+            const tds = node.querySelectorAll('td');
+            requestAnimationFrame(() => {
+                helper.querySelectorAll('td').forEach((td, index) => {
+                    if (tds[index]) {
+                        td.style.width = getComputedStyle(tds[index]).width;
+                    }
                 });
-            }
-        };
-        const WrapperComp = useCallback(
-            (props: any) => (
-                <SortableBody
-                    useDragHandle
-                    lockAxis="y"
-                    helperClass={`${prefixCls}-sort-helper`}
-                    helperContainer={() => {
-                        return ref.current?.querySelector('tbody');
-                    }}
-                    onSortStart={({node}) => {
-                        addTdStyles(node as HTMLElement);
-                    }}
-                    onSortEnd={({oldIndex, newIndex}) => {
-                        field.move(oldIndex, newIndex);
-                    }}
-                    {...props}
+            });
+        }
+    };
+    const WrapperComp = useCallback(
+        (props: any) => (
+            <SortableBody
+                useDragHandle
+                lockAxis="y"
+                helperClass={`${prefixCls}-sort-helper`}
+                helperContainer={() => {
+                    return ref.current?.querySelector('tbody');
+                }}
+                onSortStart={({node}) => {
+                    addTdStyles(node as HTMLElement);
+                }}
+                onSortEnd={({oldIndex, newIndex}) => {
+                    field.move(oldIndex, newIndex);
+                }}
+                {...props}
+            />
+        ),
+        []
+    );
+
+    // !!!此处增加了从RvTableContext处获取loading
+    const {loading} = useContext<RvTableContextType>(RvTableContext);
+    // !!!此处增加了渲染扩展行的功能
+    const additionalProps = {} as any;
+    const arrayTableSchema: any = useFieldSchema();
+    if (arrayTableSchema.expandedRowSchema && !props.expandedRowRender) {
+        additionalProps.expandedRowRender = (record, index) => {
+            return (
+                <RecursionField
+                    schema={arrayTableSchema.expandedRowSchema}
+                    basePath={`${field.address.entire}.${index}`}
                 />
-            ),
-            []
-        );
-
-        // !!此处增加了从RvTableContext处获取loading
-        const rvTableContext = useContext<RvTableContextType>(RvTableContext);
-
-        return (
-            <ArrayTablePagination {...pagination} dataSource={dataSource}>
-                {(dataSource, pager) => (
-                    <div ref={ref} className={prefixCls}>
-                        <ArrayBase>
-                            <Table
-                                size="small"
-                                bordered
-                                rowKey={defaultRowKey}
-                                loading={rvTableContext.loading}
-                                {...props}
-                                onChange={() => {
-                                }}
-                                pagination={false}
-                                columns={columns}
-                                dataSource={dataSource}
-                                components={{
-                                    body: {
-                                        wrapper: WrapperComp,
-                                        row: RowComp
-                                    }
-                                }}
-                            />
-                            <div style={{marginTop: 5, marginBottom: 5}}>{pager}</div>
-                            {sources.map((column, key) => {
-                                //专门用来承接对Column的状态管理
-                                if (!isColumnComponent(column.schema)) return;
-                                return React.createElement(RecursionField, {
-                                    name: column.name,
-                                    schema: column.schema,
-                                    onlyRenderSelf: true,
-                                    key
-                                });
-                            })}
-                            {addition}
-                        </ArrayBase>
-                    </div>
-                )}
-            </ArrayTablePagination>
+            );
+        };
+    }
+    // !!!Table组件的title是函数类型，但json-schema定义的是string类型，做一下转换
+    if (typeof props.title === 'string') {
+        additionalProps.title = () => (
+            <p style={{fontWeight: 'bold', marginBottom: 0}}>
+                {props.title}
+            </p>
         );
     }
-);
+
+    return (
+        <ArrayTablePagination dataSource={dataSource}>
+            {(tableDataSource, pager) => (
+                <div ref={ref} className={prefixCls}>
+                    <ArrayBase>
+                        <Table
+                            size="small"
+                            bordered
+                            rowKey={defaultRowKey}
+                            loading={loading}
+                            {...props}
+                            {...additionalProps}
+                            pagination={false}
+                            columns={columns}
+                            dataSource={tableDataSource}
+                            components={{
+                                body: {
+                                    wrapper: WrapperComp,
+                                    row: RowComp
+                                }
+                            }}
+                        />
+                        {addition}
+                        <div style={{marginTop: 5, marginBottom: 5}}>{pager}</div>
+                        {sources.map((column, key) => {
+                            //专门用来承接对Column的状态管理
+                            if (!isColumnComponent(column.schema)) return;
+                            return React.createElement(RecursionField, {
+                                name: column.name,
+                                schema: column.schema,
+                                onlyRenderSelf: true,
+                                key
+                            });
+                        })}
+                    </ArrayBase>
+                </div>
+            )}
+        </ArrayTablePagination>
+    );
+});
+
+const ArrayTableContainer = (props) => {
+    const [pagination, setPagination] = useState<PaginationType>(getInitPagination());
+    const field = useField<ArrayField>();
+    const dataSource = Array.isArray(field.value) ? field.value : [];
+    pagination.totalNumber = dataSource.length;
+    pagination.totalPages = Math.ceil(pagination.totalNumber / pagination.pageSize);
+    const rvTableContextValue: RvTableContextType = {
+        isDataSourcePageable: false,
+        baseUrl: '',
+        loading: undefined,
+        query: () => Promise.resolve(),
+        pagination,
+        setPagination
+    };
+    return (
+        <RvTableContext.Provider value={rvTableContextValue}>
+            <InnerArrayTable {...props}/>
+        </RvTableContext.Provider>
+    );
+};
+
+export const ArrayTable: ComposedArrayTable = (props: TableProps<any>) => {
+    const rvTableContext = useContext<RvTableContextType>(RvTableContext);
+    if (rvTableContext && rvTableContext.isDataSourcePageable) {
+        return <InnerArrayTable {...props}/>;
+    }
+    return <ArrayTableContainer {...props}/>;
+};
 
 ArrayTable.displayName = 'ArrayTable';
 
@@ -380,18 +436,63 @@ ArrayTable.Column = () => {
 
 ArrayBase.mixin(ArrayTable);
 
+ArrayBase.Addition = (props) => {
+    const self = useField();
+    const array = ArrayBase.useArray();
+    const prefixCls = usePrefixCls('formily-array-base');
+    if (!array) return null;
+    if (array.field?.pattern !== 'editable' && array.field?.pattern !== 'disabled') {
+        return null;
+    }
+    const getDefaultValue = () => {
+        return {};
+    };
+    return (
+        <Button
+            type="dashed"
+            block
+            {...props}
+            disabled={self?.disabled}
+            className={cls(`${prefixCls}-addition`, props.className)}
+            onClick={(e) => {
+                if (array.props?.disabled) return;
+                const defaultValue = getDefaultValue();
+                if (props.method === 'unshift') {
+                    array.field?.unshift?.(defaultValue);
+                    array.props?.onAdd?.(0);
+                } else {
+                    array.field?.push?.(defaultValue);
+                    array.props?.onAdd?.(array?.field?.value?.length - 1);
+                }
+                if (props.onClick) {
+                    props.onClick(e);
+                }
+            }}
+            icon={<PlusOutlined/>}
+        >
+            {props.title || self.title}
+        </Button>
+    );
+};
+
 const Addition: ArrayBaseMixins['Addition'] = (props) => {
     const array = ArrayBase.useArray();
-    const {totalPage = 0, pageSize = 10, changePage} = usePagination();
+    const {isDataSourcePageable, pagination, setPagination} = useContext(RvTableContext);
     return (
         <ArrayBase.Addition
             {...props}
             onClick={(e) => {
+                if (isDataSourcePageable) {
+                    console.warn('该表格数据为后端分页，不能使用Addition组件添加行');
+                    return;
+                }
+                ++pagination.totalNumber;
                 // 如果添加数据后将超过当前页，则自动切换到下一页
                 const total = array?.field?.value.length || 0;
-                if (total === totalPage * pageSize + 1 && isFn(changePage)) {
-                    changePage(totalPage + 1);
+                if (total === pagination.totalPages * pagination.pageSize + 1) {
+                    ++pagination.pageNumber;
                 }
+                setPagination(pagination);
                 props.onClick?.(e);
             }}
         />

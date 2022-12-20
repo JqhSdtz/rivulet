@@ -76,23 +76,6 @@ export default () => {
             menuItemRender={menuItemRender}
             bottomButtonsRender={(props: SiderMenuProps) => <UserCenterMenu {...props} />}
             headerRender={(props: HeaderViewProps) => <KeepAliveTabs {...props} />}
-            footerRender={() => (
-                <DefaultFooter
-                    links={[
-                        {
-                            key: 'icejs',
-                            title: 'icejs',
-                            href: 'https://github.com/ice-lab/icejs'
-                        },
-                        {
-                            key: 'antd',
-                            title: 'antd',
-                            href: 'https://github.com/ant-design/ant-design'
-                        }
-                    ]}
-                    copyright="by icejs & antd"
-                />
-            )}
         >
             <div style={{minHeight: '60vh'}}>
                 <Outlet/>

@@ -21,7 +21,8 @@ export const RvLinkButton = (props: LinkButtonProps) => {
     if (props.to?.startsWith('./')) {
         path = tabNode.targetMenu?.path + props.to.substring(1);
     }
-    path += '?_timestamp=' + Date.now();
+    const separator = path.indexOf('?') > -1 ? '&' : '?';
+    path += separator + '_timestamp=' + Date.now();
     if (props.data) {
         const keys = Object.keys(props.data);
         keys.forEach(key => {
@@ -49,7 +50,7 @@ export const RvQueryButton = (props: QueryButtonProps) => {
         query
     } = useContext(RvTableContext);
     return (
-        <Button type="primary" onClick={query} {...props}>
+        <Button type="primary" onClick={() => query()} {...props}>
             {props.text ?? '查询'}
         </Button>
     );

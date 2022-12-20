@@ -2,12 +2,13 @@ import styles from './index.module.css';
 import {Button} from 'antd';
 import RvRequest from '@/utils/rvRequest';
 import axios from 'axios';
-import RvModal from '@/components/common/RvModal';
+import {useRvModal} from '@/components/common/RvModal';
 
 export default () => {
+    const rvModal = useRvModal();
     const clearScriptCache = async () => {
         const result = await RvRequest.do(() => axios.post('/dataModel/clearScriptCache'));
-        RvModal.result(result);
+        rvModal.result(result);
     }
     return (
         <>

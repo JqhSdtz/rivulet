@@ -1,14 +1,16 @@
-package org.laputa.rivulet.common.config;
+package org.laputa.rivulet.common.mvc.config;
 
-import org.laputa.rivulet.common.interceptor.RvInterceptor;
+import org.laputa.rivulet.common.mvc.interceptor.RvInterceptor;
+import org.laputa.rivulet.common.mvc.resolver.RequestBodyParamResolver;
 import org.laputa.rivulet.module.data_model.interceptor.DataModelModifyConfirmInterceptor;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.annotation.Resource;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @author JQH
@@ -16,13 +18,18 @@ import javax.validation.constraints.NotNull;
  */
 
 @Configuration
-public class WebConfig implements WebMvcConfigurer {
+public class WebMvcConfig implements WebMvcConfigurer {
     @Resource
     private DataModelModifyConfirmInterceptor dataModelModifyConfirmInterceptor;
 
     @Override
     public void addInterceptors(@NotNull InterceptorRegistry registry) {
         registerInterceptor(registry, dataModelModifyConfirmInterceptor);
+    }
+
+    @Override
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+        resolvers.add(new RequestBodyParamResolver());
     }
 
     private void registerInterceptor(@NotNull InterceptorRegistry registry, RvInterceptor interceptor) {

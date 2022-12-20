@@ -12,7 +12,7 @@ rivulet:
         terminal-key:
             random-base: 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
             length: 32
-            timeout: 30
+            timeout: 60
             time-unit: minutes
         git:
             repo-url: https://gitee.com/jqhsdtz/rivulet-functions.git

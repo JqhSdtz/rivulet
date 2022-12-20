@@ -85,11 +85,12 @@ export default (props: SortableTabsProps) => {
     } = useContext<TabsContextType>(TabsContext);
     const tabNodes = splitView.tabNodes.map((node, index) => {
         const menu: MenuConfigItem | undefined = node.targetMenu;
-        const tabTitle = menu?.name || defaultTabTitle;
+        const tabTitle = ((node.title ? node.title + '-' : '') + menu?.name) || defaultTabTitle;
         const tabKey = node.name || index.toString();
         const tabElem = (
             <span>
                 {menu?.icon}
+                {node.isModified ? '*' : null}
                 {tabTitle}
             </span>
         );

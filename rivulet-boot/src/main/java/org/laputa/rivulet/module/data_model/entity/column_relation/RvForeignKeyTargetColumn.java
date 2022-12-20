@@ -26,11 +26,11 @@ import javax.persistence.Table;
 @RequiredArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "rv_foreign_key_local_column", indexes = {
-        @Index(name = "idx_rvforeignkeylocalcolumn_foreign_key_id", columnList = "foreign_key_id"),
-        @Index(name = "idx_rvforeignkeylocalcolumn_column_id", columnList = "column_id")
+@Table(name = "rv_foreign_key_target_column", indexes = {
+        @Index(name = "idx_rvforeignkeytargetcolumn_foreign_key_id", columnList = "foreign_key_id"),
+        @Index(name = "idx_rvforeignkeytargetcolumn_column_id", columnList = "column_id")
 })
-public class RvForeignKeyLocalColumn extends RvEntity<String> {
+public class RvForeignKeyTargetColumn extends RvEntity<String> {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")
@@ -40,7 +40,7 @@ public class RvForeignKeyLocalColumn extends RvEntity<String> {
     /**
      * 这里的@JoinColumn的nullable属性不能设为false，否则无法正确插入数据
      */
-    @JsonBackReference
+    @JsonBackReference("foreignKeyTargetColumns")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne

@@ -1,17 +1,20 @@
 import {fixContext, KeepAlive} from 'react-activation';
-import React, {ReactElement, useContext} from 'react';
+import React, {ReactElement, RefObject, useContext, useRef} from 'react';
 import {SplitViewType, TabsContext, TabsContextType} from '@/layouts/BasicLayout';
 import {MenuConfigItem} from '@/menuConfig';
 import {WrappedComponentFactory} from 'react-sortable-hoc';
 import {useSortable} from '@dnd-kit/sortable';
 
 export interface TabNodeAttributes {
+    title?: string;
     targetMenu?: MenuConfigItem;
     component?: TabComponentType;
+    contentRef?: RefObject<HTMLDivElement>;
     tabElement?: ReactElement;
     isActive?: boolean;
     isNewTab?: boolean;
     isRemoving?: boolean;
+    isModified?: boolean;
     needAttention?: boolean;
     sortableAttr?: ReturnType<typeof useSortable>;
 }
@@ -47,19 +50,33 @@ interface TabNodeCallbacksSetter {
 export type TabNodeContextType = {
     tabKey: string;
     tabNode: TabNodeType;
+    contentRef: RefObject<HTMLDivElement>;
     closeTab: () => void;
+    setTabTitle: (title: string) => void;
 } & TabNodeCallbacksSetter;
 
 export const TabNodeContext = React.createContext({} as TabNodeContextType);
 fixContext(TabNodeContext);
 
-export default (props: { tabKey: string; children: any }) => {
+export default (props: { tabKey: string; contentRef: RefObject<HTMLDivElement>; children: any }) => {
     const tabKey = props.tabKey;
     const {
         removeNode,
         findNode,
-        setTabNodeCallbacks
+        setTabNodeCallbacks,
+        setTabNodeAttributes,
+        refreshTabNode,
+        updateTabs
     } = useContext<TabsContextType>(TabsContext);
+
+    const setTabTitle = (title) => {
+        if (tabNode.isRemoving) return;
+        setTabNodeAttributes(tabKey, {
+            title
+        });
+        refreshTabNode(tabNode);
+        updateTabs();
+    };
     const closeTab = () => {
         removeNode(tabKey);
     };
@@ -68,10 +85,15 @@ export default (props: { tabKey: string; children: any }) => {
             beforeCloseCallback: callback
         });
     };
+    const tabNode = findNode(tabKey);
+    const contentRef = useRef<HTMLDivElement>();
+    tabNode.contentRef = contentRef;
     const value = {
         tabKey,
-        tabNode: findNode(tabKey),
+        tabNode,
+        contentRef,
         closeTab,
+        setTabTitle,
         beforeClose
     };
     return (
@@ -82,7 +104,14 @@ export default (props: { tabKey: string; children: any }) => {
                 cacheKey={tabKey}
                 saveScrollPosition="screen"
             >
-                {props.children}
+                <div ref={contentRef}
+                     style={{
+                         height: '100%',
+                         transform: 'scale(1,1)'
+                     }}
+                >
+                    {props.children}
+                </div>
             </KeepAlive>
         </TabNodeContext.Provider>
     );

@@ -1,47 +1,80 @@
 import {useRequest} from 'ahooks';
 import axios from 'axios';
 import {RecursionField, useFieldSchema, useForm} from '@formily/react';
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {filterEmptyString} from '@/utils/formilyUtil';
 import {Result} from '@/types/result';
 import RvRequest from '@/utils/rvRequest';
+import {useRvModal} from '@/components/common/RvModal';
 
 interface RvTableProps {
     baseUrl: string;
 }
 
+export interface PaginationType {
+    pageNumber: number;
+    pageSize: number;
+    totalNumber?: number;
+    totalPages?: number;
+}
+
+export const getInitPagination = () => ({
+    pageSize: 10,
+    pageNumber: 0
+});
+
 export interface RvTableContextType {
+    isDataSourcePageable: boolean;
     baseUrl: string;
     loading: boolean;
-    query: () => void;
+    query: (queryPagination?: PaginationType) => Promise<any>;
+    pagination: PaginationType;
+    setPagination: (pagination: PaginationType) => void;
 }
 
 export const RvTableContext = React.createContext({} as RvTableContextType);
 
 export const RvTable: React.FC<RvTableProps> = (props) => {
-    const queryRequest = (params) => {
-        return RvRequest.doRaw(() => axios.get(props.baseUrl, {
-            params
-        }));
+    const rvModal = useRvModal();
+    const initPagination = getInitPagination();
+    const initParams = {
+        pagination: initPagination
     };
-    const {data, loading, run} = useRequest<any, any[]>(queryRequest);
-    const result = data?.data as any as Result;
+    const queryRequest = (params) => {
+        return RvRequest.doRaw(() => axios.post(props.baseUrl, params ?? initParams));
+    };
+    const [pagination, setPagination] = useState<PaginationType>(initPagination);
+    const {data, loading, runAsync} = useRequest<any, any[]>(queryRequest);
+    const result = data?.data as Result;
     const form = useForm();
+    const query = (queryPagination) => {
+        const params = {
+            payload: form.getValuesIn('toolbar'),
+            pagination: queryPagination ?? pagination
+        };
+        return runAsync(filterEmptyString(params));
+    };
     useEffect(() => {
         if (!result) return;
-        form.setValues({
-            table: result.payload
-        });
+        if (!result.successful) {
+            rvModal.result(result);
+        } else {
+            const payload = result.payload;
+            form.setValues({
+                table: payload.content
+            });
+            pagination.totalNumber = payload.totalElements;
+            setPagination(pagination);
+        }
     }, [result]);
     const rvTableSchema = useFieldSchema();
-    const query = () => {
-        const params = form.getValuesIn('toolbar');
-        run(filterEmptyString(params));
-    };
     const rvTableContextValue = {
+        isDataSourcePageable: true,
         baseUrl: props.baseUrl,
         query,
-        loading
+        loading,
+        pagination,
+        setPagination
     };
     return (
         <RvTableContext.Provider value={rvTableContextValue}>

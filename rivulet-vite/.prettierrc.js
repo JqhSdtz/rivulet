@@ -1,7 +1,5 @@
-const {getPrettierConfig} = require('@iceworks/spec');
-
-const customConfig = {
-    printWidth: 80,
+module.exports = {
+    printWidth: 120,
     tabWidth: 4,
     useTabs: false,
     singleQuote: true,
@@ -12,5 +10,3 @@ const customConfig = {
     jsxBracketSameLine: false,
     quoteProps: 'as-needed'
 };
-
-module.exports = getPrettierConfig('react', customConfig);

@@ -77,12 +77,12 @@ public class LiquibaseDdlExecutor implements DisposableBean {
         ChangeSet changeSet = getChangeSet(changeLog);
         changeLog.addChangeSet(changeSet);
         CreateTableChange createTableChange = new CreateTableChange();
-        createTableChange.setTableName(rvPrototype.getCode());
+        createTableChange.setTableName(rvPrototype.getName());
         List<RvColumn> rvColumns = rvPrototype.getColumns();
         if (rvColumns != null && rvColumns.size() > 0) {
             rvColumns.forEach(rvColumn -> {
                 ColumnConfig column = new ColumnConfig();
-                column.setName(rvColumn.getCode())
+                column.setName(rvColumn.getName())
                         .setType(rvColumn.getDataType())
                         .setDefaultValue(rvColumn.getDefaultValue());
                 ConstraintsConfig constraintsConfig = new ConstraintsConfig();

@@ -6,7 +6,7 @@ import {Card} from 'antd';
 import * as ICONS from '@ant-design/icons';
 import {FormProps} from '@formily/antd/esm/form';
 import md5 from 'md5';
-import RvModal from '@/components/common/RvModal';
+import {useRvModal} from '@/components/common/RvModal';
 import store from '@/store';
 import axios from 'axios';
 import {Result} from '@/types/result';
@@ -77,13 +77,14 @@ interface ICreateInitialUserProps {
 }
 
 export default (props: ICreateInitialUserProps) => {
+    const rvModal = useRvModal();
     const authDispatchers = store.useModelDispatchers('auth');
 
     async function onSubmit(data) {
         data.password = md5(data.password);
         const result: Result = await RvRequest.do(() => axios.post('/app/initialUser', data));
         if (result.successful) {
-            RvModal.success({
+            rvModal.success({
                 content: '创建初始用户成功！',
                 onOk() {
                     authDispatchers.setState({
@@ -93,7 +94,7 @@ export default (props: ICreateInitialUserProps) => {
                 }
             });
         } else {
-            RvModal.error({
+            rvModal.error({
                 content: '创建初始用户失败！',
                 onOk() {
                     props.onReject?.();

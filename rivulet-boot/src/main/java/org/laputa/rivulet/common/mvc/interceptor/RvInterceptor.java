@@ -1,4 +1,4 @@
-package org.laputa.rivulet.common.interceptor;
+package org.laputa.rivulet.common.mvc.interceptor;
 
 import org.springframework.web.servlet.HandlerInterceptor;
 

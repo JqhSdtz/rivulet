@@ -1,4 +1,4 @@
-package org.laputa.rivulet.common.config;
+package org.laputa.rivulet.common.mvc.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;

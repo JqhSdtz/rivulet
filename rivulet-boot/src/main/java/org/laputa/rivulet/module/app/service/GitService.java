@@ -74,7 +74,7 @@ public class GitService implements ApplicationRunner {
         if (rvPrototypes.size() == 0) return;
         RmCommand rmCommand = gitRepo.rm();
         rvPrototypes.forEach(rvPrototype -> {
-            String filePath = "/prototypes/builtIn/" + rvPrototype.getCode();
+            String filePath = "/prototypes/builtIn/" + rvPrototype.getName();
             rmCommand.addFilepattern(filePath);
         });
         rmCommand.call();
@@ -85,9 +85,9 @@ public class GitService implements ApplicationRunner {
         if (rvPrototypes.size() == 0) return;
         AddCommand addCommand = gitRepo.add();
         rvPrototypes.forEach(rvPrototype -> {
-            String filePath = "/prototypes/builtIn/" + rvPrototype.getCode() + ".js";
+            String filePath = "/prototypes/builtIn/" + rvPrototype.getName() + ".js";
             File rvPrototypeFile = FileUtil.touch(FileUtil.normalize(gitProperty.getLocalDir() + File.separator + filePath));
-            String content = rvPrototype.getName();
+            String content = rvPrototype.getTitle();
             FileUtil.writeString(content, rvPrototypeFile, StandardCharsets.UTF_8);
             addCommand.addFilepattern(filePath);
         });

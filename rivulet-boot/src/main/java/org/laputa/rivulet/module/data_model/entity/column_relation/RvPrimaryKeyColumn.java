@@ -40,7 +40,7 @@ public class RvPrimaryKeyColumn extends RvEntity<String> {
     /**
      * 这里的@JoinColumn的nullable属性不能设为false，否则无法正确插入数据
      */
-    @JsonBackReference
+    @JsonBackReference("primaryKeyColumns")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne

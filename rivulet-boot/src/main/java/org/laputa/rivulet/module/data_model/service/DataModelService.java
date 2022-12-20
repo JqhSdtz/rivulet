@@ -5,6 +5,8 @@ import org.laputa.rivulet.ddl.LiquibaseDdlExecutor;
 import org.laputa.rivulet.module.data_model.entity.RvPrototype;
 import org.laputa.rivulet.module.data_model.repository.RvPrototypeRepository;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -30,9 +32,9 @@ public class DataModelService {
         return Result.succeed();
     }
 
-    public Result<List<RvPrototype>> queryDataModel(RvPrototype prototype) {
+    public Result<Page<RvPrototype>> queryDataModel(RvPrototype prototype, Pageable pagination) {
         Example<RvPrototype> example = Example.of(prototype);
-        List<RvPrototype> list = rvPrototypeRepository.findAll(example);
+        Page<RvPrototype> list = rvPrototypeRepository.findAll(example, pagination);
         return Result.succeed(list);
     }
 

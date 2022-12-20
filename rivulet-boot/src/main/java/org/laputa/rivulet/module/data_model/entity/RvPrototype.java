@@ -1,7 +1,9 @@
 package org.laputa.rivulet.module.data_model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import liquibase.ext.hibernate.annotation.DefaultValue;
 import liquibase.ext.hibernate.annotation.TableComment;
 import lombok.Getter;
@@ -28,6 +30,7 @@ import java.util.List;
 @Accessors(chain = true)
 @ToString
 @RequiredArgsConstructor
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @DynamicInsert
 @DynamicUpdate
 @TableComment("数据模型")
@@ -39,11 +42,11 @@ public class RvPrototype extends RvEntity<String> {
     @Column(name = "id", nullable = false, length = 64)
     private String id;
 
+    @Column(name = "title", nullable = false)
+    private String title;
+
     @Column(name = "name", nullable = false)
     private String name;
-
-    @Column(name = "code", nullable = false)
-    private String code;
 
     @Column(name = "remark")
     private String remark;
@@ -56,7 +59,7 @@ public class RvPrototype extends RvEntity<String> {
     @DefaultValue(Strings.FALSE)
     private Boolean builtIn;
 
-    @JsonManagedReference
+    @JsonManagedReference("columns")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "prototype")
     private List<RvColumn> columns;
 
@@ -69,7 +72,7 @@ public class RvPrototype extends RvEntity<String> {
         columns.forEach(column -> column.setPrototype(this));
     }
 
-    @JsonManagedReference
+    @JsonManagedReference("indexes")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "prototype")
     private List<RvIndex> indexes;
 
@@ -82,7 +85,8 @@ public class RvPrototype extends RvEntity<String> {
         indexes.forEach(index -> index.setPrototype(this));
     }
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "prototype")
+    @JsonManagedReference("primaryKey")
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "prototype")
     private RvPrimaryKey primaryKey;
 
     @JsonSetter("primaryKey")
@@ -94,7 +98,7 @@ public class RvPrototype extends RvEntity<String> {
         primaryKey.setPrototype(this);
     }
 
-    @JsonManagedReference
+    @JsonManagedReference("foreignKeys")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "prototype")
     private List<RvForeignKey> foreignKeys;
 
@@ -107,7 +111,7 @@ public class RvPrototype extends RvEntity<String> {
         foreignKeys.forEach(foreignKey -> foreignKey.setPrototype(this));
     }
 
-    @JsonManagedReference
+    @JsonManagedReference("uniqueConstraints")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "prototype")
     private List<RvUniqueConstraint> uniqueConstraints;
 

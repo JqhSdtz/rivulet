@@ -7,7 +7,7 @@ import * as ICONS from '@ant-design/icons';
 import {FormProps} from '@formily/antd/esm/form';
 import store from '@/store';
 import md5 from 'md5';
-import RvModal from '@/components/common/RvModal';
+import {useRvModal} from '@/components/common/RvModal';
 import axios from 'axios';
 import {Result} from '@/types/result';
 import RvRequest from '@/utils/rvRequest';
@@ -62,6 +62,7 @@ const formLayout: FormProps = {
 };
 
 export default () => {
+    const rvModal = useRvModal();
     const userDispatchers = store.useModelDispatchers('user');
     const authDispatchers = store.useModelDispatchers('auth');
 
@@ -70,7 +71,7 @@ export default () => {
         const result = await RvRequest.do(() => axios.post('/auth/login', data));
         if (result.successful) {
             userDispatchers.setState(result.payload);
-            RvModal.success({
+            rvModal.success({
                 content: '登录成功！',
                 onOk() {
                     authDispatchers.setState({
@@ -79,7 +80,7 @@ export default () => {
                 }
             });
         } else {
-            RvModal.error({
+            rvModal.error({
                 content: '登录失败！' + result.errorMessage
             });
         }

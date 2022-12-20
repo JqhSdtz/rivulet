@@ -308,7 +308,7 @@ export default (props) => {
     };
     const getPrevNode = (targetKey) => {
         const splitView = findNode(targetKey)?.splitView;
-        if (!splitView) return;
+        if (!splitView || splitView.tabNodes.length <= 1) return;
         const curIdx = splitView.tabNodes.findIndex(
             node => node.name === targetKey
         );
@@ -391,14 +391,14 @@ export default (props) => {
         const targetNode = findNode(targetKey);
         if (!targetNode) return;
         if (targetNode.isActive) {
-            const prevNodeKey = getPrevNode(targetKey).name ?? '';
+            const prevNodeKey = getPrevNode(targetKey)?.name ?? '';
             dropNode(targetKey, false, fromCallback).then(shouldClose => {
                 if (!shouldClose) {
                     return;
                 }
                 if (targetNode.splitView.tabNodes.filter(node => !node.isRemoving).length === 0) {
                     removeSplitView(targetNode.splitView.id);
-                } else {
+                } else if (prevNodeKey) {
                     activeNode(prevNodeKey);
                 }
             });

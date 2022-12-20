@@ -1,11 +1,10 @@
 import {FormTab} from '@formily/antd';
 import {createSchemaField, FormProvider} from '@formily/react';
 import axios from 'axios';
-import {useRequest} from 'ahooks';
+import {useMount, useRequest} from 'ahooks';
 import {PageLoading} from '@/layouts/BasicLayout';
 import {allComponents} from '@/utils/formilyUtil';
 import {useFormInstance} from '@/components/formily/hooks';
-import {useEffect} from 'react';
 import useUrlState from '@ahooksjs/use-url-state';
 import RvRequest from '@/utils/rvRequest';
 
@@ -17,9 +16,9 @@ const formTab = FormTab.createFormTab();
 
 const FormComponent = (props) => {
     const form = useFormInstance();
-    useEffect(() => {
+    useMount(() => {
         form.setValues(props.values);
-    }, [props.values]);
+    });
     return (
         <FormProvider form={form}>
             <SchemaField schema={props.schema} scope={{formTab}}/>

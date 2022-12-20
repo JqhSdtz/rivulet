@@ -6,7 +6,7 @@ import {InputStatus} from 'antd/lib/_util/statusUtils';
 import ReactDOM from 'react-dom';
 import './index.less';
 import {Result} from '@/types/result';
-import RvModal from '@/components/common/RvModal';
+import {useRvModal} from '@/components/common/RvModal';
 
 function wrapRequestFunction(oriRequest: () => Promise<AxiosResponse>): () => Promise<Result> {
     return () => oriRequest().then(response => {
@@ -30,6 +30,7 @@ const ConfirmUpdateSqlModal = (props: {
     doRequest: () => Promise<Result>,
     onUpdateSucceed: () => void
 }) => {
+    const rvModal = useRvModal();
     const [isModalOpen, setModalOpen] = useState<boolean>(true);
     const [confirmKey, setConfirmKey] = useState<string>();
     const [inputStatus, setInputStatus] = useState<InputStatus>('');
@@ -44,7 +45,7 @@ const ConfirmUpdateSqlModal = (props: {
                 setModalOpen(false);
                 props.onUpdateSucceed();
             }
-            RvModal.result(confirmResult);
+            rvModal.result(confirmResult);
         }
     };
     return (

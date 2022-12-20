@@ -3,6 +3,7 @@ package org.laputa.rivulet.module.data_model.service;
 import com.google.common.collect.Streams;
 import liquibase.Contexts;
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
@@ -43,6 +44,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -52,6 +54,7 @@ import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import static liquibase.structure.core.ForeignKeyConstraintType.importedKeyCascade;
@@ -96,6 +99,8 @@ public class BuiltInDataModelService implements ApplicationRunner {
     private TerminalKeyUtil terminalKeyUtil;
     @Resource
     private TerminalKeyProperty terminalKeyProperty;
+    @Resource
+    private TransactionTemplate transactionTemplate;
 
     private RBucket<String> confirmKeyBucket;
     private Map<String, Field> columnFieldMap = new HashMap<>();
@@ -140,7 +145,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
         return Result.succeedWithMessage("内部数据模型更新成功");
     }
 
-    public synchronized void refreshStructureUpdateSql() throws LiquibaseException, SQLException {
+    public synchronized void refreshStructureUpdateSql() throws Exception {
         DatabaseFactory factory = DatabaseFactory.getInstance();
         Map<String, String> hibernateProperties = new HashMap<>();
         hibernateProperties.put("dialect", jpaProperties.getProperties().get("hibernate.dialect"));
@@ -176,7 +181,13 @@ public class BuiltInDataModelService implements ApplicationRunner {
         }
         StringWriter stringWriter = new StringWriter();
         // 指定writer后就不会真正执行update，而是将sql语句输入writer中
-        liquibase.update(new Contexts(), stringWriter);
+        Map<String, Object> config = new HashMap<>();
+        // 临时调整日志等级，避免在执行过程中输出changeSet应用成功的误导信息
+        // 因为changeSet只是被转成了sql，并没有执行
+        config.put("liquibase.logLevel", "WARNING");
+        Scope.child(config, () -> {
+            liquibase.update(new Contexts(), stringWriter);
+        });
         targetDataBase.close();
         database.close();
         this.currentStructureUpdateSql = stringWriter.toString();
@@ -228,13 +239,29 @@ public class BuiltInDataModelService implements ApplicationRunner {
 
     @SneakyThrows
     private void syncBuiltInDataModel() {
-        Result result = redissonLockUtil.doWithLock("checkBuiltInDataModel", () -> doSyncBuiltInDataModel());
+        Result result = redissonLockUtil.doWithLock("checkBuiltInDataModel", () -> doSyncBuiltInDataModelWithTransaction());
         if (!result.isSuccessful()) {
             throw result.toRawException();
         }
     }
 
-    @SneakyThrows
+    /**
+     * 因为在执行过程中会触发hibernate的懒加载，而hibernate的懒加载需要在事务中
+     *
+     * @return
+     */
+    private Result doSyncBuiltInDataModelWithTransaction() {
+        return transactionTemplate.execute(transactionStatus -> {
+            try {
+                return doSyncBuiltInDataModel();
+            } catch (Exception exception) {
+                exception.printStackTrace();
+                transactionStatus.setRollbackOnly();
+                return Result.fail(Result.UNEXPECTED_ERROR, "服务异常，请重试");
+            }
+        });
+    }
+
     private Result doSyncBuiltInDataModel() {
         DatabaseSnapshot hibernateSnapshot = this.diffResult.getReferenceSnapshot();
         DatabaseObjectCollection hibernateDatabaseObjects = (DatabaseObjectCollection) hibernateSnapshot.getSerializableFieldValue("objects");
@@ -244,8 +271,8 @@ public class BuiltInDataModelService implements ApplicationRunner {
         List<RvPrototype> toDeletePrototypeList = new ArrayList<>();
         Map<String, RvPrototype> rvPrototypeMap = new HashMap<>(tableSet.size());
         originalPrototypeList.forEach(prototype -> {
-            if (tableSet.stream().filter(table -> table.getName().equals(prototype.getCode())).findAny().isPresent()) {
-                rvPrototypeMap.put(prototype.getCode(), prototype);
+            if (tableSet.stream().filter(table -> table.getName().equals(prototype.getName())).findAny().isPresent()) {
+                rvPrototypeMap.put(prototype.getName(), prototype);
             } else {
                 toDeletePrototypeList.add(prototype);
             }
@@ -268,11 +295,10 @@ public class BuiltInDataModelService implements ApplicationRunner {
 
     private RvPrototype buildRvPrototype(Table table, Map<String, RvPrototype> rvPrototypeMap) {
         RvPrototype rvPrototype = rvPrototypeMap.get(table.getName());
-        boolean isNew = rvPrototype.getId() == null;
-        rvPrototype.setCode(table.getName());
+        rvPrototype.setName(table.getName());
         rvPrototype.setBuiltIn(true);
-        if (isNew) {
-            rvPrototype.setName(table.getName());
+        if (rvPrototype.getTitle() == null) {
+            rvPrototype.setTitle(table.getName());
         }
         if (rvPrototype.getRemark() == null) {
             rvPrototype.setRemark(table.getRemarks());
@@ -282,8 +308,8 @@ public class BuiltInDataModelService implements ApplicationRunner {
         List<String> deletedColumnIdList = new ArrayList<>();
         if (rvPrototype.getColumns() != null) {
             rvPrototype.getColumns().forEach(rvColumn -> {
-                if (table.getColumns().stream().filter(column -> column.getName().equals(rvColumn.getCode())).findAny().isPresent()) {
-                    rvColumnMap.put(rvColumn.getCode(), rvColumn);
+                if (table.getColumns().stream().filter(column -> column.getName().equals(rvColumn.getName())).findAny().isPresent()) {
+                    rvColumnMap.put(rvColumn.getName(), rvColumn);
                 } else {
                     deletedColumnIdList.add(rvColumn.getId());
                 }
@@ -300,8 +326,8 @@ public class BuiltInDataModelService implements ApplicationRunner {
         List<String> deletedIndexIdList = new ArrayList<>();
         if (rvPrototype.getIndexes() != null) {
             rvPrototype.getIndexes().forEach(rvIndex -> {
-                if (table.getIndexes().stream().filter(index -> index.getName().equals(rvIndex.getCode())).findAny().isPresent()) {
-                    rvIndexMap.put(rvIndex.getCode(), rvIndex);
+                if (table.getIndexes().stream().filter(index -> index.getName().equals(rvIndex.getName())).findAny().isPresent()) {
+                    rvIndexMap.put(rvIndex.getName(), rvIndex);
                 } else {
                     deletedIndexIdList.add(rvIndex.getId());
                 }
@@ -321,8 +347,8 @@ public class BuiltInDataModelService implements ApplicationRunner {
         List<String> deletedForeignKeyIdList = new ArrayList<>();
         if (rvPrototype.getForeignKeys() != null) {
             rvPrototype.getForeignKeys().forEach(rvForeignKey -> {
-                if (table.getOutgoingForeignKeys().stream().filter(foreignKey -> foreignKey.getName().equals(rvForeignKey.getCode())).findAny().isPresent()) {
-                    rvForeignKeyMap.put(rvForeignKey.getCode(), rvForeignKey);
+                if (table.getOutgoingForeignKeys().stream().filter(foreignKey -> foreignKey.getName().equals(rvForeignKey.getName())).findAny().isPresent()) {
+                    rvForeignKeyMap.put(rvForeignKey.getName(), rvForeignKey);
                 } else {
                     deletedForeignKeyIdList.add(rvForeignKey.getId());
                 }
@@ -340,8 +366,8 @@ public class BuiltInDataModelService implements ApplicationRunner {
         List<String> deletedUniqueConstraintIdList = new ArrayList<>();
         if (rvPrototype.getUniqueConstraints() != null) {
             rvPrototype.getUniqueConstraints().forEach(rvUniqueConstraint -> {
-                if (table.getUniqueConstraints().stream().filter(uniqueConstraint -> uniqueConstraint.getName().equals(rvUniqueConstraint.getCode())).findAny().isPresent()) {
-                    rvUniqueConstraintMap.put(rvUniqueConstraint.getCode(), rvUniqueConstraint);
+                if (table.getUniqueConstraints().stream().filter(uniqueConstraint -> uniqueConstraint.getName().equals(rvUniqueConstraint.getName())).findAny().isPresent()) {
+                    rvUniqueConstraintMap.put(rvUniqueConstraint.getName(), rvUniqueConstraint);
                 } else {
                     deletedUniqueConstraintIdList.add(rvUniqueConstraint.getId());
                 }
@@ -360,13 +386,11 @@ public class BuiltInDataModelService implements ApplicationRunner {
 
     private RvColumn buildRvColumn(Column column, Map<String, RvColumn> rvColumnMap) {
         RvColumn rvColumn = rvColumnMap.get(column.getName());
-        boolean isNew = rvColumn == null;
-        if (isNew) {
+        if (rvColumn == null) {
             rvColumn = new RvColumn();
             rvColumnMap.put(column.getName(), rvColumn);
-            rvColumn.setName(column.getName());
         }
-        rvColumn.setCode(column.getName());
+        rvColumn.setName(column.getName());
         rvColumn.setDataType(column.getType().toString());
         rvColumn.setDefaultValue(String.valueOf(column.getDefaultValue()));
         rvColumn.setNullable(column.isNullable());
@@ -374,6 +398,9 @@ public class BuiltInDataModelService implements ApplicationRunner {
         if (column.isAutoIncrement()) {
             rvColumn.setIncrementBy(column.getAutoIncrementInformation().getIncrementBy());
             rvColumn.setStartWith(column.getAutoIncrementInformation().getStartWith());
+        }
+        if (rvColumn.getTitle() == null) {
+            rvColumn.setTitle(column.getName());
         }
         if (rvColumn.getOrderNum() == null) {
             rvColumn.setOrderNum(column.getOrder());
@@ -387,19 +414,31 @@ public class BuiltInDataModelService implements ApplicationRunner {
     private RvIndex buildRvIndex(Index index, Map<String, RvColumn> rvColumnMap, Map<String, RvIndex> rvIndexMap) {
         RvIndex rvIndex = rvIndexMap.get(index.getName());
         boolean isNew = rvIndex == null;
-        if (isNew) {
+        if (rvIndex == null) {
             rvIndex = new RvIndex();
             rvIndexMap.put(index.getName(), rvIndex);
-            rvIndex.setName(index.getName());
         }
-        rvIndex.setCode(index.getName());
+        if (rvIndex.getTitle() == null) {
+            rvIndex.setTitle(index.getName());
+        }
+        rvIndex.setName(index.getName());
         rvIndex.setUniqueIndex(index.isUnique());
         final RvIndex targetRvIndex = rvIndex;
         rvIndex.setIndexColumns(Streams.mapWithIndex(index.getColumns().stream(), (column, idx) -> {
-            RvIndexColumn rvIndexColumn = new RvIndexColumn();
-            rvIndexColumn.setIndex(targetRvIndex);
-            rvIndexColumn.setColumn(rvColumnMap.get(column.getName()));
-            rvIndexColumn.setOrderNum((int) idx);
+            // 只有通过hibernate查出来的对象才会被代理，调用getIndexColumns方法的时候才会懒加载
+            // new出来的对象没有被代理，调用getIndexColumns的时候会直接返回null
+            List<RvIndexColumn> matchedRvIndexColumns = isNew ? null : targetRvIndex.getIndexColumns().stream()
+                    .filter(indexColumn -> column.getName().equals(indexColumn.getColumn().getName()))
+                    .collect(Collectors.toList());
+            RvIndexColumn rvIndexColumn;
+            if (matchedRvIndexColumns != null && matchedRvIndexColumns.size() > 0) {
+                rvIndexColumn = matchedRvIndexColumns.get(0);
+            } else {
+                rvIndexColumn = new RvIndexColumn();
+                rvIndexColumn.setIndex(targetRvIndex);
+                rvIndexColumn.setColumn(rvColumnMap.get(column.getName()));
+                rvIndexColumn.setOrderNum((int) idx);
+            }
             return rvIndexColumn;
         }).collect(Collectors.toList()));
         return rvIndex;
@@ -408,20 +447,30 @@ public class BuiltInDataModelService implements ApplicationRunner {
     private RvPrimaryKey buildRvPrimaryKey(PrimaryKey primaryKey, RvPrototype rvPrototype, Map<String, RvColumn> rvColumnMap, Map<String, RvIndex> rvIndexMap) {
         RvPrimaryKey rvPrimaryKey = rvPrototype.getPrimaryKey();
         boolean isNew = rvPrimaryKey == null;
-        if (isNew) {
+        if (rvPrimaryKey == null) {
             rvPrimaryKey = new RvPrimaryKey();
-            rvPrimaryKey.setName(primaryKey.getName());
         }
-        rvPrimaryKey.setCode(primaryKey.getName());
+        if (rvPrimaryKey.getTitle() == null) {
+            rvPrimaryKey.setTitle(primaryKey.getName());
+        }
+        rvPrimaryKey.setName(primaryKey.getName());
         if (primaryKey.getBackingIndex() != null) {
             rvPrimaryKey.setBackingIndex(rvIndexMap.get(primaryKey.getBackingIndex().getName()));
         }
         final RvPrimaryKey targetRvPrimaryKey = rvPrimaryKey;
         rvPrimaryKey.setPrimaryKeyColumns(Streams.mapWithIndex(primaryKey.getColumns().stream(), (column, idx) -> {
-            RvPrimaryKeyColumn rvPrimaryKeyColumn = new RvPrimaryKeyColumn();
-            rvPrimaryKeyColumn.setPrimaryKey(targetRvPrimaryKey);
-            rvPrimaryKeyColumn.setColumn(rvColumnMap.get(column.getName()));
-            rvPrimaryKeyColumn.setOrderNum((int) idx);
+            List<RvPrimaryKeyColumn> matchedRvPrimaryKeyColumns = isNew ? null : targetRvPrimaryKey.getPrimaryKeyColumns().stream()
+                    .filter(primaryKeyColumn -> column.getName().equals(primaryKeyColumn.getColumn().getName()))
+                    .collect(Collectors.toList());
+            RvPrimaryKeyColumn rvPrimaryKeyColumn;
+            if (matchedRvPrimaryKeyColumns != null && matchedRvPrimaryKeyColumns.size() > 0) {
+                rvPrimaryKeyColumn = matchedRvPrimaryKeyColumns.get(0);
+            } else {
+                rvPrimaryKeyColumn = new RvPrimaryKeyColumn();
+                rvPrimaryKeyColumn.setPrimaryKey(targetRvPrimaryKey);
+                rvPrimaryKeyColumn.setColumn(rvColumnMap.get(column.getName()));
+                rvPrimaryKeyColumn.setOrderNum((int) idx);
+            }
             return rvPrimaryKeyColumn;
         }).collect(Collectors.toList()));
         return rvPrimaryKey;
@@ -430,31 +479,49 @@ public class BuiltInDataModelService implements ApplicationRunner {
     private RvForeignKey buildRvForeignKey(ForeignKey foreignKey, Map<String, RvPrototype> rvPrototypeMap, Map<String, RvColumn> rvColumnMap, Map<String, RvIndex> rvIndexMap, Map<String, RvForeignKey> rvForeignKeyMap) {
         RvForeignKey rvForeignKey = rvForeignKeyMap.get(foreignKey.getName());
         boolean isNew = rvForeignKey == null;
-        if (isNew) {
+        if (rvForeignKey == null) {
             rvForeignKey = new RvForeignKey();
             rvForeignKeyMap.put(foreignKey.getName(), rvForeignKey);
-            rvForeignKey.setName(foreignKey.getName());
         }
-        rvForeignKey.setCode(foreignKey.getName());
+        if (rvForeignKey.getTitle() == null) {
+            rvForeignKey.setTitle(foreignKey.getName());
+        }
+        rvForeignKey.setName(foreignKey.getName());
         // 是否级联删除
         rvForeignKey.setCascadeDelete(importedKeyCascade.equals(foreignKey.getDeleteRule()));
         if (foreignKey.getBackingIndex() != null) {
             rvForeignKey.setBackingIndex(rvIndexMap.get(foreignKey.getBackingIndex().getName()));
         }
         final RvForeignKey targetRvForeignKey = rvForeignKey;
-        rvForeignKey.setForeignKeyLocalColumns(Streams.mapWithIndex(foreignKey.getPrimaryKeyColumns().stream(), (column, idx) -> {
-            RvForeignKeyLocalColumn rvForeignKeyLocalColumn = new RvForeignKeyLocalColumn();
-            rvForeignKeyLocalColumn.setForeignKey(targetRvForeignKey);
-            rvForeignKeyLocalColumn.setColumn(rvColumnMap.get(column.getName()));
-            rvForeignKeyLocalColumn.setOrderNum((int) idx);
-            return rvForeignKeyLocalColumn;
+        rvForeignKey.setForeignKeyTargetColumns(Streams.mapWithIndex(foreignKey.getPrimaryKeyColumns().stream(), (column, idx) -> {
+            List<RvForeignKeyTargetColumn> matchedRvForeignKeyTargetColumns = isNew ? null : targetRvForeignKey.getForeignKeyTargetColumns().stream()
+                    .filter(foreignKeyTargetColumn -> column.getName().equals(foreignKeyTargetColumn.getColumn().getName()))
+                    .collect(Collectors.toList());
+            RvForeignKeyTargetColumn rvForeignKeyTargetColumn;
+            if (matchedRvForeignKeyTargetColumns != null && matchedRvForeignKeyTargetColumns.size() > 0) {
+                rvForeignKeyTargetColumn = matchedRvForeignKeyTargetColumns.get(0);
+            } else {
+                rvForeignKeyTargetColumn = new RvForeignKeyTargetColumn();
+                rvForeignKeyTargetColumn.setForeignKey(targetRvForeignKey);
+                rvForeignKeyTargetColumn.setColumn(rvColumnMap.get(column.getName()));
+                rvForeignKeyTargetColumn.setOrderNum((int) idx);
+            }
+            return rvForeignKeyTargetColumn;
         }).collect(Collectors.toList()));
-        rvForeignKey.setForeignPrototype(rvPrototypeMap.get(foreignKey.getForeignKeyTable().getName()));
+        rvForeignKey.setTargetPrototype(rvPrototypeMap.get(foreignKey.getPrimaryKeyTable().getName()));
         rvForeignKey.setForeignKeyForeignColumns(Streams.mapWithIndex(foreignKey.getForeignKeyColumns().stream(), (column, idx) -> {
-            RvForeignKeyForeignColumn rvForeignKeyForeignColumn = new RvForeignKeyForeignColumn();
-            rvForeignKeyForeignColumn.setForeignKey(targetRvForeignKey);
-            rvForeignKeyForeignColumn.setColumn(rvColumnMap.get(column.getName()));
-            rvForeignKeyForeignColumn.setOrderNum((int) idx);
+            List<RvForeignKeyForeignColumn> matchedRvForeignKeyForeignColumns = isNew ? null : targetRvForeignKey.getForeignKeyForeignColumns().stream()
+                    .filter(foreignKeyForeignColumn -> column.getName().equals(foreignKeyForeignColumn.getColumn().getName()))
+                    .collect(Collectors.toList());
+            RvForeignKeyForeignColumn rvForeignKeyForeignColumn;
+            if (matchedRvForeignKeyForeignColumns != null && matchedRvForeignKeyForeignColumns.size() > 0) {
+                rvForeignKeyForeignColumn = matchedRvForeignKeyForeignColumns.get(0);
+            } else {
+                rvForeignKeyForeignColumn = new RvForeignKeyForeignColumn();
+                rvForeignKeyForeignColumn.setForeignKey(targetRvForeignKey);
+                rvForeignKeyForeignColumn.setColumn(rvColumnMap.get(column.getName()));
+                rvForeignKeyForeignColumn.setOrderNum((int) idx);
+            }
             return rvForeignKeyForeignColumn;
         }).collect(Collectors.toList()));
         return rvForeignKey;
@@ -463,21 +530,31 @@ public class BuiltInDataModelService implements ApplicationRunner {
     private RvUniqueConstraint buildRvUniqueConstraint(UniqueConstraint uniqueConstraint, Map<String, RvColumn> rvColumnMap, Map<String, RvIndex> rvIndexMap, Map<String, RvUniqueConstraint> rvUniqueConstraintMap) {
         RvUniqueConstraint rvUniqueConstraint = rvUniqueConstraintMap.get(uniqueConstraint.getName());
         boolean isNew = rvUniqueConstraint == null;
-        if (isNew) {
+        if (rvUniqueConstraint == null) {
             rvUniqueConstraint = new RvUniqueConstraint();
             rvUniqueConstraintMap.put(uniqueConstraint.getName(), rvUniqueConstraint);
-            rvUniqueConstraint.setName(uniqueConstraint.getName());
         }
-        rvUniqueConstraint.setCode(uniqueConstraint.getColumnNames());
+        if (rvUniqueConstraint.getTitle() == null) {
+            rvUniqueConstraint.setTitle(uniqueConstraint.getName());
+        }
+        rvUniqueConstraint.setName(uniqueConstraint.getColumnNames());
         if (uniqueConstraint.getBackingIndex() != null) {
             rvUniqueConstraint.setBackingIndex(rvIndexMap.get(uniqueConstraint.getBackingIndex().getName()));
         }
         final RvUniqueConstraint targetRvUniqueConstraint = rvUniqueConstraint;
         rvUniqueConstraint.setUniqueConstraintColumns(Streams.mapWithIndex(uniqueConstraint.getColumns().stream(), (column, idx) -> {
-            RvUniqueConstraintColumn rvUniqueConstraintColumn = new RvUniqueConstraintColumn();
-            rvUniqueConstraintColumn.setUniqueConstraint(targetRvUniqueConstraint);
-            rvUniqueConstraintColumn.setColumn(rvColumnMap.get(column.getName()));
-            rvUniqueConstraintColumn.setOrderNum((int) idx);
+            List<RvUniqueConstraintColumn> matchedRvUniqueConstraintColumns = isNew ? null : targetRvUniqueConstraint.getUniqueConstraintColumns().stream()
+                    .filter(uniqueConstraintColumn -> column.getName().equals(uniqueConstraintColumn.getColumn().getName()))
+                    .collect(Collectors.toList());
+            RvUniqueConstraintColumn rvUniqueConstraintColumn;
+            if (matchedRvUniqueConstraintColumns != null && matchedRvUniqueConstraintColumns.size() > 0) {
+                rvUniqueConstraintColumn = matchedRvUniqueConstraintColumns.get(0);
+            } else {
+                rvUniqueConstraintColumn = new RvUniqueConstraintColumn();
+                rvUniqueConstraintColumn.setUniqueConstraint(targetRvUniqueConstraint);
+                rvUniqueConstraintColumn.setColumn(rvColumnMap.get(column.getName()));
+                rvUniqueConstraintColumn.setOrderNum((int) idx);
+            }
             return rvUniqueConstraintColumn;
         }).collect(Collectors.toList()));
         return rvUniqueConstraint;

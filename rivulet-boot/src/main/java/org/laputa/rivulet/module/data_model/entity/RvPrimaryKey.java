@@ -42,20 +42,20 @@ public class RvPrimaryKey extends RvEntity<String> {
     /**
      * 这里的@JoinColumn的nullable属性不能设为false，否则无法正确插入数据
      */
-    @JsonBackReference
+    @JsonBackReference("primaryKey")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     @OneToOne
     @JoinColumn(name = "prototype_id")
     private RvPrototype prototype;
 
+    @Column(name = "title", nullable = false)
+    private String title;
+
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "code", nullable = false)
-    private String code;
-
-    @JsonManagedReference
+    @JsonManagedReference("primaryKeyColumns")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "primaryKey")
     private List<RvPrimaryKeyColumn> primaryKeyColumns;
 

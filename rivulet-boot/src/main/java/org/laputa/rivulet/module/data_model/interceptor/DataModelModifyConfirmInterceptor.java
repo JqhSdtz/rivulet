@@ -6,7 +6,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.laputa.rivulet.access_limit.annotation.AccessLimit;
 import org.laputa.rivulet.access_limit.annotation.LimitTimeUnit;
-import org.laputa.rivulet.common.interceptor.RvInterceptor;
+import org.laputa.rivulet.common.mvc.interceptor.RvInterceptor;
 import org.laputa.rivulet.common.model.Result;
 import org.laputa.rivulet.common.state.AppState;
 import org.laputa.rivulet.module.data_model.service.BuiltInDataModelService;

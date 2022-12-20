@@ -5,7 +5,7 @@ import {Form, FormItem, Input, Password, Submit} from '@formily/antd';
 import {Card} from 'antd';
 import * as ICONS from '@ant-design/icons';
 import {FormProps} from '@formily/antd/esm/form';
-import RvModal from '@/components/common/RvModal';
+import {useRvModal} from '@/components/common/RvModal';
 import axios from 'axios';
 import {Result} from '@/types/result';
 import RvRequest from '@/utils/rvRequest';
@@ -52,6 +52,7 @@ interface IVerifyInitKeyProps {
 }
 
 export default (props: IVerifyInitKeyProps) => {
+    const rvModal = useRvModal();
     return (
         <div
             style={{
@@ -77,14 +78,14 @@ export default (props: IVerifyInitKeyProps) => {
                     onAutoSubmit={async (data) => {
                         const result: Result = await RvRequest.do(() => axios.post('/app/verifyInitKey', data));
                         if (result.successful) {
-                            RvModal.success({
+                            rvModal.success({
                                 content: '密钥验证成功！',
                                 onOk() {
                                     props.onPass?.();
                                 }
                             });
                         } else {
-                            RvModal.error({
+                            rvModal.error({
                                 content: '密钥验证失败！请检查密钥是否已过期。',
                                 onOk() {
                                     props.onReject?.();

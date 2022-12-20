@@ -1,14 +1,16 @@
 package org.laputa.rivulet.module.data_model.controller;
 
+import org.laputa.rivulet.common.model.Pagination;
 import org.laputa.rivulet.common.model.Result;
+import org.laputa.rivulet.common.mvc.annotation.RequestBodyParam;
 import org.laputa.rivulet.common.script.JsRunner;
 import org.laputa.rivulet.module.data_model.entity.RvPrototype;
 import org.laputa.rivulet.module.data_model.service.DataModelService;
+import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * @author JQH
@@ -23,14 +25,15 @@ public class DataModelController {
     @Resource
     private JsRunner jsRunner;
 
-    @PostMapping
+    @PostMapping("/create")
     public Result<Void> createDataModel(@RequestBody @Validated RvPrototype rvPrototype) {
         return dataModelService.createDataModel(rvPrototype);
     }
 
-    @GetMapping
-    public Result<List<RvPrototype>> queryDataModel(RvPrototype prototype) {
-        return dataModelService.queryDataModel(prototype);
+    @PostMapping("/query")
+    public Result<Page<RvPrototype>> queryDataModel(@RequestBodyParam RvPrototype payload, @RequestBodyParam Pagination pagination) {
+        RvPrototype rvPrototype = payload == null ? new RvPrototype() : payload;
+        return dataModelService.queryDataModel(rvPrototype, pagination.getPageable());
     }
 
     @GetMapping("/single/{id}")
@@ -40,7 +43,7 @@ public class DataModelController {
 
     @GetMapping("/ModelDetailSchema")
     public Result<Object> getModelDetailSchema() {
-        return jsRunner.runScript("/src/schemas/ModelDetail.mjs");
+        return jsRunner.runScript("/src/schemas/ModelDetail/index.mjs");
     }
 
     @GetMapping("/DataModelIndexSchema")

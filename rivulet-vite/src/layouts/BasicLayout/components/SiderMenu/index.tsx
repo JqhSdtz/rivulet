@@ -49,7 +49,7 @@ const SiderMenuWrapper: React.FC<SiderMenuProps & PrivateSiderMenuProps> = props
 
     return isMobile ? (
         <Drawer
-            visible={!collapsed}
+            open={!collapsed}
             placement="left"
             className={classNames(`${prefixCls}-drawer-sider`, className)}
             onClose={() => onCollapse?.(true)}
