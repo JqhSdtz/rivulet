@@ -2,12 +2,14 @@ import {useContext, useRef} from 'react';
 import {SplitViewType, TabNodeProvider, TabsContext, TabsContextType} from '@/layouts/BasicLayout';
 import {useEventListener, useSize} from 'ahooks';
 import {ErrorBoundary} from '@ant-design/pro-utils';
+import {useNavigate} from 'react-router-dom';
 
 const SplitView = (props: { splitView: SplitViewType }) => {
     const {
         splitViewContainer,
         updateTabs
     } = useContext<TabsContextType>(TabsContext);
+    const navigate = useNavigate();
     const {splitView} = props;
     const activeTab = splitView.tabNodes.find(node => node.isActive);
     const tabComponent = activeTab?.component;
@@ -17,16 +19,19 @@ const SplitView = (props: { splitView: SplitViewType }) => {
     useEventListener('click', () => {
         splitViewContainer.splitViews.forEach(tmpSplitView => tmpSplitView.isActive = false);
         splitView.isActive = true;
+        navigate(activeTab.name ?? '');
         updateTabs();
     }, {target: ref});
     const tabsSize = useSize(document.getElementsByClassName('keep-alive-tabs')[0]);
+    splitView.contentRef = ref;
     return (
         <div key={activeTab.name}
              style={{
                  width,
                  height: `calc(100vh - ${tabsSize?.height ?? 0}px)`,
                  display: 'inline-block',
-                 position: 'relative'
+                 position: 'relative',
+                 transform: 'scale(1,1)'
              }}
              ref={ref}>
             <TabNodeProvider tabKey={activeTab.name ?? ''} contentRef={ref}>

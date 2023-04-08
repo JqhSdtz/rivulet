@@ -1,6 +1,6 @@
 import {useContext} from 'react';
 import {TabNodeContext} from '@/layouts/BasicLayout';
-import {createForm, Form} from '@formily/core';
+import {createForm, Form, IFormProps} from '@formily/core';
 import {useCreation} from 'ahooks';
 
 const formInstanceMap = new Map<string, Form>();

@@ -5,14 +5,15 @@ import {TabNodeContext, TabNodeContextType} from '@/layouts/BasicLayout';
 
 function presetProps(props: ModalFuncProps, tabNodeContext: TabNodeContextType) {
     const {tabNode} = tabNodeContext;
-    if (tabNode?.contentRef?.current) {
-        props.getContainer = () => tabNode.contentRef.current;
+    if (tabNode?.splitView?.contentRef?.current) {
+        props.getContainer = () => tabNode.splitView.contentRef.current;
     }
     props.wrapClassName = (props.wrapClassName ?? '') + ' rv-modal';
     props.maskStyle = {
         position: 'absolute'
     };
     props.maskClosable = false;
+    props.centered = true;
     props.transitionName = props.transitionName ?? '';
     return props;
 }

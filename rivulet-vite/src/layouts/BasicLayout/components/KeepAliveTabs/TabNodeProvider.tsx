@@ -50,7 +50,6 @@ interface TabNodeCallbacksSetter {
 export type TabNodeContextType = {
     tabKey: string;
     tabNode: TabNodeType;
-    contentRef: RefObject<HTMLDivElement>;
     closeTab: () => void;
     setTabTitle: (title: string) => void;
 } & TabNodeCallbacksSetter;
@@ -86,12 +85,9 @@ export default (props: { tabKey: string; contentRef: RefObject<HTMLDivElement>; 
         });
     };
     const tabNode = findNode(tabKey);
-    const contentRef = useRef<HTMLDivElement>();
-    tabNode.contentRef = contentRef;
     const value = {
         tabKey,
         tabNode,
-        contentRef,
         closeTab,
         setTabTitle,
         beforeClose
@@ -104,10 +100,10 @@ export default (props: { tabKey: string; contentRef: RefObject<HTMLDivElement>; 
                 cacheKey={tabKey}
                 saveScrollPosition="screen"
             >
-                <div ref={contentRef}
+                <div
                      style={{
                          height: '100%',
-                         transform: 'scale(1,1)'
+                         overflowY: 'scroll'
                      }}
                 >
                     {props.children}

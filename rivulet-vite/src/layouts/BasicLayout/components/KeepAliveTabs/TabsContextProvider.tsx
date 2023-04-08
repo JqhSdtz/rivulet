@@ -1,4 +1,4 @@
-import {createContext, MutableRefObject, ReactElement, useContext, useRef} from 'react';
+import {createContext, MutableRefObject, ReactElement, RefObject, useContext, useRef} from 'react';
 import {CachingNode, fixContext, useAliveController} from 'react-activation';
 import {useCreation, useEventEmitter, useLatest, useUpdate} from 'ahooks';
 import {EventEmitter} from 'ahooks/lib/useEventEmitter';
@@ -139,6 +139,7 @@ export interface SplitViewType {
     isActive?: boolean;
     tabBarElement?: ReactElement;
     tabNodes: TabNodeType[];
+    contentRef?: RefObject<HTMLDivElement>;
 }
 
 export interface SplitViewContainerType {
@@ -193,7 +194,10 @@ export default (props) => {
         return splitViewContainerCopy;
     };
     const resetSplitViewOfTabNodes = () => splitViewContainerRef.current.splitViews.forEach(
-        splitView => splitView.tabNodes.forEach(node => setTabNodeAttributes(node.name, {splitView}))
+        splitView => splitView.tabNodes.forEach(node => {
+            node.splitView = splitView;
+            setTabNodeAttributes(node.name, {splitView});
+        })
     );
     const resetSplitViewContainer = (splitViewContainerCopy) => {
         splitViewContainerRef.current = splitViewContainerCopy;
@@ -289,6 +293,7 @@ export default (props) => {
         setTabNodeAttributes(targetNode.name, {
             splitView: splitViews[index]
         });
+        resetSplitViewOfTabNodes();
         setActiveSplitView(splitViews[index]);
         updateTabs();
     };
