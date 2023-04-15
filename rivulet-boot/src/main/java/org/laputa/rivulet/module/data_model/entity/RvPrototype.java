@@ -16,6 +16,10 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
 import org.laputa.rivulet.common.constant.Strings;
 import org.laputa.rivulet.common.entity.RvEntity;
+import org.laputa.rivulet.module.data_model.entity.constraint.RvForeignKey;
+import org.laputa.rivulet.module.data_model.entity.constraint.RvNotNull;
+import org.laputa.rivulet.module.data_model.entity.constraint.RvPrimaryKey;
+import org.laputa.rivulet.module.data_model.entity.constraint.RvUnique;
 
 import javax.persistence.*;
 import java.util.List;
@@ -111,16 +115,29 @@ public class RvPrototype extends RvEntity<String> {
         foreignKeys.forEach(foreignKey -> foreignKey.setPrototype(this));
     }
 
-    @JsonManagedReference("uniqueConstraints")
+    @JsonManagedReference("uniques")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "prototype")
-    private List<RvUniqueConstraint> uniqueConstraints;
+    private List<RvUnique> uniques;
 
-    @JsonSetter("uniqueConstraints")
-    public void setUniqueConstraints(List<RvUniqueConstraint> uniqueConstraints) {
-        this.uniqueConstraints = uniqueConstraints;
-        if (uniqueConstraints == null) {
+    @JsonSetter("uniques")
+    public void setUniques(List<RvUnique> uniques) {
+        this.uniques = uniques;
+        if (uniques == null) {
             return;
         }
-        uniqueConstraints.forEach(uniqueConstraint -> uniqueConstraint.setPrototype(this));
+        uniques.forEach(unique -> unique.setPrototype(this));
+    }
+
+    @JsonManagedReference("notNulls")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "prototype")
+    private List<RvNotNull> notNulls;
+
+    @JsonSetter("notNulls")
+    public void setNotNulls(List<RvNotNull> notNulls) {
+        this.notNulls = notNulls;
+        if (notNulls == null) {
+            return;
+        }
+        notNulls.forEach(notNull -> notNull.setPrototype(this));
     }
 }

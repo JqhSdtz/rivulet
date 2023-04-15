@@ -1,4 +1,4 @@
-package org.laputa.rivulet.module.data_model.entity;
+package org.laputa.rivulet.module.data_model.entity.constraint;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -9,6 +9,8 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.*;
 import org.laputa.rivulet.common.entity.RvEntity;
+import org.laputa.rivulet.module.data_model.entity.RvIndex;
+import org.laputa.rivulet.module.data_model.entity.RvPrototype;
 import org.laputa.rivulet.module.data_model.entity.column_relation.RvForeignKeyForeignColumn;
 import org.laputa.rivulet.module.data_model.entity.column_relation.RvForeignKeyTargetColumn;
 

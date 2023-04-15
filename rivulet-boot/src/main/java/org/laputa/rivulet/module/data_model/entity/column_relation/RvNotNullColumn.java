@@ -8,7 +8,7 @@ import lombok.ToString;
 import org.hibernate.annotations.*;
 import org.laputa.rivulet.common.entity.RvEntity;
 import org.laputa.rivulet.module.data_model.entity.RvColumn;
-import org.laputa.rivulet.module.data_model.entity.RvUniqueConstraint;
+import org.laputa.rivulet.module.data_model.entity.constraint.RvNotNull;
 
 import javax.persistence.Entity;
 import javax.persistence.Index;
@@ -17,7 +17,7 @@ import javax.persistence.*;
 
 /**
  * @author JQH
- * @since 下午 8:02 22/07/25
+ * @since 下午 7:13 23/04/15
  */
 @Entity
 @Getter
@@ -26,11 +26,11 @@ import javax.persistence.*;
 @RequiredArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "rv_unique_constraint_column", indexes = {
-        @Index(name = "idx_rvuniqueconstraintcolumn_constraint_id", columnList = "unique_constraint_id"),
-        @Index(name = "idx_rvuniqueconstraintcolumn_column_id", columnList = "column_id")
+@Table(name = "rv_not_null_column", indexes = {
+        @Index(name = "idx_rvnotnullcolumn_constraint_id", columnList = "not_null_id"),
+        @Index(name = "idx_rvnotnullcolumn_column_id", columnList = "column_id")
 })
-public class RvUniqueConstraintColumn extends RvEntity<String> {
+public class RvNotNullColumn extends RvEntity<String> {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")
@@ -40,12 +40,12 @@ public class RvUniqueConstraintColumn extends RvEntity<String> {
     /**
      * 这里的@JoinColumn的nullable属性不能设为false，否则无法正确插入数据
      */
-    @JsonBackReference("uniqueConstraintColumns")
+    @JsonBackReference("notNullColumns")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne
-    @JoinColumn(name = "unique_constraint_id")
-    private RvUniqueConstraint uniqueConstraint;
+    @JoinColumn(name = "not_null_id")
+    private RvNotNull notNull;
 
     @OneToOne
     @OnDelete(action = OnDeleteAction.CASCADE)

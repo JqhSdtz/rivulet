@@ -33,6 +33,9 @@ import org.laputa.rivulet.module.app.property.TerminalKeyProperty;
 import org.laputa.rivulet.module.app.service.GitService;
 import org.laputa.rivulet.module.data_model.entity.*;
 import org.laputa.rivulet.module.data_model.entity.column_relation.*;
+import org.laputa.rivulet.module.data_model.entity.constraint.RvForeignKey;
+import org.laputa.rivulet.module.data_model.entity.constraint.RvPrimaryKey;
+import org.laputa.rivulet.module.data_model.entity.constraint.RvUnique;
 import org.laputa.rivulet.module.data_model.model.RemarkMetaInfo;
 import org.laputa.rivulet.module.data_model.repository.*;
 import org.laputa.rivulet.module.data_model.util.RemarkMetaInfoUtil;
@@ -54,7 +57,6 @@ import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import static liquibase.structure.core.ForeignKeyConstraintType.importedKeyCascade;
@@ -94,7 +96,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
     @Resource
     private RvForeignKeyRepository rvForeignKeyRepository;
     @Resource
-    private RvUniqueConstraintRepository rvUniqueConstraintRepository;
+    private RvUniqueRepository rvUniqueRepository;
     @Resource
     private TerminalKeyUtil terminalKeyUtil;
     @Resource
@@ -203,32 +205,33 @@ public class BuiltInDataModelService implements ApplicationRunner {
 
     /**
      * 从待删除的数据库对象中过滤掉目标数据库中非系统内部的数据模型
+     * 因为根据系统内部的数据模型删除数据库的字段操作只能是针对标记为系统内置的表、字段或索引
      */
     private void filterDiffResult() {
         Iterator<? extends DatabaseObject> iterator = this.diffResult.getUnexpectedObjects().iterator();
         while (iterator.hasNext()) {
             DatabaseObject object = iterator.next();
-            String tableRemark = null;
+            String remark = null;
             if (object instanceof Table) {
-                tableRemark = ((Table) object).getRemarks();
+                remark = ((Table) object).getRemarks();
             } else if (object instanceof Column) {
-                tableRemark = ((Column) object).getRelation().getRemarks();
+                remark = ((Column) object).getRelation().getRemarks();
             } else if (object instanceof ForeignKey) {
-                tableRemark = ((ForeignKey) object).getPrimaryKeyTable().getRemarks();
+                remark = ((ForeignKey) object).getPrimaryKeyTable().getRemarks();
             } else if (object instanceof Index) {
-                tableRemark = ((Index) object).getRelation().getRemarks();
+                remark = ((Index) object).getRelation().getRemarks();
             } else if (object instanceof PrimaryKey) {
-                tableRemark = ((PrimaryKey) object).getTable().getRemarks();
+                remark = ((PrimaryKey) object).getTable().getRemarks();
             } else if (object instanceof UniqueConstraint) {
-                tableRemark = ((UniqueConstraint) object).getRelation().getRemarks();
+                remark = ((UniqueConstraint) object).getRelation().getRemarks();
             }
-            final String finalTableName = tableRemark;
+            final String finalRemark = remark;
             boolean isBuiltIn;
             // 如果该DatabaseObject不属于上述类型，则不属于系统内置数据模型
-            if (finalTableName == null) {
+            if (finalRemark == null) {
                 isBuiltIn = false;
             } else {
-                RemarkMetaInfo metaInfo = RemarkMetaInfoUtil.getMetaInfo(tableRemark);
+                RemarkMetaInfo metaInfo = RemarkMetaInfoUtil.getMetaInfo(remark);
                 isBuiltIn = metaInfo.isBuiltIn();
             }
             if (!isBuiltIn) {
@@ -362,23 +365,23 @@ public class BuiltInDataModelService implements ApplicationRunner {
             return rvForeignKey;
         }).collect(Collectors.toList()));
 
-        Map<String, RvUniqueConstraint> rvUniqueConstraintMap = new HashMap<>(table.getUniqueConstraints().size());
+        Map<String, RvUnique> rvUniqueMap = new HashMap<>(table.getUniqueConstraints().size());
         List<String> deletedUniqueConstraintIdList = new ArrayList<>();
-        if (rvPrototype.getUniqueConstraints() != null) {
-            rvPrototype.getUniqueConstraints().forEach(rvUniqueConstraint -> {
-                if (table.getUniqueConstraints().stream().filter(uniqueConstraint -> uniqueConstraint.getName().equals(rvUniqueConstraint.getName())).findAny().isPresent()) {
-                    rvUniqueConstraintMap.put(rvUniqueConstraint.getName(), rvUniqueConstraint);
+        if (rvPrototype.getUniques() != null) {
+            rvPrototype.getUniques().forEach(rvUnique -> {
+                if (table.getUniqueConstraints().stream().filter(uniqueConstraint -> uniqueConstraint.getName().equals(rvUnique.getName())).findAny().isPresent()) {
+                    rvUniqueMap.put(rvUnique.getName(), rvUnique);
                 } else {
-                    deletedUniqueConstraintIdList.add(rvUniqueConstraint.getId());
+                    deletedUniqueConstraintIdList.add(rvUnique.getId());
                 }
             });
         }
-        rvUniqueConstraintRepository.deleteAllById(deletedUniqueConstraintIdList);
-        rvPrototype.setUniqueConstraints(Streams.mapWithIndex(table.getUniqueConstraints().stream(), (uniqueConstraint, idx) -> {
-            RvUniqueConstraint rvUniqueConstraint = buildRvUniqueConstraint(uniqueConstraint, rvColumnMap, rvIndexMap, rvUniqueConstraintMap);
-            rvUniqueConstraint.setOrderNum((int) idx);
-            rvUniqueConstraint.setPrototype(rvPrototype);
-            return rvUniqueConstraint;
+        rvUniqueRepository.deleteAllById(deletedUniqueConstraintIdList);
+        rvPrototype.setUniques(Streams.mapWithIndex(table.getUniqueConstraints().stream(), (uniqueConstraint, idx) -> {
+            RvUnique rvUnique = buildRvUnique(uniqueConstraint, rvColumnMap, rvIndexMap, rvUniqueMap);
+            rvUnique.setOrderNum((int) idx);
+            rvUnique.setPrototype(rvPrototype);
+            return rvUnique;
         }).collect(Collectors.toList()));
         rvPrototype.setSyncFlag(true);
         return rvPrototype;
@@ -527,37 +530,37 @@ public class BuiltInDataModelService implements ApplicationRunner {
         return rvForeignKey;
     }
 
-    private RvUniqueConstraint buildRvUniqueConstraint(UniqueConstraint uniqueConstraint, Map<String, RvColumn> rvColumnMap, Map<String, RvIndex> rvIndexMap, Map<String, RvUniqueConstraint> rvUniqueConstraintMap) {
-        RvUniqueConstraint rvUniqueConstraint = rvUniqueConstraintMap.get(uniqueConstraint.getName());
-        boolean isNew = rvUniqueConstraint == null;
-        if (rvUniqueConstraint == null) {
-            rvUniqueConstraint = new RvUniqueConstraint();
-            rvUniqueConstraintMap.put(uniqueConstraint.getName(), rvUniqueConstraint);
+    private RvUnique buildRvUnique(UniqueConstraint uniqueConstraint, Map<String, RvColumn> rvColumnMap, Map<String, RvIndex> rvIndexMap, Map<String, RvUnique> rvUniqueMap) {
+        RvUnique rvUnique = rvUniqueMap.get(uniqueConstraint.getName());
+        boolean isNew = rvUnique == null;
+        if (rvUnique == null) {
+            rvUnique = new RvUnique();
+            rvUniqueMap.put(uniqueConstraint.getName(), rvUnique);
         }
-        if (rvUniqueConstraint.getTitle() == null) {
-            rvUniqueConstraint.setTitle(uniqueConstraint.getName());
+        if (rvUnique.getTitle() == null) {
+            rvUnique.setTitle(uniqueConstraint.getName());
         }
-        rvUniqueConstraint.setName(uniqueConstraint.getColumnNames());
+        rvUnique.setName(uniqueConstraint.getColumnNames());
         if (uniqueConstraint.getBackingIndex() != null) {
-            rvUniqueConstraint.setBackingIndex(rvIndexMap.get(uniqueConstraint.getBackingIndex().getName()));
+            rvUnique.setBackingIndex(rvIndexMap.get(uniqueConstraint.getBackingIndex().getName()));
         }
-        final RvUniqueConstraint targetRvUniqueConstraint = rvUniqueConstraint;
-        rvUniqueConstraint.setUniqueConstraintColumns(Streams.mapWithIndex(uniqueConstraint.getColumns().stream(), (column, idx) -> {
-            List<RvUniqueConstraintColumn> matchedRvUniqueConstraintColumns = isNew ? null : targetRvUniqueConstraint.getUniqueConstraintColumns().stream()
-                    .filter(uniqueConstraintColumn -> column.getName().equals(uniqueConstraintColumn.getColumn().getName()))
+        final RvUnique targetRvUnique = rvUnique;
+        rvUnique.setUniqueColumns(Streams.mapWithIndex(uniqueConstraint.getColumns().stream(), (column, idx) -> {
+            List<RvUniqueColumn> matchedRvUniqueColumns = isNew ? null : targetRvUnique.getUniqueColumns().stream()
+                    .filter(uniqueColumn -> column.getName().equals(uniqueColumn.getColumn().getName()))
                     .collect(Collectors.toList());
-            RvUniqueConstraintColumn rvUniqueConstraintColumn;
-            if (matchedRvUniqueConstraintColumns != null && matchedRvUniqueConstraintColumns.size() > 0) {
-                rvUniqueConstraintColumn = matchedRvUniqueConstraintColumns.get(0);
+            RvUniqueColumn rvUniqueColumn;
+            if (matchedRvUniqueColumns != null && matchedRvUniqueColumns.size() > 0) {
+                rvUniqueColumn = matchedRvUniqueColumns.get(0);
             } else {
-                rvUniqueConstraintColumn = new RvUniqueConstraintColumn();
-                rvUniqueConstraintColumn.setUniqueConstraint(targetRvUniqueConstraint);
-                rvUniqueConstraintColumn.setColumn(rvColumnMap.get(column.getName()));
-                rvUniqueConstraintColumn.setOrderNum((int) idx);
+                rvUniqueColumn = new RvUniqueColumn();
+                rvUniqueColumn.setUnique(targetRvUnique);
+                rvUniqueColumn.setColumn(rvColumnMap.get(column.getName()));
+                rvUniqueColumn.setOrderNum((int) idx);
             }
-            return rvUniqueConstraintColumn;
+            return rvUniqueColumn;
         }).collect(Collectors.toList()));
-        return rvUniqueConstraint;
+        return rvUnique;
     }
 
     private void processMetadata(MetadataImpl metadata) {

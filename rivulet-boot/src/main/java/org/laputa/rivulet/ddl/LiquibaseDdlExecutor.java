@@ -11,8 +11,6 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.datatype.DataTypeFactory;
-import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.DatabaseException;
 import lombok.SneakyThrows;
 import org.laputa.rivulet.module.data_model.entity.RvColumn;
@@ -34,12 +32,14 @@ import java.util.List;
 @Component
 public class LiquibaseDdlExecutor implements DisposableBean {
 
+    private LiquibaseChangeConverter converter;
     private final Database database;
 
     public LiquibaseDdlExecutor(DataSource dataSource) {
         try {
             Connection connection = dataSource.getConnection();
             database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
+            converter = new LiquibaseChangeConverter(database);
         } catch (SQLException | DatabaseException e) {
             throw new RuntimeException(e);
         }
@@ -81,13 +81,7 @@ public class LiquibaseDdlExecutor implements DisposableBean {
         List<RvColumn> rvColumns = rvPrototype.getColumns();
         if (rvColumns != null && rvColumns.size() > 0) {
             rvColumns.forEach(rvColumn -> {
-                ColumnConfig column = new ColumnConfig();
-                column.setName(rvColumn.getName())
-                        .setType(rvColumn.getDataType())
-                        .setDefaultValue(rvColumn.getDefaultValue());
-                ConstraintsConfig constraintsConfig = new ConstraintsConfig();
-                column.setConstraints(constraintsConfig);
-                createTableChange.addColumn(column);
+                createTableChange.addColumn(converter.toColumnConfig(rvColumn));
             });
         }
         changeSet.addChange(createTableChange);
@@ -97,12 +91,6 @@ public class LiquibaseDdlExecutor implements DisposableBean {
     @SneakyThrows
     public void doUpdate(Liquibase liquibase) {
         liquibase.update(new Contexts());
-    }
-
-    public String convertDataTypeToSqlType(String dataType, boolean isAutoIncrement) {
-        String definition = dataType + (isAutoIncrement ? "{autoIncrement:true}" : "");
-        DatabaseDataType columnType = DataTypeFactory.getInstance().fromDescription(definition, this.database).toDatabaseDataType(this.database);
-        return columnType.toSql();
     }
 
 }

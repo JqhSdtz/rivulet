@@ -1,6 +1,6 @@
 package org.laputa.rivulet.module.data_model.repository;
 
-import org.laputa.rivulet.module.data_model.entity.RvForeignKey;
+import org.laputa.rivulet.module.data_model.entity.constraint.RvForeignKey;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**

@@ -1,4 +1,4 @@
-package org.laputa.rivulet.module.data_model.entity;
+package org.laputa.rivulet.module.data_model.entity.constraint;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -9,7 +9,9 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.*;
 import org.laputa.rivulet.common.entity.RvEntity;
-import org.laputa.rivulet.module.data_model.entity.column_relation.RvUniqueConstraintColumn;
+import org.laputa.rivulet.module.data_model.entity.RvIndex;
+import org.laputa.rivulet.module.data_model.entity.RvPrototype;
+import org.laputa.rivulet.module.data_model.entity.column_relation.RvUniqueColumn;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -29,10 +31,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "rv_unique_constraint", indexes = {
-        @Index(name = "idx_rvuniqueconstraint_prototype_id", columnList = "prototype_id")
+@Table(name = "rv_unique", indexes = {
+        @Index(name = "idx_rvunique_prototype_id", columnList = "prototype_id")
 })
-public class RvUniqueConstraint extends RvEntity<String> {
+public class RvUnique extends RvEntity<String> {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")
@@ -42,7 +44,7 @@ public class RvUniqueConstraint extends RvEntity<String> {
     /**
      * 这里的@JoinColumn的nullable属性不能设为false，否则无法正确插入数据
      */
-    @JsonBackReference("uniqueConstraints")
+    @JsonBackReference("uniques")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne
@@ -55,17 +57,17 @@ public class RvUniqueConstraint extends RvEntity<String> {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @JsonManagedReference("uniqueConstraintColumns")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "uniqueConstraint")
-    private List<RvUniqueConstraintColumn> uniqueConstraintColumns;
+    @JsonManagedReference("uniqueColumns")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "unique")
+    private List<RvUniqueColumn> uniqueColumns;
 
-    @JsonSetter("uniqueConstraintColumns")
-    public void setUniqueConstraintColumns(List<RvUniqueConstraintColumn> rvUniqueConstraintColumns) {
-        this.uniqueConstraintColumns = rvUniqueConstraintColumns;
-        if (rvUniqueConstraintColumns == null) {
+    @JsonSetter("uniqueColumns")
+    public void setUniqueColumns(List<RvUniqueColumn> rvUniqueColumns) {
+        this.uniqueColumns = rvUniqueColumns;
+        if (rvUniqueColumns == null) {
             return;
         }
-        rvUniqueConstraintColumns.forEach(rvUniqueConstraintColumn -> rvUniqueConstraintColumn.setUniqueConstraint(this));
+        rvUniqueColumns.forEach(rvUniqueColumn -> rvUniqueColumn.setUnique(this));
     }
 
     @OneToOne

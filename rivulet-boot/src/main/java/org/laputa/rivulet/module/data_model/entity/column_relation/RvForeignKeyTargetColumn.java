@@ -8,7 +8,7 @@ import lombok.ToString;
 import org.hibernate.annotations.*;
 import org.laputa.rivulet.common.entity.RvEntity;
 import org.laputa.rivulet.module.data_model.entity.RvColumn;
-import org.laputa.rivulet.module.data_model.entity.RvForeignKey;
+import org.laputa.rivulet.module.data_model.entity.constraint.RvForeignKey;
 
 import javax.persistence.*;
 import javax.persistence.Entity;

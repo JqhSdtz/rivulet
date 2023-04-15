@@ -8,7 +8,7 @@ import lombok.ToString;
 import org.hibernate.annotations.*;
 import org.laputa.rivulet.common.entity.RvEntity;
 import org.laputa.rivulet.module.data_model.entity.RvColumn;
-import org.laputa.rivulet.module.data_model.entity.constraint.RvPrimaryKey;
+import org.laputa.rivulet.module.data_model.entity.constraint.RvUnique;
 
 import javax.persistence.Entity;
 import javax.persistence.Index;
@@ -26,11 +26,11 @@ import javax.persistence.*;
 @RequiredArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "rv_primary_key_column", indexes = {
-        @Index(name = "idx_rvprimarykeycolumn_primary_key_id", columnList = "primary_key_id"),
-        @Index(name = "idx_rvprimarykeycolumn_column_id", columnList = "column_id")
+@Table(name = "rv_unique_column", indexes = {
+        @Index(name = "idx_rvuniquecolumn_constraint_id", columnList = "unique_id"),
+        @Index(name = "idx_rvuniquecolumn_column_id", columnList = "column_id")
 })
-public class RvPrimaryKeyColumn extends RvEntity<String> {
+public class RvUniqueColumn extends RvEntity<String> {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")
@@ -40,12 +40,12 @@ public class RvPrimaryKeyColumn extends RvEntity<String> {
     /**
      * 这里的@JoinColumn的nullable属性不能设为false，否则无法正确插入数据
      */
-    @JsonBackReference("primaryKeyColumns")
+    @JsonBackReference("uniqueColumns")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne
-    @JoinColumn(name = "primary_key_id")
-    private RvPrimaryKey primaryKey;
+    @JoinColumn(name = "unique_id")
+    private RvUnique unique;
 
     @OneToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
