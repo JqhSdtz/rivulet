@@ -10,6 +10,7 @@ import org.laputa.rivulet.common.entity.RvEntity;
 import org.laputa.rivulet.module.data_model.entity.RvColumn;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvUnique;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
@@ -47,7 +48,7 @@ public class RvUniqueColumn extends RvEntity<String> {
     @JoinColumn(name = "unique_id")
     private RvUnique unique;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.PERSIST)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "column_id")
     private RvColumn column;

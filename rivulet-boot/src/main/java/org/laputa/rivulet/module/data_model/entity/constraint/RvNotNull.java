@@ -1,25 +1,19 @@
 package org.laputa.rivulet.module.data_model.entity.constraint;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.*;
 import org.laputa.rivulet.common.entity.RvEntity;
-import org.laputa.rivulet.module.data_model.entity.RvIndex;
+import org.laputa.rivulet.module.data_model.entity.RvColumn;
 import org.laputa.rivulet.module.data_model.entity.RvPrototype;
-import org.laputa.rivulet.module.data_model.entity.column_relation.RvNotNullColumn;
-import org.laputa.rivulet.module.data_model.entity.column_relation.RvUniqueColumn;
 
 import javax.persistence.*;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
-import java.util.List;
 
 /**
  * @author JQH
@@ -55,23 +49,10 @@ public class RvNotNull extends RvEntity<String> {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @JsonManagedReference("notNullColumns")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "notNull")
-    private List<RvNotNullColumn> notNullColumns;
-
-    @JsonSetter("notNullColumns")
-    public void setNotNullColumns(List<RvNotNullColumn> rvNotNullColumns) {
-        this.notNullColumns = rvNotNullColumns;
-        if (rvNotNullColumns == null) {
-            return;
-        }
-        rvNotNullColumns.forEach(rvNotNullColumn -> rvNotNullColumn.setNotNull(this));
-    }
-
     @OneToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "backing_index_id")
-    private RvIndex backingIndex;
+    @JoinColumn(name = "column_id")
+    private RvColumn column;
 
     @Column(name = "remark")
     private String remark;

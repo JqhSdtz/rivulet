@@ -11,6 +11,7 @@ import org.laputa.rivulet.module.data_model.entity.RvColumn;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvForeignKey;
 
 import javax.persistence.*;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
@@ -47,7 +48,7 @@ public class RvForeignKeyForeignColumn extends RvEntity<String> {
     @JoinColumn(name = "foreign_key_id")
     private RvForeignKey foreignKey;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.PERSIST)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "column_id")
     private RvColumn column;

@@ -5,6 +5,9 @@ import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
+import liquibase.change.core.AddForeignKeyConstraintChange;
+import liquibase.change.core.AddNotNullConstraintChange;
+import liquibase.change.core.AddUniqueConstraintChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -76,15 +79,12 @@ public class LiquibaseDdlExecutor implements DisposableBean {
         DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog();
         ChangeSet changeSet = getChangeSet(changeLog);
         changeLog.addChangeSet(changeSet);
-        CreateTableChange createTableChange = new CreateTableChange();
-        createTableChange.setTableName(rvPrototype.getName());
-        List<RvColumn> rvColumns = rvPrototype.getColumns();
-        if (rvColumns != null && rvColumns.size() > 0) {
-            rvColumns.forEach(rvColumn -> {
-                createTableChange.addColumn(converter.toColumnConfig(rvColumn));
-            });
-        }
-        changeSet.addChange(createTableChange);
+        changeSet.addChange(converter.createTable(rvPrototype));
+        changeSet.addChange(converter.addPrimaryKey(rvPrototype.getPrimaryKey()));
+        rvPrototype.getIndexes().forEach(rvIndex -> changeSet.addChange(converter.createIndex(rvIndex)));
+        rvPrototype.getForeignKeys().forEach(rvForeignKey -> changeSet.addChange(converter.addForeignKeyConstraint(rvForeignKey)));
+        rvPrototype.getUniques().forEach(rvUnique -> changeSet.addChange(converter.addUniqueConstraint(rvUnique)));
+        rvPrototype.getNotNulls().forEach(rvNotNull -> changeSet.addChange(converter.addNotNullConstraint(rvNotNull)));
         return liquibase;
     }
 

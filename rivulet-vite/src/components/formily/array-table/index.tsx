@@ -1,5 +1,6 @@
 import React, {Fragment, useCallback, useContext, useEffect, useRef, useState} from 'react';
-import {Badge, Button, Pagination, Select, Space, Table} from 'antd';
+import {Badge, Button, Pagination, Select, Space} from 'antd';
+import Table from '@/components/antd/table';
 import {PaginationProps} from 'antd/lib/pagination';
 import {ColumnProps, TableProps} from 'antd/lib/table';
 import {SelectProps} from 'antd/lib/select';
@@ -339,11 +340,12 @@ const InnerArrayTable = observer((props: TableProps<any>) => {
     // !!!此处增加了渲染扩展行的功能
     const additionalProps = {} as any;
     const arrayTableSchema: any = useFieldSchema();
-    if (arrayTableSchema.expandedRowSchema && !props.expandedRowRender) {
-        additionalProps.expandedRowRender = (record, index) => {
+    if (!additionalProps.expandable) additionalProps.expandable = {};
+    if (arrayTableSchema.additionalProperties && !props.expandedRowRender) {
+        additionalProps.expandable.expandedRowRender = (record, index) => {
             return (
                 <RecursionField
-                    schema={arrayTableSchema.expandedRowSchema}
+                    schema={arrayTableSchema.additionalProperties}
                     basePath={`${field.address.entire}.${index}`}
                 />
             );
@@ -444,9 +446,6 @@ ArrayBase.Addition = (props) => {
     if (array.field?.pattern !== 'editable' && array.field?.pattern !== 'disabled') {
         return null;
     }
-    const getDefaultValue = () => {
-        return {};
-    };
     return (
         <Button
             type="dashed"
@@ -456,14 +455,16 @@ ArrayBase.Addition = (props) => {
             className={cls(`${prefixCls}-addition`, props.className)}
             onClick={(e) => {
                 if (array.props?.disabled) return;
-                const defaultValue = getDefaultValue();
-                if (props.method === 'unshift') {
-                    array.field?.unshift?.(defaultValue);
-                    array.props?.onAdd?.(0);
-                } else {
-                    array.field?.push?.(defaultValue);
-                    array.props?.onAdd?.(array?.field?.value?.length - 1);
-                }
+                setTimeout(() => {
+                    const defaultValue = props.defaultValue ? props.defaultValue() : {};
+                    if (props.method === 'unshift') {
+                        array.field?.unshift?.(defaultValue);
+                        array.props?.onAdd?.(0);
+                    } else {
+                        array.field?.push?.(defaultValue);
+                        array.props?.onAdd?.(array?.field?.value?.length - 1);
+                    }
+                }, 0);
                 if (props.onClick) {
                     props.onClick(e);
                 }

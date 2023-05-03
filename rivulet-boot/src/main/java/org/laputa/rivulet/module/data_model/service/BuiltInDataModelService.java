@@ -16,6 +16,7 @@ import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.LiquibaseException;
 import liquibase.ext.hibernate.database.HibernateDatabase;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.statement.NotNullConstraint;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.*;
@@ -34,6 +35,7 @@ import org.laputa.rivulet.module.app.service.GitService;
 import org.laputa.rivulet.module.data_model.entity.*;
 import org.laputa.rivulet.module.data_model.entity.column_relation.*;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvForeignKey;
+import org.laputa.rivulet.module.data_model.entity.constraint.RvNotNull;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvPrimaryKey;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvUnique;
 import org.laputa.rivulet.module.data_model.model.RemarkMetaInfo;
@@ -97,6 +99,8 @@ public class BuiltInDataModelService implements ApplicationRunner {
     private RvForeignKeyRepository rvForeignKeyRepository;
     @Resource
     private RvUniqueRepository rvUniqueRepository;
+    @Resource
+    private RvNotNullRepository rvNotNullRepository;
     @Resource
     private TerminalKeyUtil terminalKeyUtil;
     @Resource
@@ -366,23 +370,43 @@ public class BuiltInDataModelService implements ApplicationRunner {
         }).collect(Collectors.toList()));
 
         Map<String, RvUnique> rvUniqueMap = new HashMap<>(table.getUniqueConstraints().size());
-        List<String> deletedUniqueConstraintIdList = new ArrayList<>();
+        List<String> deletedUniqueIdList = new ArrayList<>();
         if (rvPrototype.getUniques() != null) {
             rvPrototype.getUniques().forEach(rvUnique -> {
                 if (table.getUniqueConstraints().stream().filter(uniqueConstraint -> uniqueConstraint.getName().equals(rvUnique.getName())).findAny().isPresent()) {
                     rvUniqueMap.put(rvUnique.getName(), rvUnique);
                 } else {
-                    deletedUniqueConstraintIdList.add(rvUnique.getId());
+                    deletedUniqueIdList.add(rvUnique.getId());
                 }
             });
         }
-        rvUniqueRepository.deleteAllById(deletedUniqueConstraintIdList);
+        rvUniqueRepository.deleteAllById(deletedUniqueIdList);
         rvPrototype.setUniques(Streams.mapWithIndex(table.getUniqueConstraints().stream(), (uniqueConstraint, idx) -> {
             RvUnique rvUnique = buildRvUnique(uniqueConstraint, rvColumnMap, rvIndexMap, rvUniqueMap);
             rvUnique.setOrderNum((int) idx);
             rvUnique.setPrototype(rvPrototype);
             return rvUnique;
         }).collect(Collectors.toList()));
+
+        Map<String, RvNotNull> rvNotNullMap = new HashMap<>(table.getNotNullConstraints().size());
+        List<String> deletedNotNullIdList = new ArrayList<>();
+        if (rvPrototype.getNotNulls() != null) {
+            rvPrototype.getNotNulls().forEach(rvNotNull -> {
+                if (table.getNotNullConstraints().stream().filter(notNullConstraint -> notNullConstraint.getConstraintName().equals(rvNotNull.getName())).findAny().isPresent()) {
+                    rvNotNullMap.put(rvNotNull.getName(), rvNotNull);
+                } else {
+                    deletedNotNullIdList.add(rvNotNull.getId());
+                }
+            });
+        }
+        rvNotNullRepository.deleteAllById(deletedNotNullIdList);
+        rvPrototype.setNotNulls(Streams.mapWithIndex(table.getNotNullConstraints().stream(), (notNullConstraint, idx) -> {
+            RvNotNull rvNotNull = buildRvNotNull(notNullConstraint, rvColumnMap, rvNotNullMap);
+            rvNotNull.setOrderNum((int) idx);
+            rvNotNull.setPrototype(rvPrototype);
+            return rvNotNull;
+        }).collect(Collectors.toList()));
+
         rvPrototype.setSyncFlag(true);
         return rvPrototype;
     }
@@ -561,6 +585,21 @@ public class BuiltInDataModelService implements ApplicationRunner {
             return rvUniqueColumn;
         }).collect(Collectors.toList()));
         return rvUnique;
+    }
+
+    private RvNotNull buildRvNotNull(NotNullConstraint notNullConstraint, Map<String, RvColumn> rvColumnMap, Map<String, RvNotNull> rvNotNullMap) {
+        RvNotNull rvNotNull = rvNotNullMap.get(notNullConstraint.getConstraintName());
+        if (rvNotNull == null) {
+            rvNotNull = new RvNotNull();
+            rvNotNullMap.put(notNullConstraint.getConstraintName(), rvNotNull);
+        }
+        if (rvNotNull.getTitle() == null) {
+            rvNotNull.setTitle(notNullConstraint.getConstraintName());
+        }
+        String columnName = notNullConstraint.getColumnName();
+        rvNotNull.setName(columnName);
+        rvNotNull.setColumn(rvColumnMap.get(columnName));
+        return rvNotNull;
     }
 
     private void processMetadata(MetadataImpl metadata) {

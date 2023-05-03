@@ -11,6 +11,7 @@ import org.laputa.rivulet.module.data_model.entity.RvColumn;
 import org.laputa.rivulet.module.data_model.entity.RvIndex;
 
 import javax.persistence.*;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
@@ -47,7 +48,7 @@ public class RvIndexColumn extends RvEntity<String> {
     @JoinColumn(name = "index_id")
     private RvIndex index;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.PERSIST)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "column_id")
     private RvColumn column;
