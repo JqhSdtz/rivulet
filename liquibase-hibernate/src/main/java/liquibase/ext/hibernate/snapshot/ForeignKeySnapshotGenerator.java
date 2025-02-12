@@ -7,7 +7,6 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.ForeignKey;
-import liquibase.structure.core.ForeignKeyConstraintType;
 import liquibase.structure.core.Table;
 import org.hibernate.boot.spi.MetadataImplementor;
 
@@ -38,7 +37,7 @@ public class ForeignKeySnapshotGenerator extends HibernateSnapshotGenerator {
             Collection<org.hibernate.mapping.Table> tmapp = metadata.collectTableMappings();
             Iterator<org.hibernate.mapping.Table> tableMappings = tmapp.iterator();
             while (tableMappings.hasNext()) {
-                org.hibernate.mapping.Table hibernateTable = tableMappings.next();
+                org.hibernate.mapping.Table hibernateTable = (org.hibernate.mapping.Table) tableMappings.next();
                 Iterator fkIterator = hibernateTable.getForeignKeyIterator();
                 while (fkIterator.hasNext()) {
                     org.hibernate.mapping.ForeignKey hibernateForeignKey = (org.hibernate.mapping.ForeignKey) fkIterator.next();
@@ -64,10 +63,6 @@ public class ForeignKeySnapshotGenerator extends HibernateSnapshotGenerator {
                             for (Object column : hibernateReferencedTable.getPrimaryKey().getColumns()) {
                                 fk.addPrimaryKeyColumn(new liquibase.structure.core.Column(((org.hibernate.mapping.Column) column).getName()));
                             }
-                        }
-
-                        if (hibernateForeignKey.isCascadeDeleteEnabled()) {
-                            fk.setDeleteRule(ForeignKeyConstraintType.importedKeyCascade);
                         }
 
                         fk.setDeferrable(false);

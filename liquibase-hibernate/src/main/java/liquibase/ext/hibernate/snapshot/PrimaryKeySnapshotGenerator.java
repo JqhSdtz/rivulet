@@ -55,6 +55,7 @@ public class PrimaryKeySnapshotGenerator extends HibernateSnapshotGenerator {
                     pk.getColumns().add(new Column(hibernateColumn.getName()).setRelation(table));
                 }
 
+                // !!!全局控制found信息输出
                 if (GlobalSetting.isShowFoundInfo()) {
                     Scope.getCurrentScope().getLog(getClass()).info("Found primary key " + pk.getName());
                 }

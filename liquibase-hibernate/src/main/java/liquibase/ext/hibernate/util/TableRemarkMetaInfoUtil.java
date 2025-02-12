@@ -1,12 +1,11 @@
-package org.laputa.rivulet.module.data_model.util;
-
-import org.laputa.rivulet.module.data_model.model.RemarkMetaInfo;
+package liquibase.ext.hibernate.util;
 
 /**
+ * !!!
  * @author JQH
  * @since 下午 5:40 22/10/27
  */
-public class RemarkMetaInfoUtil {
+public class TableRemarkMetaInfoUtil {
     public final static String META_FLAG = "Rv&Sys";
 
     public static boolean existMetaInfo(String remarkStr) {
@@ -17,21 +16,21 @@ public class RemarkMetaInfoUtil {
         return true;
     }
 
-    public static RemarkMetaInfo getMetaInfo(String remarkStr) {
+    public static TableRemarkMetaInfo getMetaInfo(String remarkStr) {
         if (!existMetaInfo(remarkStr)) {
-            return new RemarkMetaInfo();
+            return new TableRemarkMetaInfo();
         }
         int rightBracketPos = remarkStr.indexOf(']');
         String metaInfoStr = remarkStr.substring(1, rightBracketPos);
         String[] metaInfoParts = metaInfoStr.split("#");
-        RemarkMetaInfo metaInfo = new RemarkMetaInfo();
+        TableRemarkMetaInfo metaInfo = new TableRemarkMetaInfo();
         if (metaInfoParts.length > 1) {
             metaInfo.setBuiltIn("1".equals(metaInfoParts[1]));
         }
         return metaInfo;
     }
 
-    public static String setMetaInfo(String remarkStr, RemarkMetaInfo metaInfo) {
+    public static String setMetaInfo(String remarkStr, TableRemarkMetaInfo metaInfo) {
         remarkStr = remarkStr == null ? "" : remarkStr;
         StringBuilder metaInfoStr = new StringBuilder('[' + META_FLAG);
         metaInfoStr.append('#').append(metaInfo.isBuiltIn() ? '1' : '0');

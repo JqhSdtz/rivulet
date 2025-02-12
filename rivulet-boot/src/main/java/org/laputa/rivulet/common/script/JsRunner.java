@@ -12,8 +12,8 @@ import org.laputa.rivulet.common.model.Result;
 import org.laputa.rivulet.module.app.property.GitProperty;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import java.io.File;
 import java.nio.file.NoSuchFileException;
 

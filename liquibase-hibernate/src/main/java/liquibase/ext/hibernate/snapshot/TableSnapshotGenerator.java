@@ -6,17 +6,17 @@ import liquibase.ext.hibernate.GlobalSetting;
 import liquibase.ext.hibernate.annotation.TableComment;
 import liquibase.ext.hibernate.database.HibernateDatabase;
 import liquibase.ext.hibernate.snapshot.extension.ExtendedSnapshotGenerator;
-import liquibase.ext.hibernate.snapshot.extension.MultipleHiLoPerTableSnapshotGenerator;
 import liquibase.ext.hibernate.snapshot.extension.TableGeneratorSnapshotGenerator;
+import liquibase.ext.hibernate.util.TableRemarkMetaInfo;
+import liquibase.ext.hibernate.util.TableRemarkMetaInfoUtil;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import org.hibernate.boot.spi.MetadataImplementor;
-import org.hibernate.id.IdentifierGenerator;
-import org.hibernate.mapping.PersistentClass;
-import org.hibernate.mapping.RootClass;
+import org.hibernate.generator.Generator;
+import org.hibernate.mapping.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,11 +25,10 @@ import java.util.List;
 
 public class TableSnapshotGenerator extends HibernateSnapshotGenerator {
 
-    private List<ExtendedSnapshotGenerator<IdentifierGenerator, Table>> tableIdGenerators = new ArrayList<ExtendedSnapshotGenerator<IdentifierGenerator, Table>>();
+    private List<ExtendedSnapshotGenerator<Generator, Table>> tableIdGenerators = new ArrayList<>();
 
     public TableSnapshotGenerator() {
         super(Table.class, new Class[]{Schema.class});
-        tableIdGenerators.add(new MultipleHiLoPerTableSnapshotGenerator());
         tableIdGenerators.add(new TableGeneratorSnapshotGenerator());
     }
 
@@ -44,6 +43,7 @@ public class TableSnapshotGenerator extends HibernateSnapshotGenerator {
         }
 
         Table table = new Table().setName(hibernateTable.getName());
+        // !!!全局控制found信息输出
         if (GlobalSetting.isShowFoundInfo()) {
             Scope.getCurrentScope().getLog(getClass()).info("Found table " + table.getName());
         }
@@ -63,6 +63,10 @@ public class TableSnapshotGenerator extends HibernateSnapshotGenerator {
             } else {
                 table.setRemarks(oriComment + " " + tableComment.value());
             }
+            // !!!增加附着在表注释的Meta数据
+            TableRemarkMetaInfo metaInfo = new TableRemarkMetaInfo();
+            metaInfo.setBuiltIn(true);
+            table.setRemarks(TableRemarkMetaInfoUtil.setMetaInfo(table.getRemarks(), metaInfo));
         }
 
         return table;
@@ -88,28 +92,28 @@ public class TableSnapshotGenerator extends HibernateSnapshotGenerator {
 
                 org.hibernate.mapping.Table hibernateTable = pc.getTable();
                 if (hibernateTable.isPhysicalTable()) {
-                    Table table = new Table().setName(hibernateTable.getName());
-                    table.setSchema(schema);
-                    if (GlobalSetting.isShowFoundInfo()) {
-                        Scope.getCurrentScope().getLog(getClass()).info("Found table " + table.getName());
+                    addDatabaseObjectToSchema(hibernateTable, schema, snapshot);
+
+                    Collection<Join> joins = pc.getJoins();
+                    Iterator<Join> joinMappings = joins.iterator();
+                    while (joinMappings.hasNext()) {
+                        Join join = joinMappings.next();
+                        addDatabaseObjectToSchema(join.getTable(), schema, snapshot);
                     }
-                    schema.addDatabaseObject(snapshotObject(table, snapshot));
                 }
             }
 
             Iterator<PersistentClass> classMappings = entityBindings.iterator();
             while (classMappings.hasNext()) {
-                PersistentClass persistentClass = (PersistentClass) classMappings
-                        .next();
-                if (!persistentClass.isInherited()) {
-                    IdentifierGenerator ig = persistentClass.getIdentifier().createIdentifierGenerator(
-                            metadata.getIdentifierGeneratorFactory(),
+                PersistentClass persistentClass = classMappings.next();
+                if (!persistentClass.isInherited() && persistentClass.getIdentifier() instanceof SimpleValue) {
+                    var simpleValue =  (SimpleValue) persistentClass.getIdentifier();
+                    Generator ig = simpleValue.createGenerator(
+                            metadata.getMetadataBuildingOptions().getIdentifierGeneratorFactory(),
                             database.getDialect(),
-                            null,
-                            null,
                             (RootClass) persistentClass
                     );
-                    for (ExtendedSnapshotGenerator<IdentifierGenerator, Table> tableIdGenerator : tableIdGenerators) {
+                    for (ExtendedSnapshotGenerator<Generator, Table> tableIdGenerator : tableIdGenerators) {
                         if (tableIdGenerator.supports(ig)) {
                             Table idTable = tableIdGenerator.snapshot(ig);
                             idTable.setSchema(schema);
@@ -126,14 +130,19 @@ public class TableSnapshotGenerator extends HibernateSnapshotGenerator {
                 org.hibernate.mapping.Collection coll = collIter.next();
                 org.hibernate.mapping.Table hTable = coll.getCollectionTable();
                 if (hTable.isPhysicalTable()) {
-                    Table table = new Table().setName(hTable.getName());
-                    table.setSchema(schema);
-                    if (GlobalSetting.isShowFoundInfo()) {
-                        Scope.getCurrentScope().getLog(getClass()).info("Found table " + table.getName());
-                    }
-                    schema.addDatabaseObject(snapshotObject(table, snapshot));
+                    addDatabaseObjectToSchema(hTable, schema, snapshot);
                 }
             }
         }
+    }
+
+    private void addDatabaseObjectToSchema(org.hibernate.mapping.Table join, Schema schema, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+        Table joinTable = new Table().setName(join.getName());
+        joinTable.setSchema(schema);
+        // !!!全局控制found信息输出
+        if (GlobalSetting.isShowFoundInfo()) {
+            Scope.getCurrentScope().getLog(getClass()).info("Found table " + joinTable.getName());
+        }
+        schema.addDatabaseObject(snapshotObject(joinTable, snapshot));
     }
 }

@@ -1,7 +1,9 @@
 package org.laputa.rivulet.access_limit.aspect;
 
 import cn.hutool.core.io.resource.ResourceUtil;
-import cn.hutool.extra.servlet.ServletUtil;
+import cn.hutool.extra.servlet.JakartaServletUtil;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -27,8 +29,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
@@ -294,7 +294,7 @@ public class AccessLimitAspect implements ApplicationRunner {
         if (currentUser != null) {
             return "US:" + currentUser.getId();
         } else {
-            return "IP:" + ServletUtil.getClientIP(request);
+            return "IP:" + JakartaServletUtil.getClientIP(request);
         }
     }
 

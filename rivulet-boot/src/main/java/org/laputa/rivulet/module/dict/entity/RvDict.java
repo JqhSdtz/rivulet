@@ -11,7 +11,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.laputa.rivulet.common.entity.RvEntity;
 import org.laputa.rivulet.common.entity.RvTree;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 /**
  * @author JQH

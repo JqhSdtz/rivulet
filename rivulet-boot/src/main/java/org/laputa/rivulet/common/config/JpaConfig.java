@@ -11,9 +11,10 @@ import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
-import javax.annotation.Resource;
-import javax.persistence.Column;
-import javax.persistence.criteria.Order;
+import jakarta.annotation.Resource;
+import jakarta.persistence.Column;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.spi.PersistenceUnitInfo;
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
 

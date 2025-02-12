@@ -5,7 +5,7 @@ import org.laputa.rivulet.module.app.property.TerminalKeyProperty;
 import org.redisson.api.RBucket;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 产生一个终端密钥，存放于Redis中

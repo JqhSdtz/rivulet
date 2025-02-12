@@ -21,7 +21,7 @@ import org.laputa.rivulet.module.data_model.entity.constraint.RvNotNull;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvPrimaryKey;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvUnique;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.List;
 
 /**

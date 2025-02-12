@@ -1,6 +1,9 @@
 package org.laputa.rivulet.module.data_model.service;
 
+import cn.hutool.core.util.RandomUtil;
 import com.google.common.collect.Streams;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.Scope;
@@ -15,6 +18,8 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.LiquibaseException;
 import liquibase.ext.hibernate.database.HibernateDatabase;
+import liquibase.ext.hibernate.util.TableRemarkMetaInfo;
+import liquibase.ext.hibernate.util.TableRemarkMetaInfoUtil;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.statement.NotNullConstraint;
 import liquibase.structure.DatabaseObject;
@@ -32,15 +37,15 @@ import org.laputa.rivulet.common.util.TerminalKeyUtil;
 import org.laputa.rivulet.common.util.TimeUnitUtil;
 import org.laputa.rivulet.module.app.property.TerminalKeyProperty;
 import org.laputa.rivulet.module.app.service.GitService;
-import org.laputa.rivulet.module.data_model.entity.*;
+import org.laputa.rivulet.module.data_model.entity.RvColumn;
+import org.laputa.rivulet.module.data_model.entity.RvIndex;
+import org.laputa.rivulet.module.data_model.entity.RvPrototype;
 import org.laputa.rivulet.module.data_model.entity.column_relation.*;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvForeignKey;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvNotNull;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvPrimaryKey;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvUnique;
-import org.laputa.rivulet.module.data_model.model.RemarkMetaInfo;
 import org.laputa.rivulet.module.data_model.repository.*;
-import org.laputa.rivulet.module.data_model.util.RemarkMetaInfoUtil;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.boot.ApplicationArguments;
@@ -51,8 +56,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
@@ -155,21 +158,27 @@ public class BuiltInDataModelService implements ApplicationRunner {
         DatabaseFactory factory = DatabaseFactory.getInstance();
         Map<String, String> hibernateProperties = new HashMap<>();
         hibernateProperties.put("dialect", jpaProperties.getProperties().get("hibernate.dialect"));
-        hibernateProperties.put("hibernate.physical_naming_strategy", "org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy");
+        // springboot 3.4.2版本中没有SpringPhysicalNamingStrategy 参考https://github.com/openrewrite/rewrite-spring/issues/339
+        hibernateProperties.put("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
         hibernateProperties.put("hibernate.implicit_naming_strategy", "org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy");
         // temp.use_jdbc_metadata_defaults属性用于跳过数据库连接检查，因为这里的reference，即hibernate不是真正的数据库
         hibernateProperties.put("hibernate.temp.use_jdbc_metadata_defaults", "false");
         // 禁止liquibase-hibernate显示found column/index/...的信息，太多了
         hibernateProperties.put("liquibase.show_found_info", "false");
+        hibernateProperties.put("liquibase.show_converted_info", "false");
         String url = buildUrl("hibernate:spring:org.laputa.rivulet", hibernateProperties);
         String driver = "liquibase.ext.hibernate.database.connection.HibernateDriver";
         HibernateDatabase database = (HibernateDatabase) factory.openDatabase(url, null, null, driver, null, null, null, null);
         processMetadata((MetadataImpl) database.getMetadata());
         final DatabaseChangeLog databaseChangeLog = new DatabaseChangeLog();
+        // logicalFilePath设置为随机字符，防止受过去的changeLog影响
+        String changeLogFilePath = RandomUtil.randomString(64);
+        databaseChangeLog.setLogicalFilePath(changeLogFilePath);
+        databaseChangeLog.setPhysicalFilePath(changeLogFilePath);
         Connection connection = this.dataSource.getConnection();
         Database targetDataBase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
         Liquibase liquibase = new Liquibase(databaseChangeLog, null, targetDataBase);
-        this.diffResult = liquibase.diff(database, targetDataBase, new CompareControl());
+        this.diffResult = liquibase.diff(database, targetDataBase, CompareControl.STANDARD);
         filterDiffResult();
         // hibernate的database的schema是'HIBERNATE'，这里要忽略schema才能正确执行update
         DiffOutputControl diffOutputControl = new DiffOutputControl(false, false, false, null);
@@ -179,10 +188,15 @@ public class BuiltInDataModelService implements ApplicationRunner {
             // 加上这句可以防止因为update操作抛异常引起回滚而意外地将update操作应用到数据库上，具体源码怎么做的我也不知道
             changeSet.getRollback().getChanges().clear();
             changeSet.setFilePath(changeSet.getId());
-            databaseChangeLog.addChangeSet(changeSet);
+            // 因为没法直接设置changeLog，而不设置changeLog就会报错
+            ChangeSet newChangeSet = new ChangeSet(changeSet.getId(), changeSet.getAuthor(), changeSet.isAlwaysRun(), changeSet.isRunOnChange(), changeSet.getFilePath(),
+                    changeSet.getContextFilter().getOriginalString(), changeSet.getDbmsOriginalString(), changeSet.getRunWith(), changeSet.getRunWithSpoolFile(),
+                    changeSet.isRunInTransaction(), changeSet.getObjectQuotingStrategy(), databaseChangeLog);
+            changeSet.getChanges().forEach(newChangeSet::addChange);
+            databaseChangeLog.addChangeSet(newChangeSet);
         });
         this.currentDatabaseChangeLog = databaseChangeLog;
-        if (changeSets.size() == 0) {
+        if (changeSets.isEmpty()) {
             this.appState.setBuiltInDataModelSynced(true);
         }
         StringWriter stringWriter = new StringWriter();
@@ -190,7 +204,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
         Map<String, Object> config = new HashMap<>();
         // 临时调整日志等级，避免在执行过程中输出changeSet应用成功的误导信息
         // 因为changeSet只是被转成了sql，并没有执行
-        config.put("liquibase.logLevel", "WARNING");
+        config.put("logLevel", "WARNING");
         Scope.child(config, () -> {
             liquibase.update(new Contexts(), stringWriter);
         });
@@ -235,7 +249,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
             if (finalRemark == null) {
                 isBuiltIn = false;
             } else {
-                RemarkMetaInfo metaInfo = RemarkMetaInfoUtil.getMetaInfo(remark);
+                TableRemarkMetaInfo metaInfo = TableRemarkMetaInfoUtil.getMetaInfo(remark);
                 isBuiltIn = metaInfo.isBuiltIn();
             }
             if (!isBuiltIn) {
@@ -611,18 +625,12 @@ public class BuiltInDataModelService implements ApplicationRunner {
                 for (Field field : entityClass.getFields()) {
                     Property property = entity.getProperty(field.getName());
                     String tableName = entity.getTable().getName();
-                    String columnName = property.getValue().getColumnIterator().next().getText();
+                    List<org.hibernate.mapping.Column> columnList = property.getValue().getColumns();
+                    String columnName = columnList.get(0).getText();
                     this.columnFieldMap.put(tableName + "." + columnName, field);
                 }
             });
         }
-        entityBindingMap.forEach((className, entity) -> {
-            String oriComment = entity.getTable().getComment();
-            RemarkMetaInfo metaInfo = RemarkMetaInfoUtil.getMetaInfo(oriComment);
-            metaInfo.setBuiltIn(true);
-            String newComment = RemarkMetaInfoUtil.setMetaInfo(oriComment, metaInfo);
-            entity.getTable().setComment(newComment);
-        });
     }
 
     private String buildUrl(String baseUrl, Map<String, String> parameterMap) {

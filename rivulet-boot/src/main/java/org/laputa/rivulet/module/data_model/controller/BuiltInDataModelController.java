@@ -4,7 +4,7 @@ import org.laputa.rivulet.common.model.Result;
 import org.laputa.rivulet.module.data_model.service.BuiltInDataModelService;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.Map;
 
 /**

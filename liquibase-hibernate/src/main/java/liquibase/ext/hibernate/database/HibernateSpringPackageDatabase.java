@@ -1,25 +1,30 @@
 package liquibase.ext.hibernate.database;
 
-import liquibase.Scope;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.DatabaseException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
+
 import liquibase.ext.hibernate.GlobalSetting;
-import liquibase.ext.hibernate.database.connection.HibernateConnection;
+import org.hibernate.bytecode.enhance.spi.EnhancementContext;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.envers.configuration.EnversSettings;
 import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
+import org.hibernate.jpa.boot.internal.PersistenceUnitInfoDescriptor;
 import org.hibernate.jpa.boot.spi.Bootstrap;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager;
 import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-
-import javax.persistence.spi.PersistenceUnitInfo;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.core.NativeDetector;
+import jakarta.persistence.spi.PersistenceUnitInfo;
+import liquibase.Scope;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.DatabaseException;
+import liquibase.ext.hibernate.database.connection.HibernateConnection;
 
 /**
  * Database implementation for "spring" hibernate configurations that scans packages. If specifying a bean, {@link HibernateSpringBeanDatabase} is used.
@@ -72,36 +77,74 @@ public class HibernateSpringPackageDatabase extends JpaPersistenceDatabase {
     protected EntityManagerFactoryBuilderImpl createEntityManagerFactoryBuilder() {
         DefaultPersistenceUnitManager internalPersistenceUnitManager = new DefaultPersistenceUnitManager();
         internalPersistenceUnitManager.setResourceLoader(new DefaultResourceLoader(Scope.getCurrentScope().getClassLoader()));
+
         String[] packagesToScan = getHibernateConnection().getPath().split(",");
+
         for (String packageName : packagesToScan) {
             Scope.getCurrentScope().getLog(getClass()).info("Found package " + packageName);
         }
+
         internalPersistenceUnitManager.setPackagesToScan(packagesToScan);
+
         internalPersistenceUnitManager.preparePersistenceUnitInfos();
         PersistenceUnitInfo persistenceUnitInfo = internalPersistenceUnitManager.obtainDefaultPersistenceUnitInfo();
         HibernateJpaVendorAdapter jpaVendorAdapter = new HibernateJpaVendorAdapter();
+
         if (persistenceUnitInfo instanceof SmartPersistenceUnitInfo) {
             ((SmartPersistenceUnitInfo) persistenceUnitInfo).setPersistenceProviderPackageName(jpaVendorAdapter.getPersistenceProviderRootPackage());
         }
-        Map<String, String> map = new HashMap<>(16);
+
+        Map<String, String> map = new HashMap<>();
+        // !!!增加控制found信息开关，同时修改代码，让所有properties都生效，不知道之前为什么没有这么做
         getHibernateConnection().getProperties().forEach((key, value) -> {
             map.put(key.toString(), value.toString());
         });
         if ("false".equalsIgnoreCase(map.get("liquibase.show_found_info"))) {
             GlobalSetting.setShowFoundInfo(false);
         }
+        if ("false".equalsIgnoreCase(map.get("liquibase.show_converted_info"))) {
+            GlobalSetting.setShowConvertedInfo(false);
+        }
+        
         map.put(AvailableSettings.DIALECT, getProperty(AvailableSettings.DIALECT));
+        map.put(HibernateDatabase.HIBERNATE_TEMP_USE_JDBC_METADATA_DEFAULTS, Boolean.FALSE.toString());
         map.put(AvailableSettings.USE_SECOND_LEVEL_CACHE, Boolean.FALSE.toString());
         map.put(AvailableSettings.PHYSICAL_NAMING_STRATEGY, getHibernateConnection().getProperties().getProperty(AvailableSettings.PHYSICAL_NAMING_STRATEGY));
         map.put(AvailableSettings.IMPLICIT_NAMING_STRATEGY, getHibernateConnection().getProperties().getProperty(AvailableSettings.IMPLICIT_NAMING_STRATEGY));
-        // disable scanning of all classes and hbm.xml files. Only scan speficied packages
-        map.put(AvailableSettings.SCANNER_DISCOVERY, "");
-        map.put(EnversSettings.AUDIT_TABLE_PREFIX, getHibernateConnection().getProperties().getProperty(EnversSettings.AUDIT_TABLE_PREFIX, ""));
-        map.put(EnversSettings.AUDIT_TABLE_SUFFIX, getHibernateConnection().getProperties().getProperty(EnversSettings.AUDIT_TABLE_SUFFIX, "_AUD"));
+        map.put(AvailableSettings.SCANNER_DISCOVERY, "");	// disable scanning of all classes and hbm.xml files. Only scan speficied packages
+        map.put(EnversSettings.AUDIT_TABLE_PREFIX,getHibernateConnection().getProperties().getProperty(EnversSettings.AUDIT_TABLE_PREFIX,""));
+        map.put(EnversSettings.AUDIT_TABLE_SUFFIX,getHibernateConnection().getProperties().getProperty(EnversSettings.AUDIT_TABLE_SUFFIX,"_AUD"));
+        map.put(EnversSettings.REVISION_FIELD_NAME,getHibernateConnection().getProperties().getProperty(EnversSettings.REVISION_FIELD_NAME,"REV"));
+        map.put(EnversSettings.REVISION_TYPE_FIELD_NAME,getHibernateConnection().getProperties().getProperty(EnversSettings.REVISION_TYPE_FIELD_NAME,"REVTYPE"));
         map.put(AvailableSettings.USE_NATIONALIZED_CHARACTER_DATA, getProperty(AvailableSettings.USE_NATIONALIZED_CHARACTER_DATA));
-        EntityManagerFactoryBuilderImpl builder = (EntityManagerFactoryBuilderImpl) Bootstrap.getEntityManagerFactoryBuilder(persistenceUnitInfo, map);
+        PersistenceUnitInfoDescriptor persistenceUnitInfoDescriptor = createPersistenceUnitInfoDescriptor(persistenceUnitInfo);
+        EntityManagerFactoryBuilderImpl builder = (EntityManagerFactoryBuilderImpl) Bootstrap.getEntityManagerFactoryBuilder(persistenceUnitInfoDescriptor, map);
+        
         return builder;
     }
+
+
+    public PersistenceUnitInfoDescriptor createPersistenceUnitInfoDescriptor(PersistenceUnitInfo info) {
+        final List<String> mergedClassesAndPackages = new ArrayList<>(info.getManagedClassNames());
+        if (info instanceof SmartPersistenceUnitInfo ) {
+            mergedClassesAndPackages.addAll(((SmartPersistenceUnitInfo)info).getManagedPackages());
+        }
+        return
+                new PersistenceUnitInfoDescriptor(info) {
+                    @Override
+                    public List<String> getManagedClassNames() {
+                        return mergedClassesAndPackages;
+                    }
+
+                    @Override
+                    public void pushClassTransformer(EnhancementContext enhancementContext) {
+                        if (!NativeDetector.inNativeImage()) {
+                            super.pushClassTransformer(enhancementContext);
+                        }
+                    }
+                };
+    }
+
 
     @Override
     public String getShortName() {

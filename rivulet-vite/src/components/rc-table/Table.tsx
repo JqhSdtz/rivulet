@@ -32,6 +32,7 @@ import {getTargetScrollBarSize} from 'rc-util/lib/getScrollBarSize';
 import pickAttrs from 'rc-util/lib/pickAttrs';
 import warning from 'rc-util/lib/warning';
 import * as React from 'react';
+import {useEffect} from 'react';
 import shallowEqual from 'shallowequal';
 import Body from './Body';
 import ColGroup from './ColGroup';
@@ -68,7 +69,7 @@ import type {
     TableComponents,
     TableLayout,
     TableSticky,
-    TriggerEventHandler,
+    TriggerEventHandler
 } from './interface';
 import Panel from './Panel';
 import StickyScrollBar from './stickyScrollBar';
@@ -105,11 +106,10 @@ const MemoTableContent = React.memo<MemoTableContentProps>(
         // No additional render when pinged status change.
         // This is not a bug.
         return prev.pingLeft !== next.pingLeft || prev.pingRight !== next.pingRight;
-    },
+    }
 );
 
-export interface TableProps<RecordType = unknown>
-    extends Omit<LegacyExpandableProps<RecordType>, 'showExpandColumn'> {
+export interface TableProps<RecordType = unknown> extends Omit<LegacyExpandableProps<RecordType>, 'showExpandColumn'> {
     prefixCls?: string;
     className?: string;
     style?: React.CSSProperties;
@@ -120,7 +120,7 @@ export interface TableProps<RecordType = unknown>
     tableLayout?: TableLayout;
 
     // Fixed Columns
-    scroll?: { x?: number | true | string; y?: number | string };
+    scroll?: {x?: number | true | string; y?: number | string};
 
     // Expandable
     /** Config expand rows */
@@ -176,7 +176,7 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
         rowKey: 'key',
         prefixCls: 'rc-table',
         emptyText: () => 'No Data',
-        ...tableProps,
+        ...tableProps
     };
 
     const {
@@ -209,7 +209,7 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
         transformColumns,
         internalRefs,
 
-        sticky,
+        sticky
     } = props;
 
     const mergedData = data || EMPTY_DATA;
@@ -217,28 +217,21 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
 
     // ===================== Warning ======================
     if (process.env.NODE_ENV !== 'production') {
-        [
-            'onRowClick',
-            'onRowDoubleClick',
-            'onRowContextMenu',
-            'onRowMouseEnter',
-            'onRowMouseLeave',
-        ].forEach(name => {
+        ['onRowClick', 'onRowDoubleClick', 'onRowContextMenu', 'onRowMouseEnter', 'onRowMouseLeave'].forEach(name => {
             warning(props[name] === undefined, `\`${name}\` is removed, please use \`onRow\` instead.`);
         });
 
         warning(
             !('getBodyWrapper' in props),
-            '`getBodyWrapper` is deprecated, please use custom `components` instead.',
+            '`getBodyWrapper` is deprecated, please use custom `components` instead.'
         );
     }
 
     // ==================== Customize =====================
     const getComponent = React.useCallback<GetComponent>(
         (path, defaultComponent) =>
-            getPathValue<CustomizeComponent, TableComponents<RecordType>>(components || {}, path) ||
-            defaultComponent,
-        [components],
+            getPathValue<CustomizeComponent, TableComponents<RecordType>>(components || {}, path) || defaultComponent,
+        [components]
     );
 
     const getRowKey = React.useMemo<GetRowKey<RecordType>>(() => {
@@ -251,7 +244,7 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
             if (process.env.NODE_ENV !== 'production') {
                 warning(
                     key !== undefined,
-                    'Each record in table should have a unique `key` prop, or set `rowKey` to an unique primary key.',
+                    'Each record in table should have a unique `key` prop, or set `rowKey` to an unique primary key.'
                 );
             }
 
@@ -276,7 +269,7 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
         expandIconColumnIndex,
         expandedRowClassName,
         childrenColumnName,
-        indentSize,
+        indentSize
     } = expandableConfig;
 
     const mergedExpandIcon = expandIcon || renderExpandIcon;
@@ -298,9 +291,7 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
             (props.expandable &&
                 internalHooks === INTERNAL_HOOKS &&
                 (props.expandable as any).__PARENT_RENDER_ICON__) ||
-            mergedData.some(
-                record => record && typeof record === 'object' && record[mergedChildrenColumnName],
-            )
+            mergedData.some(record => record && typeof record === 'object' && record[mergedChildrenColumnName])
         ) {
             return 'nest';
         }
@@ -308,8 +299,7 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
         return false;
     }, [!!expandedRowRender, mergedData]);
 
-    const [innerExpandedKeys, setInnerExpandedKeys] = React.useState(() => {
-        console.log(defaultExpandedRowKeys, defaultExpandAllRows)
+    const getInnerExpandedKeys = () => {
         if (defaultExpandedRowKeys) {
             return defaultExpandedRowKeys;
         }
@@ -317,10 +307,16 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
             return findAllChildrenKeys<RecordType>(mergedData, getRowKey, mergedChildrenColumnName);
         }
         return [];
-    });
+    };
+
+    const [innerExpandedKeys, setInnerExpandedKeys] = React.useState<Key[]>();
+    useEffect(() => {
+        setInnerExpandedKeys(getInnerExpandedKeys() as Key[]);
+    }, [defaultExpandedRowKeys, defaultExpandAllRows, mergedData, mergedChildrenColumnName]);
+
     const mergedExpandedKeys = React.useMemo(
         () => new Set(expandedRowKeys || innerExpandedKeys || []),
-        [expandedRowKeys, innerExpandedKeys],
+        [expandedRowKeys, innerExpandedKeys]
     );
 
     const onTriggerExpand: TriggerEventHandler<RecordType> = React.useCallback(
@@ -344,7 +340,7 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
                 onExpandedRowsChange(newExpandedKeys);
             }
         },
-        [getRowKey, mergedExpandedKeys, mergedData, onExpand, onExpandedRowsChange],
+        [getRowKey, mergedExpandedKeys, mergedData, onExpand, onExpandedRowsChange]
     );
 
     // Warning if use `expandedRowRender` and nest children in the same time
@@ -373,17 +369,17 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
             onTriggerExpand,
             expandIcon: mergedExpandIcon,
             expandIconColumnIndex,
-            direction,
+            direction
         },
-        internalHooks === INTERNAL_HOOKS ? transformColumns : null,
+        internalHooks === INTERNAL_HOOKS ? transformColumns : null
     );
 
     const columnContext = React.useMemo(
         () => ({
             columns,
-            flattenColumns,
+            flattenColumns
         }),
-        [columns, flattenColumns],
+        [columns, flattenColumns]
     );
 
     // ====================== Scroll ======================
@@ -406,9 +402,11 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
     const fixColumn = horizonScroll && flattenColumns.some(({fixed}) => fixed);
 
     // Sticky
-    const stickyRef = React.useRef<{ setScrollLeft: (left: number) => void }>();
-    const {isSticky, offsetHeader, offsetSummary, offsetScroll, stickyClassName, container} =
-        useSticky(sticky, prefixCls);
+    const stickyRef = React.useRef<{setScrollLeft: (left: number) => void}>();
+    const {isSticky, offsetHeader, offsetSummary, offsetScroll, stickyClassName, container} = useSticky(
+        sticky,
+        prefixCls
+    );
 
     // Footer (Fix footer must fixed header)
     const summaryNode = summary?.(mergedData);
@@ -426,7 +424,7 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
     if (fixHeader) {
         scrollYStyle = {
             overflowY: 'scroll',
-            maxHeight: scroll.y,
+            maxHeight: scroll.y
         };
     }
 
@@ -440,7 +438,7 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
         }
         scrollTableStyle = {
             width: scroll?.x === true ? 'auto' : scroll?.x,
-            minWidth: '100%',
+            minWidth: '100%'
         };
     }
 
@@ -478,13 +476,7 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
         }
     }
 
-    const onScroll = ({
-                          currentTarget,
-                          scrollLeft,
-                      }: {
-        currentTarget: HTMLElement;
-        scrollLeft?: number;
-    }) => {
+    const onScroll = ({currentTarget, scrollLeft}: {currentTarget: HTMLElement; scrollLeft?: number}) => {
         const isRTL = direction === 'rtl';
         const mergedScrollLeft = typeof scrollLeft === 'number' ? scrollLeft : currentTarget.scrollLeft;
 
@@ -594,7 +586,7 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
         stickyOffsets,
         onHeaderRow,
         fixHeader,
-        scroll,
+        scroll
     };
 
     // Empty
@@ -623,9 +615,7 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
         />
     );
 
-    const bodyColGroup = (
-        <ColGroup colWidths={flattenColumns.map(({width}) => width)} columns={flattenColumns}/>
-    );
+    const bodyColGroup = <ColGroup colWidths={flattenColumns.map(({width}) => width)} columns={flattenColumns} />;
 
     const captionElement =
         caption !== null && caption !== undefined ? (
@@ -634,12 +624,7 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
 
     const customizeScrollBody = getComponent(['body']) as CustomizeScrollBody<RecordType>;
 
-    if (
-        process.env.NODE_ENV !== 'production' &&
-        typeof customizeScrollBody === 'function' &&
-        hasData &&
-        !fixHeader
-    ) {
+    if (process.env.NODE_ENV !== 'production' && typeof customizeScrollBody === 'function' && hasData && !fixHeader) {
         warning(false, '`components.body` with render props is only work on `scroll.y`.');
     }
 
@@ -651,7 +636,7 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
             bodyContent = customizeScrollBody(mergedData, {
                 scrollbarSize,
                 ref: scrollBodyRef,
-                onScroll,
+                onScroll
             });
 
             headerProps.colWidths = flattenColumns.map(({width}, index) => {
@@ -661,7 +646,7 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
                 }
                 warning(
                     false,
-                    'When use `components.body` with render props. Each column should have a fixed `width` value.',
+                    'When use `components.body` with render props. Each column should have a fixed `width` value.'
                 );
 
                 return 0;
@@ -671,7 +656,7 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
                 <div
                     style={{
                         ...scrollXStyle,
-                        ...scrollYStyle,
+                        ...scrollYStyle
                     }}
                     onScroll={onScroll}
                     ref={scrollBodyRef}
@@ -680,7 +665,7 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
                     <TableComponent
                         style={{
                             ...scrollTableStyle,
-                            tableLayout: mergedTableLayout,
+                            tableLayout: mergedTableLayout
                         }}
                     >
                         {captionElement}
@@ -704,7 +689,7 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
             ...columnContext,
             direction,
             stickyClassName,
-            onScroll,
+            onScroll
         };
 
         groupTableNode = (
@@ -758,7 +743,7 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
             <div
                 style={{
                     ...scrollXStyle,
-                    ...scrollYStyle,
+                    ...scrollYStyle
                 }}
                 className={classNames(`${prefixCls}-content`)}
                 onScroll={onScroll}
@@ -794,8 +779,8 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
                 [`${prefixCls}-scroll-horizontal`]: horizonScroll,
                 [`${prefixCls}-has-fix-left`]: flattenColumns[0] && flattenColumns[0].fixed,
                 [`${prefixCls}-has-fix-right`]:
-                flattenColumns[flattenColumns.length - 1] &&
-                flattenColumns[flattenColumns.length - 1].fixed === 'right',
+                    flattenColumns[flattenColumns.length - 1] &&
+                    flattenColumns[flattenColumns.length - 1].fixed === 'right'
             })}
             style={style}
             id={id}
@@ -827,11 +812,11 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
             scrollbarSize,
             direction,
             fixedInfoList: flattenColumns.map((_, colIndex) =>
-                getCellFixedInfo(colIndex, colIndex, flattenColumns, stickyOffsets, direction),
+                getCellFixedInfo(colIndex, colIndex, flattenColumns, stickyOffsets, direction)
             ),
-            isSticky,
+            isSticky
         }),
-        [prefixCls, getComponent, scrollbarSize, direction, flattenColumns, stickyOffsets, isSticky],
+        [prefixCls, getComponent, scrollbarSize, direction, flattenColumns, stickyOffsets, isSticky]
     );
 
     const BodyContextValue = React.useMemo(
@@ -847,7 +832,7 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
             onTriggerExpand,
             expandIconColumnIndex,
             indentSize,
-            allColumnsFixedLeft: columnContext.flattenColumns.every(col => col.fixed === 'left'),
+            allColumnsFixedLeft: columnContext.flattenColumns.every(col => col.fixed === 'left')
         }),
         [
             columnContext,
@@ -860,8 +845,8 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
             expandedRowRender,
             onTriggerExpand,
             expandIconColumnIndex,
-            indentSize,
-        ],
+            indentSize
+        ]
     );
 
     const ExpandedRowContextValue = React.useMemo(
@@ -869,9 +854,9 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
             componentWidth,
             fixHeader,
             fixColumn,
-            horizonScroll,
+            horizonScroll
         }),
-        [componentWidth, fixHeader, fixColumn, horizonScroll],
+        [componentWidth, fixHeader, fixColumn, horizonScroll]
     );
 
     const ResizeContextValue = React.useMemo(() => ({onColumnResize}), [onColumnResize]);

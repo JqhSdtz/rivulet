@@ -1,6 +1,6 @@
 package org.laputa.rivulet.common.validation;
 
-import javax.validation.groups.Default;
+import jakarta.validation.groups.Default;
 
 /**
  * spring validation的分组的基类

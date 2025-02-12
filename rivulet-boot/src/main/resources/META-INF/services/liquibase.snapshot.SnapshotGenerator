@@ -1,0 +1,10 @@
+#org.laputa.rivulet.liquibase.snapshot.CatalogSnapshotGenerator
+#org.laputa.rivulet.liquibase.snapshot.ColumnSnapshotGenerator
+#org.laputa.rivulet.liquibase.snapshot.ForeignKeySnapshotGenerator
+#org.laputa.rivulet.liquibase.snapshot.IndexSnapshotGenerator
+#org.laputa.rivulet.liquibase.snapshot.PrimaryKeySnapshotGenerator
+#org.laputa.rivulet.liquibase.snapshot.SchemaSnapshotGenerator
+#org.laputa.rivulet.liquibase.snapshot.SequenceSnapshotGenerator
+#org.laputa.rivulet.liquibase.snapshot.TableSnapshotGenerator
+#org.laputa.rivulet.liquibase.snapshot.UniqueConstraintSnapshotGenerator
+#org.laputa.rivulet.liquibase.snapshot.ViewSnapshotGenerator
