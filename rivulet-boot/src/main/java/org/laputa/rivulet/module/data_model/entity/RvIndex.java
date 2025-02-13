@@ -31,9 +31,7 @@ import java.util.List;
 @DynamicInsert
 @DynamicUpdate
 @TableComment("数据模型索引")
-@Table(name = "rv_index", indexes = {
-        @Index(name = "idx_rvindex_prototype_id", columnList = "prototype_id")
-})
+@Table(name = "rv_index")
 public class RvIndex extends RvEntity<String> {
     @Id
     @GeneratedValue(generator = "uuid")

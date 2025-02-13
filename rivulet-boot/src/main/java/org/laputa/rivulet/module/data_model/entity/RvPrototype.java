@@ -37,7 +37,7 @@ import java.util.List;
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @DynamicInsert
 @DynamicUpdate
-@TableComment("数据模型")
+@TableComment("数据模型000")
 @Table(name = "rv_prototype")
 public class RvPrototype extends RvEntity<String> {
     @Id

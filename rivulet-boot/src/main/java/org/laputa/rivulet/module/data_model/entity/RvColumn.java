@@ -29,9 +29,7 @@ import java.math.BigInteger;
 @DynamicInsert
 @DynamicUpdate
 @TableComment("数据模型字段")
-@Table(name = "rv_column", indexes = {
-        @Index(name = "idx_rvcolumn_prototype_id", columnList = "prototype_id")
-})
+@Table(name = "rv_column")
 public class RvColumn extends RvEntity<String> {
     @Id
     @GeneratedValue(generator = "uuid")
