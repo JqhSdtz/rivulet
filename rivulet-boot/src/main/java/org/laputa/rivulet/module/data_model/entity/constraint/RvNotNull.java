@@ -26,9 +26,7 @@ import jakarta.persistence.Table;
 @RequiredArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "rv_not_null", indexes = {
-        @Index(name = "idx_rvnotnull_prototype_id", columnList = "prototype_id")
-})
+@Table(name = "rv_not_null")
 public class RvNotNull extends RvEntity<String> {
     @Id
     @GeneratedValue(generator = "uuid")

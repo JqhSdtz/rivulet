@@ -32,9 +32,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "rv_foreign_key", indexes = {
-        @Index(name = "idx_rvforeignkey_prototype_id", columnList = "prototype_id")
-})
+@Table(name = "rv_foreign_key")
 public class RvForeignKey extends RvEntity<String> {
     @Id
     @GeneratedValue(generator = "uuid")

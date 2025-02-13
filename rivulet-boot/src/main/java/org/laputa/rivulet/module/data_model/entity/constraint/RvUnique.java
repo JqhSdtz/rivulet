@@ -31,9 +31,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "rv_unique", indexes = {
-        @Index(name = "idx_rvunique_prototype_id", columnList = "prototype_id")
-})
+@Table(name = "rv_unique")
 public class RvUnique extends RvEntity<String> {
     @Id
     @GeneratedValue(generator = "uuid")
