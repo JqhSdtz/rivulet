@@ -27,10 +27,7 @@ import jakarta.persistence.Table;
 @RequiredArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "rv_foreign_key_foreign_column", indexes = {
-        @Index(name = "idx_rvforeignkeyforeigncolumn_foreign_key_id", columnList = "foreign_key_id"),
-        @Index(name = "idx_rvforeignkeyforeigncolumn_column_id", columnList = "column_id")
-})
+@Table(name = "rv_foreign_key_foreign_column")
 public class RvForeignKeyForeignColumn extends RvEntity<String> {
     @Id
     @GeneratedValue(generator = "uuid")

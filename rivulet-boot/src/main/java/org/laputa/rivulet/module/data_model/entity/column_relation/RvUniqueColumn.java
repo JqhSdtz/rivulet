@@ -27,10 +27,7 @@ import jakarta.persistence.*;
 @RequiredArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "rv_unique_column", indexes = {
-        @Index(name = "idx_rvuniquecolumn_constraint_id", columnList = "unique_id"),
-        @Index(name = "idx_rvuniquecolumn_column_id", columnList = "column_id")
-})
+@Table(name = "rv_unique_column")
 public class RvUniqueColumn extends RvEntity<String> {
     @Id
     @GeneratedValue(generator = "uuid")
