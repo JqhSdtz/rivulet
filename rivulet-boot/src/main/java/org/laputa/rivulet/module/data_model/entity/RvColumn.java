@@ -87,4 +87,9 @@ public class RvColumn extends RvEntity<String> {
     @Comment("是否可以为空值")
     @DefaultValue(Strings.FALSE)
     private Boolean nullable;
+
+    @Column(name = "descending")
+    @Comment("是否降序，MySQL8中有降序索引，如果为true，则在降序索引中该列标记为降序")
+    @DefaultValue(Strings.FALSE)
+    private Boolean descending;
 }
