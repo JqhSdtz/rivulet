@@ -12,8 +12,12 @@ import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import org.hibernate.sql.Alias;
+import org.laputa.rivulet.module.data_model.entity.RvIndex;
+import org.laputa.rivulet.module.data_model.entity.RvPrototype;
+import org.laputa.rivulet.module.data_model.entity.column_relation.RvPrimaryKeyColumn;
+import org.laputa.rivulet.module.data_model.entity.constraint.RvPrimaryKey;
 
-public class PrimaryKeySnapshotGenerator extends HibernateSnapshotGenerator {
+public class PrimaryKeySnapshotGenerator extends RivuletSnapshotGenerator {
 
     private static final int PK_NAME_LENGTH = 63;
     private static final String PK_NAME_SUFFIX = "PK";
@@ -30,46 +34,33 @@ public class PrimaryKeySnapshotGenerator extends HibernateSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        if (!snapshot.getSnapshotControl().shouldInclude(PrimaryKey.class)) {
+        if (!(snapshot.getSnapshotControl().shouldInclude(PrimaryKey.class)
+                && foundObject instanceof Table)) {
             return;
         }
-        if (foundObject instanceof Table) {
-            Table table = (Table) foundObject;
-            org.hibernate.mapping.Table hibernateTable = findHibernateTable(table, snapshot);
-            if (hibernateTable == null) {
-                return;
-            }
-            org.hibernate.mapping.PrimaryKey hibernatePrimaryKey = hibernateTable.getPrimaryKey();
-            if (hibernatePrimaryKey != null) {
-                PrimaryKey pk = new PrimaryKey();
-                String hbnTableName = hibernateTable.getName();
-
-                String pkName = PK_NAME_ALIAS.toAliasString(hbnTableName);
-                if (pkName.length() == PK_NAME_LENGTH) {
-                    String suffix = "_" + Integer.toHexString(hbnTableName.hashCode()).toUpperCase() + "_" + PK_NAME_SUFFIX;
-                    pkName = pkName.substring(0, PK_NAME_LENGTH - suffix.length()) + suffix;
-                }
-                pk.setName(pkName);
-
-                pk.setTable(table);
-                for (org.hibernate.mapping.Column hibernateColumn : hibernatePrimaryKey.getColumns()) {
-                    pk.getColumns().add(new Column(hibernateColumn.getName()).setRelation(table));
-                }
-
-                // !!!全局控制found信息输出
-                if (GlobalSetting.isShowFoundInfo()) {
-                    Scope.getCurrentScope().getLog(getClass()).info("Found primary key " + pk.getName());
-                }
-                table.setPrimaryKey(pk);
-                Index index = new Index();
-                index.setName("IX_" + pk.getName());
-                index.setRelation(table);
-                index.setColumns(pk.getColumns());
-                index.setUnique(true);
-                pk.setBackingIndex(index);
-                table.getIndexes().add(index);
-            }
+        Table table = (Table) foundObject;
+        RvPrototype prototype = findRvPrototype(table, snapshot);
+        if (prototype == null) {
+            return;
         }
+        RvPrimaryKey rvPrimaryKey = prototype.getPrimaryKey();
+        if (rvPrimaryKey == null) {
+            return;
+        }
+        PrimaryKey pk = new PrimaryKey();
+        pk.setName(rvPrimaryKey.getName());
+        pk.setTable(table);
+        for (RvPrimaryKeyColumn rvPrimaryKeyColumn : rvPrimaryKey.getPrimaryKeyColumns()) {
+            pk.getColumns().add(new Column(rvPrimaryKeyColumn.getColumn().getName()).setRelation(table));
+        }
+        table.setPrimaryKey(pk);
+        Index index = new Index();
+        RvIndex backingIndex = rvPrimaryKey.getBackingIndex();
+        index.setName(backingIndex.getName());
+        index.setRelation(table);
+        index.setColumns(pk.getColumns());
+        index.setUnique(true);
+        pk.setBackingIndex(index);
+//        table.getIndexes().add(index);
     }
-
 }

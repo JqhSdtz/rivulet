@@ -1,7 +1,6 @@
 package org.laputa.rivulet.liquibase.snapshot;
 
 import liquibase.exception.DatabaseException;
-import org.laputa.rivulet.liquibase.snapshot.HibernateSnapshotGenerator;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
@@ -11,7 +10,7 @@ import liquibase.structure.core.Catalog;
 /**
  * Hibernate doesn't really support Catalogs, so just return the passed example back as if it had all the info it needed.
  */
-public class CatalogSnapshotGenerator extends HibernateSnapshotGenerator {
+public class CatalogSnapshotGenerator extends RivuletSnapshotGenerator {
 
     public CatalogSnapshotGenerator() {
         super(Catalog.class);

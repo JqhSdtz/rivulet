@@ -1,5 +1,0 @@
-#org.laputa.rivulet.liquibase.diff.HibernateChangedColumnChangeGenerator
-#org.laputa.rivulet.liquibase.diff.HibernateChangedForeignKeyChangeGenerator
-#org.laputa.rivulet.liquibase.diff.HibernateChangedSequenceChangeGenerator
-#org.laputa.rivulet.liquibase.diff.HibernateMissingSequenceChangeGenerator
-#org.laputa.rivulet.liquibase.diff.HibernateUnexpectedIndexChangeGenerator

@@ -2,19 +2,21 @@ package org.laputa.rivulet.liquibase.snapshot;
 
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
-import liquibase.ext.hibernate.database.HibernateDatabase;
 import liquibase.ext.hibernate.snapshot.HibernateSnapshotGenerator;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
-import org.hibernate.boot.spi.MetadataImplementor;
+import org.laputa.rivulet.liquibase.database.RivuletDatabase;
+import org.laputa.rivulet.module.data_model.entity.RvPrototype;
+import org.laputa.rivulet.module.data_model.entity.column_relation.RvForeignKeyForeignColumn;
+import org.laputa.rivulet.module.data_model.entity.column_relation.RvForeignKeyTargetColumn;
+import org.laputa.rivulet.module.data_model.entity.column_relation.RvPrimaryKeyColumn;
+import org.laputa.rivulet.module.data_model.entity.constraint.RvForeignKey;
 
-import java.util.Collection;
-import java.util.Iterator;
-
-public class ForeignKeySnapshotGenerator extends HibernateSnapshotGenerator {
+public class ForeignKeySnapshotGenerator extends RivuletSnapshotGenerator {
 
     public ForeignKeySnapshotGenerator() {
         super(ForeignKey.class, new Class[]{Table.class});
@@ -27,59 +29,39 @@ public class ForeignKeySnapshotGenerator extends HibernateSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        if (!snapshot.getSnapshotControl().shouldInclude(ForeignKey.class)) {
+        if (!(snapshot.getSnapshotControl().shouldInclude(ForeignKey.class)
+                && foundObject instanceof Table)) {
             return;
         }
-        if (foundObject instanceof Table) {
-            Table table = (Table) foundObject;
-            HibernateDatabase database = (HibernateDatabase) snapshot.getDatabase();
-            MetadataImplementor metadata = (MetadataImplementor) database.getMetadata();
-
-            Collection<org.hibernate.mapping.Table> tmapp = metadata.collectTableMappings();
-            Iterator<org.hibernate.mapping.Table> tableMappings = tmapp.iterator();
-            while (tableMappings.hasNext()) {
-                org.hibernate.mapping.Table hibernateTable = (org.hibernate.mapping.Table) tableMappings.next();
-                for (org.hibernate.mapping.ForeignKey hibernateForeignKey: hibernateTable.getForeignKeys().values()) {
-
-                    Table currentTable = new Table().setName(hibernateTable.getName());
-                    currentTable.setSchema(hibernateTable.getCatalog(), hibernateTable.getSchema());
-
-                    org.hibernate.mapping.Table hibernateReferencedTable = hibernateForeignKey.getReferencedTable();
-                    Table referencedTable = new Table().setName(hibernateReferencedTable.getName());
-                    referencedTable.setSchema(hibernateReferencedTable.getCatalog(), hibernateReferencedTable.getSchema());
-
-                    if (hibernateForeignKey.isCreationEnabled() && hibernateForeignKey.isPhysicalConstraint()) {
-                        ForeignKey fk = new ForeignKey();
-                        fk.setName(hibernateForeignKey.getName());
-                        fk.setPrimaryKeyTable(referencedTable);
-                        fk.setForeignKeyTable(currentTable);
-                        for (Object column : hibernateForeignKey.getColumns()) {
-                            fk.addForeignKeyColumn(new liquibase.structure.core.Column(((org.hibernate.mapping.Column) column).getName()));
-                        }
-                        for (Object column : hibernateForeignKey.getReferencedColumns()) {
-                            fk.addPrimaryKeyColumn(new liquibase.structure.core.Column(((org.hibernate.mapping.Column) column).getName()));
-                        }
-                        if (fk.getPrimaryKeyColumns() == null || fk.getPrimaryKeyColumns().isEmpty()) {
-                            for (Object column : hibernateReferencedTable.getPrimaryKey().getColumns()) {
-                                fk.addPrimaryKeyColumn(new liquibase.structure.core.Column(((org.hibernate.mapping.Column) column).getName()));
-                            }
-                        }
-
-                        fk.setDeferrable(false);
-                        fk.setInitiallyDeferred(false);
-
-//			Index index = new Index();
-//			index.setName("IX_" + fk.getName());
-//			index.setTable(fk.getForeignKeyTable());
-//			index.setColumns(fk.getForeignKeyColumns());
-//			fk.setBackingIndex(index);
-//			table.getIndexes().add(index);
-
-                        if (DatabaseObjectComparatorFactory.getInstance().isSameObject(currentTable, table, null, database)) {
-                            table.getOutgoingForeignKeys().add(fk);
-                            table.getSchema().addDatabaseObject(fk);
-                        }
+        Table table = (Table) foundObject;
+        RivuletDatabase database = (RivuletDatabase) snapshot.getDatabase();
+        for (RvPrototype prototype : database.getPrototypes()) {
+            for (RvForeignKey rvForeignKey : prototype.getForeignKeys()) {
+                Table currentTable = new Table().setName(prototype.getName());
+                currentTable.setSchema(database.getDefaultCatalogName(), database.getDefaultSchemaName());
+                RvPrototype targetPrototype = rvForeignKey.getTargetPrototype();
+                Table targetTable = new Table().setName(targetPrototype.getName());
+                targetTable.setSchema(database.getDefaultCatalogName(), database.getDefaultSchemaName());
+                ForeignKey fk = new ForeignKey();
+                fk.setName(rvForeignKey.getName());
+                fk.setPrimaryKeyTable(targetTable);
+                fk.setForeignKeyTable(currentTable);
+                for (RvForeignKeyForeignColumn keyForeignColumn : rvForeignKey.getForeignKeyForeignColumns()) {
+                    fk.addForeignKeyColumn(new Column((keyForeignColumn.getColumn().getName())));
+                }
+                for (RvForeignKeyTargetColumn keyTargetColumn : rvForeignKey.getForeignKeyTargetColumns()) {
+                    fk.addPrimaryKeyColumn(new Column((keyTargetColumn).getColumn().getName()));
+                }
+                if (fk.getPrimaryKeyColumns() == null || fk.getPrimaryKeyColumns().isEmpty()) {
+                    for (RvPrimaryKeyColumn primaryKeyColumn : targetPrototype.getPrimaryKey().getPrimaryKeyColumns()) {
+                        fk.addPrimaryKeyColumn(new Column(primaryKeyColumn.getColumn().getName()));
                     }
+                }
+                fk.setDeferrable(false);
+                fk.setInitiallyDeferred(false);
+                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(currentTable, table, null, database)) {
+                    table.getOutgoingForeignKeys().add(fk);
+                    table.getSchema().addDatabaseObject(fk);
                 }
             }
         }

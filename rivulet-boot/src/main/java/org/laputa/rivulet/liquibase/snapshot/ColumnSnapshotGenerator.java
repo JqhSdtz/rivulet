@@ -1,32 +1,18 @@
 package org.laputa.rivulet.liquibase.snapshot;
 
-import liquibase.Scope;
-import liquibase.datatype.DataTypeFactory;
-import liquibase.datatype.core.UnknownType;
 import liquibase.exception.DatabaseException;
-import org.laputa.rivulet.liquibase.GlobalSetting;
-import org.laputa.rivulet.liquibase.annotation.DefaultValue;
-import org.laputa.rivulet.liquibase.database.RvDatabase;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
-import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
-import liquibase.util.SqlUtil;
 import liquibase.util.StringUtil;
-import org.hibernate.boot.Metadata;
-import org.hibernate.dialect.Dialect;
-import org.hibernate.dialect.PostgreSQLDialect;
-import org.hibernate.id.ExportableColumn;
-import org.hibernate.mapping.SimpleValue;
+import org.laputa.rivulet.liquibase.database.RivuletDatabase;
+import org.laputa.rivulet.module.data_model.entity.RvColumn;
+import org.laputa.rivulet.module.data_model.entity.RvPrototype;
 
-import java.lang.reflect.Field;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,7 +20,7 @@ import java.util.regex.Pattern;
  * Columns are snapshotted along with Tables in {@link TableSnapshotGenerator} but this class needs to be here to keep the default ColumnSnapshotGenerator from running.
  * Ideally the column logic would be moved out of the TableSnapshotGenerator to better work in situations where the object types to snapshot are being controlled, but that is not the case yet.
  */
-public class ColumnSnapshotGenerator extends HibernateSnapshotGenerator {
+public class ColumnSnapshotGenerator extends RivuletSnapshotGenerator {
 
     private final static Pattern pattern = Pattern.compile("([^\\(]*)\\s*\\(?\\s*(\\d*)?\\s*,?\\s*(\\d*)?\\s*([^\\(]*?)\\)?");
 
@@ -58,140 +44,59 @@ public class ColumnSnapshotGenerator extends HibernateSnapshotGenerator {
                 }
             }
             snapshotColumn((Column) example, snapshot);
-            return example; //did not find it
-        } else {
-            return example;
         }
+        return example; //did not find it
     }
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         if (foundObject instanceof Table) {
-            org.hibernate.mapping.Table hibernateTable = findHibernateTable(foundObject, snapshot);
-            if (hibernateTable == null) {
+            RvPrototype prototype = findRvPrototype(foundObject, snapshot);
+            if (prototype == null) {
                 return;
             }
-
-            for (org.hibernate.mapping.Column hibernateColumn: hibernateTable.getColumns()) {
+            for (RvColumn rvColumn : prototype.getColumns()) {
                 Column column = new Column();
-
-                column.setName(hibernateColumn.getName());
+                column.setName(rvColumn.getName());
                 column.setRelation((Table) foundObject);
-
                 snapshotColumn(column, snapshot);
-
-
                 ((Table) foundObject).getColumns().add(column);
-
             }
         }
     }
 
     protected void snapshotColumn(Column column, DatabaseSnapshot snapshot) throws DatabaseException {
-        RvDatabase database = (RvDatabase) snapshot.getDatabase();
-
-//        org.hibernate.mapping.Table hibernateTable = findHibernateTable(column.getRelation(), snapshot);
-//        if (hibernateTable == null) {
-//            return;
-//        }
-//
-//        Dialect dialect = database.getDialect();
-//
-//        Iterator columnIterator = hibernateTable.getColumnIterator();
-//        while (columnIterator.hasNext()) {
-//            org.hibernate.mapping.Column hibernateColumn = (org.hibernate.mapping.Column) columnIterator.next();
-//            if (hibernateColumn.getName().equalsIgnoreCase(column.getName())) {
-//
-//                String defaultValue = null;
-//                String hibernateType = hibernateColumn.getSqlType(dialect, metadata);
-//                // !!!此处增加根据@DefaultValue注解设置默认值的功能
-//                Field columnField = getColumnField(hibernateTable.getName(), hibernateColumn.getName());
-//                if (columnField != null && columnField.isAnnotationPresent(DefaultValue.class)) {
-//                    DefaultValue annotatedDefaultValue = columnField.getAnnotation(DefaultValue.class);
-//                    defaultValue = annotatedDefaultValue.value();
-//                }
-//                Matcher defaultValueMatcher = Pattern.compile("(?i) DEFAULT\\s+(.*)").matcher(hibernateType);
-//                if (defaultValueMatcher.find()) {
-//                    defaultValue = defaultValueMatcher.group(1);
-//                    hibernateType = hibernateType.replace(defaultValueMatcher.group(0), "");
-//                }
-//
-//                DataType dataType = toDataType(hibernateType, hibernateColumn.getSqlTypeCode());
-//                if (dataType == null) {
-//                    throw new DatabaseException("Unable to find column data type for column " + hibernateColumn.getName());
-//                }
-//
-//                column.setType(dataType);
-//                if (GlobalSetting.isShowFoundInfo()) {
-//                    Scope.getCurrentScope().getLog(getClass()).info("Found column " + column.getName() + " " + column.getType().toString());
-//                }
-//
-//                column.setRemarks(hibernateColumn.getComment());
-//                if (hibernateColumn.getValue() instanceof SimpleValue) {
-//                    DataType parseType;
-//                    if (DataTypeFactory.getInstance().from(dataType, database) instanceof UnknownType) {
-//                        parseType = new DataType(((SimpleValue) hibernateColumn.getValue()).getTypeName());
-//                    } else {
-//                        parseType = dataType;
-//                    }
-//
-//                    if (defaultValue == null) {
-//                        defaultValue = hibernateColumn.getDefaultValue();
-//                    }
-//
-//                    column.setDefaultValue(SqlUtil.parseValue(
-//                            snapshot.getDatabase(),
-//                            defaultValue,
-//                            parseType));
-//                } else {
-//                    column.setDefaultValue(hibernateColumn.getDefaultValue());
-//                }
-//                column.setNullable(hibernateColumn.isNullable());
-//                column.setCertainDataType(false);
-//
-//                org.hibernate.mapping.PrimaryKey hibernatePrimaryKey = hibernateTable.getPrimaryKey();
-//                if (hibernatePrimaryKey != null) {
-//                    boolean isPrimaryKeyColumn = false;
-//                    for (org.hibernate.mapping.Column pkColumn : (List<org.hibernate.mapping.Column>) hibernatePrimaryKey.getColumns()) {
-//                        if (pkColumn.getName().equalsIgnoreCase(hibernateColumn.getName())) {
-//                            isPrimaryKeyColumn = true;
-//                            break;
-//                        }
-//                    }
-//
-//                    if (isPrimaryKeyColumn) {
-//                        String identifierGeneratorStrategy;
-//
-//                        if (hibernateColumn instanceof ExportableColumn) {
-//                            //nothing
-//                        } else {
-//
-//                            identifierGeneratorStrategy = hibernateColumn.getValue().isSimpleValue() ? ((SimpleValue) hibernateColumn.getValue()).getIdentifierGeneratorStrategy() : null;
-//
-//                            if (("native".equalsIgnoreCase(identifierGeneratorStrategy) || "identity".equalsIgnoreCase(identifierGeneratorStrategy))) {
-//                                if (PostgreSQL81Dialect.class.isAssignableFrom(dialect.getClass())) {
-//                                    column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
-//                                    String sequenceName = (column.getRelation().getName() + "_" + column.getName() + "_seq").toLowerCase();
-//                                    column.setDefaultValue(new DatabaseFunction("nextval('" + sequenceName + "'::regclass)"));
-//                                } else if (database.supportsAutoIncrement()) {
-//                                    column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
-//                                }
-//                            } else if ("org.hibernate.id.enhanced.SequenceStyleGenerator".equals(identifierGeneratorStrategy)) {
-//                                Properties prop = ((SimpleValue) hibernateColumn.getValue()).getIdentifierGeneratorProperties();
-//                                if (prop.get("sequence_name") == null)
-//                                    column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
-//                            }
-//                        }
-//                        column.setNullable(false);
-//                    }
-//                }
-//                return;
-//            }
-//        }
+        RivuletDatabase database = (RivuletDatabase) snapshot.getDatabase();
+        RvPrototype prototype = findRvPrototype(column.getRelation(), snapshot);
+        if (prototype == null) {
+            return;
+        }
+        for (RvColumn rvColumn : prototype.getColumns()) {
+            if (rvColumn.getName().equalsIgnoreCase(column.getName())) {
+                String rvColumnDataType = rvColumn.getDataType();
+                String rvColumnDefaultValue = rvColumn.getDefaultValue();
+                Matcher defaultValueMatcher = Pattern.compile("(?i) DEFAULT\\s+(.*)").matcher(rvColumnDataType);
+                if (defaultValueMatcher.find()) {
+                    rvColumnDefaultValue = defaultValueMatcher.group(1);
+                    rvColumnDataType = rvColumnDataType.replace(defaultValueMatcher.group(0), "");
+                }
+                Integer sqlTypeCode = database.resolveSqlTypeCode(rvColumnDataType);
+                DataType dataType = toDataType(rvColumnDataType, sqlTypeCode);
+                if (dataType == null) {
+                    throw new DatabaseException("Unable to find column data type for column " + rvColumn.getName());
+                }
+                column.setType(dataType);
+                column.setRemarks(rvColumn.getRemark());
+                column.setDefaultValue(rvColumnDefaultValue);
+                column.setNullable(rvColumn.getNullable());
+                column.setCertainDataType(false);
+                return;
+            }
+        }
     }
 
-    protected DataType toDataType(String hibernateType, Integer sqlTypeCode) throws DatabaseException {
-        Matcher matcher = pattern.matcher(hibernateType);
+    protected DataType toDataType(String rvColumnDataType, Integer sqlTypeCode) {
+        Matcher matcher = pattern.matcher(rvColumnDataType);
         if (!matcher.matches()) {
             return null;
         }
@@ -204,7 +109,6 @@ public class ColumnSnapshotGenerator extends HibernateSnapshotGenerator {
             dataType.setColumnSize(Integer.parseInt(matcher.group(2)));
             dataType.setDecimalDigits(Integer.parseInt(matcher.group(3)));
         }
-
         String extra = StringUtil.trimToNull(matcher.group(4));
         // !!!添加默认的size unit，防止类型比对的时候出现错误
         dataType.setColumnSizeUnit(DataType.ColumnSizeUnit.BYTE);
@@ -213,7 +117,6 @@ public class ColumnSnapshotGenerator extends HibernateSnapshotGenerator {
                 dataType.setColumnSizeUnit(DataType.ColumnSizeUnit.CHAR);
             }
         }
-
         dataType.setDataTypeId(sqlTypeCode);
         return dataType;
     }

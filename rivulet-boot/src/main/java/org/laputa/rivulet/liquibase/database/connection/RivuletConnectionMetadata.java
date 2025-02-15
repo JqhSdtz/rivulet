@@ -8,11 +8,11 @@ import java.sql.*;
  * Implements the standard java.sql.DatabaseMetaData interface to allow the Hibernate integration to better fit into
  * what Liquibase expects.
  */
-public class HibernateConnectionMetadata implements DatabaseMetaData {
+public class RivuletConnectionMetadata implements DatabaseMetaData {
 
-    private String url;
+    private final String url;
 
-    public HibernateConnectionMetadata(String url) {
+    public RivuletConnectionMetadata(String url) {
         this.url = url;
     }
 
@@ -53,7 +53,7 @@ public class HibernateConnectionMetadata implements DatabaseMetaData {
     }
 
     public String getDatabaseProductName() throws SQLException {
-        return "Hibernate";
+        return "Rivulet";
     }
 
     public String getDatabaseProductVersion() throws SQLException {

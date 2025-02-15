@@ -1,9 +1,6 @@
 package org.laputa.rivulet.liquibase.snapshot;
 
-import liquibase.Scope;
 import liquibase.exception.DatabaseException;
-import liquibase.ext.hibernate.GlobalSetting;
-import liquibase.ext.hibernate.snapshot.HibernateSnapshotGenerator;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
@@ -11,14 +8,11 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
-import liquibase.util.StringUtil;
-import org.hibernate.HibernateException;
+import org.laputa.rivulet.module.data_model.entity.RvPrototype;
+import org.laputa.rivulet.module.data_model.entity.column_relation.RvUniqueColumn;
+import org.laputa.rivulet.module.data_model.entity.constraint.RvUnique;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
-public class UniqueConstraintSnapshotGenerator extends HibernateSnapshotGenerator {
+public class UniqueConstraintSnapshotGenerator extends RivuletSnapshotGenerator {
 
     public UniqueConstraintSnapshotGenerator() {
         super(UniqueConstraint.class, new Class[]{Table.class});
@@ -31,92 +25,36 @@ public class UniqueConstraintSnapshotGenerator extends HibernateSnapshotGenerato
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        if (!snapshot.getSnapshotControl().shouldInclude(UniqueConstraint.class)) {
+        if (!(snapshot.getSnapshotControl().shouldInclude(UniqueConstraint.class)
+                && foundObject instanceof Table)) {
             return;
         }
-
-        if (foundObject instanceof Table) {
-            Table table = (Table) foundObject;
-            org.hibernate.mapping.Table hibernateTable = findHibernateTable(table, snapshot);
-            if (hibernateTable == null) {
-                return;
+        Table table = (Table) foundObject;
+        RvPrototype prototype = findRvPrototype(table, snapshot);
+        if (prototype == null) {
+            return;
+        }
+        for (RvUnique rvUnique : prototype.getUniques()) {
+            UniqueConstraint uniqueConstraint = new UniqueConstraint();
+            uniqueConstraint.setName(rvUnique.getName());
+            uniqueConstraint.setRelation(table);
+            uniqueConstraint.setClustered(false); // No way to set true via Hibernate
+            int i = 0;
+            for (RvUniqueColumn rvUniqueColumn : rvUnique.getUniqueColumns()) {
+                uniqueConstraint.addColumn(i++, new Column(rvUniqueColumn.getColumn().getName()).setRelation(table));
             }
-            for (var hibernateUnique : hibernateTable.getUniqueKeys().values()) {
-                UniqueConstraint uniqueConstraint = new UniqueConstraint();
-                uniqueConstraint.setName(hibernateUnique.getName());
-                uniqueConstraint.setRelation(table);
-                uniqueConstraint.setClustered(false); // No way to set true via Hibernate
-
-                int i = 0;
-                for (var hibernateColumn : hibernateUnique.getColumns()) {
-                    uniqueConstraint.addColumn(i++, new Column(hibernateColumn.getName()).setRelation(table));
-                }
-
-                Index index = getBackingIndex(uniqueConstraint, hibernateTable, snapshot);
-                uniqueConstraint.setBackingIndex(index);
-
-                // !!!全局控制found信息输出
-                if (GlobalSetting.isShowFoundInfo()) {
-                    Scope.getCurrentScope().getLog(getClass()).info("Found unique constraint " + uniqueConstraint);
-                }
-                table.getUniqueConstraints().add(uniqueConstraint);
-            }
-            for (var column : hibernateTable.getColumns()) {
-                if (column.isUnique()) {
-                    UniqueConstraint uniqueConstraint = new UniqueConstraint();
-                    uniqueConstraint.setRelation(table);
-                    uniqueConstraint.setClustered(false); // No way to set true via Hibernate
-                    String name = "UC_" + table.getName().toUpperCase() + column.getName().toUpperCase() + "_COL";
-                    if (name.length() > 64) {
-                        name = name.substring(0, 63);
-                    }
-                    uniqueConstraint.addColumn(0, new Column(column.getName()).setRelation(table));
-                    uniqueConstraint.setName(name);
-                    // !!!全局控制found信息输出
-                    if (GlobalSetting.isShowFoundInfo()) {
-                        Scope.getCurrentScope().getLog(getClass()).info("Found unique constraint " + uniqueConstraint);
-                    }
-                    table.getUniqueConstraints().add(uniqueConstraint);
-
-                    Index index = getBackingIndex(uniqueConstraint, hibernateTable, snapshot);
-                    uniqueConstraint.setBackingIndex(index);
-
-                }
-            }
-
-            for (UniqueConstraint uc : table.getUniqueConstraints()) {
-                if (uc.getName() == null || uc.getName().isEmpty()) {
-                    String name = table.getName() + uc.getColumnNames();
-                    name = "UCIDX" + hashedName(name);
-                    uc.setName(name);
-                }
-            }
+            Index index = getBackingIndex(uniqueConstraint, rvUnique);
+            uniqueConstraint.setBackingIndex(index);
+            table.getUniqueConstraints().add(uniqueConstraint);
         }
     }
 
-    private String hashedName(String s) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            md.reset();
-            md.update(s.getBytes());
-            byte[] digest = md.digest();
-            BigInteger bigInt = new BigInteger(1, digest);
-            // By converting to base 35 (full alphanumeric), we guarantee
-            // that the length of the name will always be smaller than the 30
-            // character identifier restriction enforced by a few dialects.
-            return bigInt.toString(35);
-        } catch (NoSuchAlgorithmException e) {
-            throw new HibernateException("Unable to generate a hashed name!", e);
-        }
-    }
-
-    protected Index getBackingIndex(UniqueConstraint uniqueConstraint, org.hibernate.mapping.Table hibernateTable, DatabaseSnapshot snapshot) {
+    protected Index getBackingIndex(UniqueConstraint uniqueConstraint, RvUnique rvUnique) {
         Index index = new Index();
         index.setRelation(uniqueConstraint.getRelation());
         index.setColumns(uniqueConstraint.getColumns());
         index.setUnique(true);
-        index.setName(String.format("%s_%s_IX",hibernateTable.getName(), StringUtil.randomIdentifer(4)));
-
+        index.setName(rvUnique.getBackingIndex().getName());
         return index;
     }
 

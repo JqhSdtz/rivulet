@@ -25,6 +25,7 @@ import liquibase.statement.NotNullConstraint;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.*;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.boot.internal.MetadataImpl;
@@ -112,8 +113,9 @@ public class BuiltInDataModelService implements ApplicationRunner {
     private TransactionTemplate transactionTemplate;
 
     private RBucket<String> confirmKeyBucket;
-    private Map<String, Field> columnFieldMap = new HashMap<>();
+    private final Map<String, Field> columnFieldMap = new HashMap<>();
     private DiffResult diffResult;
+    @Getter
     private String currentStructureUpdateSql;
     private DatabaseChangeLog currentDatabaseChangeLog;
 
@@ -136,10 +138,6 @@ public class BuiltInDataModelService implements ApplicationRunner {
                 log.info("内部数据模型更新完毕");
             });
         }
-    }
-
-    public String getCurrentStructureUpdateSql() {
-        return currentStructureUpdateSql;
     }
 
     @SneakyThrows
@@ -201,11 +199,9 @@ public class BuiltInDataModelService implements ApplicationRunner {
         }
         StringWriter stringWriter = new StringWriter();
         // 指定writer后就不会真正执行update，而是将sql语句输入writer中
-        Map<String, Object> config = new HashMap<>();
         // 临时调整日志等级，避免在执行过程中输出changeSet应用成功的误导信息
         // 因为changeSet只是被转成了sql，并没有执行
-        config.put("logLevel", "WARNING");
-        Scope.child(config, () -> {
+        Scope.child(new HashMap<>(), () -> {
             liquibase.update(new Contexts(), stringWriter);
         });
         targetDataBase.close();
@@ -445,6 +441,9 @@ public class BuiltInDataModelService implements ApplicationRunner {
         }
         if (rvColumn.getOrderNum() == null) {
             rvColumn.setOrderNum(column.getOrder());
+        }
+        if (rvColumn.getDescending() == null) {
+            rvColumn.setDescending(column.getDescending());
         }
         if (rvColumn.getRemark() == null) {
             rvColumn.setRemark(column.getRemarks());

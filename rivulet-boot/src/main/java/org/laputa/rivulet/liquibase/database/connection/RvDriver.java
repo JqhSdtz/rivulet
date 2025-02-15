@@ -16,7 +16,7 @@ public class RvDriver implements Driver, LiquibaseExtDriver {
     private ResourceAccessor resourceAccessor;
 
     public Connection connect(String url, Properties info) throws SQLException {
-        return new HibernateConnection(url, resourceAccessor);
+        return new RivuletConnection(url, resourceAccessor);
     }
 
     public boolean acceptsURL(String url) throws SQLException {

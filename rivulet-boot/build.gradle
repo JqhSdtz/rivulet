@@ -65,6 +65,7 @@ def referenceUrlStr = 'hibernate:spring:org.laputa.rivulet'
 referenceUrlStr += '?hibernate.temp.use_jdbc_metadata_defaults=false'
 referenceUrlStr += '&dialect=' + dialect + physicalNamingStrategy + implicitNamingStrategy
 
+// liquibase升级导致一些参数名改变，参考https://github.com/liquibase/liquibase-gradle-plugin/blob/master/doc/releases.md
 liquibase {
     activities.register('main') {
         arguments = [
@@ -74,7 +75,8 @@ liquibase {
                 'password'       : appKeys.spring.datasource.password,
                 'driver'         : appKeys.spring.datasource['driver-class-name'],
                 'referenceUrl'   : referenceUrlStr,
-                'referenceDriver': 'liquibase.ext.hibernate.database.connection.HibernateDriver'
+                'referenceDriver': 'liquibase.ext.hibernate.database.connection.HibernateDriver',
+                'logLevel'       : 'WARNING'
         ]
     }
 }
@@ -92,7 +94,8 @@ dependencies {
     implementation 'org.redisson:redisson-spring-boot-starter:3.44.0'
     implementation 'org.liquibase:liquibase-core:4.31.0'
     implementation 'org.liquibase.ext:liquibase-hibernate6:4.31.0-SNAPSHOT'
-    implementation 'org.hibernate:hibernate-envers:6.6.6.Final'
+//    springboot jpa中的hibernate还是6.6.5，所以这里版本也设置为6.6.5
+    implementation 'org.hibernate:hibernate-envers:6.6.5.Final'
     implementation 'org.eclipse.jgit:org.eclipse.jgit:6.6.1.202309021850-r'
     implementation 'cn.hutool:hutool-core:5.8.35'
     implementation 'cn.hutool:hutool-crypto:5.8.35'
@@ -120,7 +123,7 @@ dependencies {
     liquibaseRuntime 'org.springframework.boot:spring-boot-starter-data-jpa'
     liquibaseRuntime 'org.postgresql:postgresql:42.7.2'
     liquibaseRuntime 'org.liquibase:liquibase-groovy-dsl:3.0.2'
-    liquibaseRuntime 'org.hibernate:hibernate-core:6.6.6.Final'
+    liquibaseRuntime 'org.hibernate:hibernate-core:6.6.5.Final'
     liquibaseRuntime 'info.picocli:picocli:4.6.3'
     liquibaseRuntime('org.liquibase.ext:liquibase-hibernate6:4.31.0-SNAPSHOT') {
         exclude group: 'org.liquibase', module: 'liquibase-test-harness'
@@ -140,11 +143,14 @@ tasks.findAll { it ->
         return it
     }
 }.each { it ->
-    // 在生成新的changeLog之前删除旧的changeLog
+    // 在生成新的changeLog之前清空旧的changeLog
     it.doFirst {
         def changelogFile = new File(changelogFilePath)
         if (changelogFile.exists()) {
-            changelogFile.delete()
+            def fileWrite = new FileWriter(changelogFile)
+            fileWrite.write("")
+            fileWrite.flush()
+            fileWrite.close()
         }
     }
     // 生成changeLog后，在history目录下复制一份作为记录

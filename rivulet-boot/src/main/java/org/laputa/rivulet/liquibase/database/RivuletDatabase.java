@@ -1,35 +1,44 @@
 package org.laputa.rivulet.liquibase.database;
 
+import cn.hutool.core.util.ReflectUtil;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
-import org.hibernate.boot.Metadata;
+import lombok.Getter;
+import lombok.SneakyThrows;
+import org.hibernate.boot.internal.MetadataImpl;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.MySQLDialect;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.engine.jdbc.connections.spi.DatabaseConnectionInfo;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
+import org.hibernate.type.spi.TypeConfiguration;
 import org.laputa.rivulet.common.util.SpringBeanUtil;
 import org.laputa.rivulet.liquibase.database.connection.RvDriver;
 import org.laputa.rivulet.module.data_model.entity.RvPrototype;
 import org.laputa.rivulet.module.data_model.repository.RvPrototypeRepository;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-public abstract class RvDatabase extends AbstractJdbcDatabase {
+public abstract class RivuletDatabase extends AbstractJdbcDatabase {
 
-    private Metadata metadata;
-
+    @Getter
     private List<RvPrototype> prototypes;
-    protected Dialect dialect;
+    private TypeConfiguration typeConfiguration;
+    private Dialect dbmsDialect;
+    private Method resolveSqlTypeCodeMethod;
 
     private boolean indexesForForeignKeys = false;
     public static final String DEFAULT_SCHEMA = "RIVULET";
 
-    public RvDatabase() {
+    public RivuletDatabase() {
         setDefaultCatalogName(DEFAULT_SCHEMA);
         setDefaultSchemaName(DEFAULT_SCHEMA);
     }
@@ -54,35 +63,35 @@ public abstract class RvDatabase extends AbstractJdbcDatabase {
     }
 
 
+    @SneakyThrows
     @Override
     public void setConnection(DatabaseConnection conn) {
         super.setConnection(conn);
         Scope.getCurrentScope().getLog(getClass()).info("Reading rivulet configuration " + getConnection().getURL());
         RvPrototypeRepository rvPrototypeRepository = SpringBeanUtil.getBean(RvPrototypeRepository.class);
+        JpaProperties jpaProperties = SpringBeanUtil.getBean(JpaProperties.class);
+        this.typeConfiguration = new TypeConfiguration();
+        String dialectClassName = jpaProperties.getProperties().get("hibernate.dialect");
+        if (dialectClassName != null) {
+            Class<? extends Dialect> dialectClass = (Class<? extends Dialect>) Class.forName(dialectClassName);
+            dbmsDialect = dialectClass.getDeclaredConstructor().newInstance();
+            this.resolveSqlTypeCodeMethod = ReflectUtil.getMethodByName(dialectClass, "resolveSqlTypeCode");
+        }
         prototypes = rvPrototypeRepository.findAll();
         afterSetup();
     }
 
-    public List<RvPrototype> getPrototypes() {
-        return prototypes;
-    }
-
-    /**
-     * Returns the dialect determined during database initialization.
-     */
-    public Dialect getDialect() {
-        return dialect;
-    }
-
-    public Metadata getMetadata() throws DatabaseException {
-        return metadata;
+    @SneakyThrows
+    public Integer resolveSqlTypeCode(String columnTypeName) {
+        if (resolveSqlTypeCodeMethod == null) return null;
+        return (Integer) resolveSqlTypeCodeMethod.invoke(columnTypeName, typeConfiguration);
     }
 
     /**
      * Perform any post-configuration setting logic.
      */
     protected void afterSetup() {
-        if (dialect instanceof MySQLDialect) {
+        if (dbmsDialect instanceof MySQLDialect) {
             indexesForForeignKeys = true;
         }
     }

@@ -3,16 +3,15 @@ package org.laputa.rivulet.liquibase.snapshot;
 import liquibase.Scope;
 import liquibase.exception.DatabaseException;
 import liquibase.ext.hibernate.GlobalSetting;
-import liquibase.ext.hibernate.snapshot.HibernateSnapshotGenerator;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
+import org.laputa.rivulet.module.data_model.entity.RvIndex;
+import org.laputa.rivulet.module.data_model.entity.RvPrototype;
+import org.laputa.rivulet.module.data_model.entity.column_relation.RvIndexColumn;
 
-public class IndexSnapshotGenerator extends HibernateSnapshotGenerator {
-
-    private static final String HIBERNATE_ORDER_ASC = "asc";
-    private static final String HIBERNATE_ORDER_DESC = "desc";
+public class IndexSnapshotGenerator extends RivuletSnapshotGenerator {
 
     @SuppressWarnings("unchecked")
     public IndexSnapshotGenerator() {
@@ -25,17 +24,13 @@ public class IndexSnapshotGenerator extends HibernateSnapshotGenerator {
             return example;
         }
         Relation table = ((Index) example).getRelation();
-        var hibernateTable = findHibernateTable(table, snapshot);
-        if (hibernateTable == null) {
+        RvPrototype prototype = findRvPrototype(table, snapshot);
+        if (prototype == null) {
             return example;
         }
-        for (var hibernateIndex : hibernateTable.getIndexes().values()) {
-            Index index = handleHibernateIndex(table, hibernateIndex);
+        for (RvIndex rvIndex : prototype.getIndexes()) {
+            Index index = handleRvIndex(table, rvIndex);
             if (index.getColumnNames().equalsIgnoreCase(((Index) example).getColumnNames())) {
-                // !!!全局控制found信息输出
-                if (GlobalSetting.isShowFoundInfo()) {
-                    Scope.getCurrentScope().getLog(getClass()).info("Found index " + index.getName());
-                }
                 table.getIndexes().add(index);
                 return index;
             }
@@ -49,54 +44,29 @@ public class IndexSnapshotGenerator extends HibernateSnapshotGenerator {
         if (!snapshot.getSnapshotControl().shouldInclude(Index.class)) {
             return;
         }
-        if (foundObject instanceof Table) {
-            Table table = (Table) foundObject;
-            org.hibernate.mapping.Table hibernateTable = findHibernateTable(table, snapshot);
-            if (hibernateTable == null) {
+        if (foundObject instanceof Table table) {
+            RvPrototype prototype = findRvPrototype(table, snapshot);
+            if (prototype == null) {
                 return;
             }
-            for (var hibernateIndex : hibernateTable.getIndexes().values()) {
-                Index index = handleHibernateIndex(table, hibernateIndex);
-                // !!!全局控制found信息输出
-                if (GlobalSetting.isShowFoundInfo()) {
-                    Scope.getCurrentScope().getLog(getClass()).info("Found index " + index.getName());
-                }
+            for (RvIndex rvIndex : prototype.getIndexes()) {
+                Index index = handleRvIndex(table, rvIndex);
                 table.getIndexes().add(index);
             }
         }
     }
 
-    private Index handleHibernateIndex(Relation table, org.hibernate.mapping.Index hibernateIndex) {
+    private Index handleRvIndex(Relation table, RvIndex rvIndex) {
         Index index = new Index();
         index.setRelation(table);
-        index.setName(hibernateIndex.getName());
-        index.setUnique(isUniqueIndex(hibernateIndex));
-        for (var hibernateColumn : hibernateIndex.getColumns()) {
-            String hibernateOrder = hibernateIndex.getColumnOrderMap().get(hibernateColumn);
-            Boolean descending = HIBERNATE_ORDER_ASC.equals(hibernateOrder)
-                    ? Boolean.FALSE
-                    : (HIBERNATE_ORDER_DESC.equals(hibernateOrder) ? Boolean.TRUE : null);
-            index.getColumns().add(new Column(hibernateColumn.getName()).setRelation(table).setDescending(descending));
+        index.setName(rvIndex.getName());
+        index.setUnique(rvIndex.getUniqueIndex());
+        for (RvIndexColumn rvIndexColumn : rvIndex.getIndexColumns()) {
+            Boolean descending = rvIndexColumn.getColumn().getDescending();
+            Column column = new Column(rvIndexColumn.getColumn().getName());
+            index.getColumns().add(column.setRelation(table).setDescending(descending));
         }
         return index;
     }
 
-    private Boolean isUniqueIndex(org.hibernate.mapping.Index hibernateIndex) {
-        /*
-        This seems to be necessary to explicitly tell liquibase that there's no
-        actual diff in certain non-unique indexes
-        */
-        if (hibernateIndex.getColumnSpan() == 1) {
-            var col = hibernateIndex.getColumns().get(0);
-            return col.isUnique();
-        } else {
-            /*
-            It seems that because Hibernate does not implement the unique property of the Jpa composite index,
-            the diff command appears 'diffence', because the unique property of the entity index is 'null',
-            and the value read from the database is 'false', resulting in the generated changeSet after the Drop and
-            Recreate Index.
-            */
-            return false;
-        }
-    }
 }

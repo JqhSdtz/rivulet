@@ -1,29 +1,51 @@
 package org.laputa.rivulet.liquibase.database.connection;
 
-import org.laputa.rivulet.liquibase.database.connection.HibernateConnectionMetadata;
 import liquibase.resource.ResourceAccessor;
+import lombok.Getter;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
 /**
- * Implements java.sql.Connection in order to pretend a hibernate configuration is a database in order to fit into the Liquibase framework.
+ * Implements java.sql.Connection in order to pretend a rivulet configuration is a database in order to fit into the Liquibase framework.
  * Beyond standard Connection methods, this class exposes {@link #getPrefix()}, {@link #getPath()} and {@link #getProperties()} to access the setting passed in the JDBC URL.
  */
-public class HibernateConnection implements Connection {
-    private String prefix;
-    private String url;
+@Getter
+public class RivuletConnection implements Connection {
+    /**
+     * -- GETTER --
+     *  Returns the 'protocol' of the URL. For example, "hibernate:classic" or "hibernate:ejb3"
+     */
+    private final String prefix;
+    /**
+     * -- GETTER --
+     *  Returns the entire connection URL
+     */
+    private final String url;
 
+    /**
+     * -- GETTER --
+     *  The portion of the url between the path and the query string. Normally a filename or a class name.
+     */
     private String path;
-    private ResourceAccessor resourceAccessor;
-    private Properties properties;
+    private final ResourceAccessor resourceAccessor;
+    /**
+     * -- GETTER --
+     *  The set of properties provided by the URL. Eg:
+     *  <p/>
+     *  <code>hibernate:classic:/path/to/hibernate.cfg.xml?foo=bar</code>
+     *  <p/>
+     *  This will have a property called 'foo' with a value of 'bar'.
+     */
+    private final Properties properties;
 
-    public HibernateConnection(String url, ResourceAccessor resourceAccessor) {
+    public RivuletConnection(String url, ResourceAccessor resourceAccessor) {
         this.url = url;
 
         this.prefix = url.replaceFirst(":[^:]+$", "");
@@ -40,8 +62,8 @@ public class HibernateConnection implements Connection {
             // Convert the query string into properties
             properties.putAll(readProperties(path.substring(queryIndex + 1)));
 
-            if (properties.containsKey("dialect") && !properties.containsKey("hibernate.dialect")) {
-                properties.put("hibernate.dialect", properties.getProperty("dialect"));
+            if (properties.containsKey("dialect") && !properties.containsKey("rivulet.dialect")) {
+                properties.put("rivulet.dialect", properties.getProperty("dialect"));
             }
 
             // Remove the query string
@@ -54,47 +76,14 @@ public class HibernateConnection implements Connection {
      */
     protected Properties readProperties(String queryString) {
         Properties properties = new Properties();
-        queryString = queryString.replaceAll("&", System.getProperty("line.separator"));
+        queryString = queryString.replaceAll("&", System.lineSeparator());
         try {
-            queryString = URLDecoder.decode(queryString, "UTF-8");
+            queryString = URLDecoder.decode(queryString, StandardCharsets.UTF_8);
             properties.load(new StringReader(queryString));
         } catch (IOException ioe) {
             throw new IllegalStateException("Failed to read properties from url", ioe);
         }
 
-        return properties;
-    }
-
-    /**
-     * Returns the entire connection URL
-     */
-    public String getUrl() {
-        return url;
-    }
-
-
-    /**
-     * Returns the 'protocol' of the URL. For example, "hibernate:classic" or "hibernate:ejb3"
-     */
-    public String getPrefix() {
-        return prefix;
-    }
-
-    /**
-     * The portion of the url between the path and the query string. Normally a filename or a class name.
-     */
-    public String getPath() {
-        return path;
-    }
-
-    /**
-     * The set of properties provided by the URL. Eg:
-     * <p/>
-     * <code>hibernate:classic:/path/to/hibernate.cfg.xml?foo=bar</code>
-     * <p/>
-     * This will have a property called 'foo' with a value of 'bar'.
-     */
-    public Properties getProperties() {
         return properties;
     }
 
@@ -144,7 +133,7 @@ public class HibernateConnection implements Connection {
     }
 
     public DatabaseMetaData getMetaData() throws SQLException {
-        return new HibernateConnectionMetadata(url);
+        return new RivuletConnectionMetadata(url);
     }
 
     public void setReadOnly(boolean readOnly) throws SQLException {
@@ -160,7 +149,7 @@ public class HibernateConnection implements Connection {
     }
 
     public String getCatalog() throws SQLException {
-        return "HIBERNATE";
+        return "RIVULET";
     }
 
     public void setTransactionIsolation(int level) throws SQLException {
@@ -310,7 +299,7 @@ public class HibernateConnection implements Connection {
 
     //@Override only in java 1.7
     public String getSchema() throws SQLException {
-        return "HIBERNATE";
+        return "RIVULET";
     }
 
     //@Override only in java 1.7
@@ -321,7 +310,4 @@ public class HibernateConnection implements Connection {
     public void setSchema(String arg0) throws SQLException {
     }
 
-    public ResourceAccessor getResourceAccessor() {
-        return resourceAccessor;
-    }
 }

@@ -8,6 +8,7 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Sequence;
+import org.laputa.rivulet.liquibase.database.RivuletDatabase;
 
 import java.math.BigInteger;
 
@@ -27,26 +28,6 @@ public class SequenceSnapshotGenerator extends HibernateSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        if (!snapshot.getSnapshotControl().shouldInclude(Sequence.class)) {
-            return;
-        }
-
-        if (foundObject instanceof Schema) {
-            Schema schema = (Schema) foundObject;
-            HibernateDatabase database = (HibernateDatabase) snapshot.getDatabase();
-            for (org.hibernate.boot.model.relational.Namespace namespace : database.getMetadata().getDatabase().getNamespaces()) {
-                for (org.hibernate.boot.model.relational.Sequence sequence : namespace.getSequences()) {
-                    schema.addDatabaseObject(new Sequence()
-                            .setName(sequence.getName().getSequenceName().getText())
-                            .setSchema(schema)
-                            .setStartValue(BigInteger.valueOf(sequence.getInitialValue()))
-                            .setIncrementBy(BigInteger.valueOf(sequence.getIncrementSize()))
-                    );
-                }
-            }
-        }
+        // Nothing to do
     }
-
-
-
 }
