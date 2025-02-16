@@ -1,11 +1,13 @@
 package org.laputa.rivulet.module.data_model.entity.column_relation;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import liquibase.ext.hibernate.annotation.DefaultValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.*;
+import org.laputa.rivulet.common.constant.Strings;
 import org.laputa.rivulet.common.entity.RvEntity;
 import org.laputa.rivulet.module.data_model.entity.RvColumn;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvForeignKey;
@@ -44,6 +46,10 @@ public class RvForeignKeyTargetColumn extends RvEntity<String> {
     @ManyToOne
     @JoinColumn(name = "foreign_key_id")
     private RvForeignKey foreignKey;
+
+    @Column(name = "built_in", nullable = false)
+    @DefaultValue(Strings.FALSE)
+    private Boolean builtIn;
 
     @ManyToOne(cascade = CascadeType.PERSIST)
     @OnDelete(action = OnDeleteAction.CASCADE)

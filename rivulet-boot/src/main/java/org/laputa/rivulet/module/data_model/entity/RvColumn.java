@@ -47,6 +47,10 @@ public class RvColumn extends RvEntity<String> {
     @JoinColumn(name = "prototype_id")
     private RvPrototype prototype;
 
+    @Column(name = "built_in", nullable = false)
+    @DefaultValue(Strings.FALSE)
+    private Boolean builtIn;
+
     @Column(name = "title", nullable = false)
     private String title;
 

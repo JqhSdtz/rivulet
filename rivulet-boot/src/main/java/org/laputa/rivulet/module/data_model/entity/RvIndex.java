@@ -3,12 +3,14 @@ package org.laputa.rivulet.module.data_model.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import liquibase.ext.hibernate.annotation.DefaultValue;
 import liquibase.ext.hibernate.annotation.TableComment;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.*;
+import org.laputa.rivulet.common.constant.Strings;
 import org.laputa.rivulet.common.entity.RvEntity;
 import org.laputa.rivulet.module.data_model.entity.column_relation.RvIndexColumn;
 
@@ -48,6 +50,10 @@ public class RvIndex extends RvEntity<String> {
     @ManyToOne
     @JoinColumn(name = "prototype_id")
     private RvPrototype prototype;
+
+    @Column(name = "built_in", nullable = false)
+    @DefaultValue(Strings.FALSE)
+    private Boolean builtIn;
 
     @Column(name = "title", nullable = false)
     private String title;
