@@ -16,6 +16,7 @@ import {ArrayBase, ArrayBaseMixins} from '@formily/antd';
 import {getInitPagination, PaginationType, RvTableContext, RvTableContextType} from '@/components/formily';
 import {useUpdate} from 'ahooks';
 import {PlusOutlined} from '@ant-design/icons';
+import {TabsContext, TabsContextType} from "@/layouts/BasicLayout";
 
 interface ObservableColumnSource {
     field: GeneralField;
@@ -301,14 +302,24 @@ const InnerArrayTable = observer((props: TableProps<any>) => {
     const defaultRowKey = (record: any) => {
         return dataSource.indexOf(record);
     };
+    const {currentTabNode} = useContext<TabsContextType>(TabsContext);
+    // helper就是拖动后随鼠标移动的DOM元素，该元素原本是position:fixed，但是受到多标签框架中每个标签页的容器都设置为了transform:scale(1,1)的影响，
+    // fixed变成了相对容器定位，但是组件原本是按照绝对定位来的，所以直接给helper设置了left和top。这里要修正left和top相对于标签页容器的偏差
+    const splitViewBoundingClientRect = currentTabNode.splitView.contentRef.current.getBoundingClientRect();
+    const splitViewLeftOffset = splitViewBoundingClientRect.left;
+    const splitViewTopOffset = splitViewBoundingClientRect.top;
     const addTdStyles = (node: HTMLElement) => {
         const helper = document.body.querySelector(`.${prefixCls}-sort-helper`);
         if (helper) {
             const tds = node.querySelectorAll('td');
+            const oriOffsetLeft = (helper as HTMLElement).offsetLeft;
+            const oriOffsetTop = (helper as HTMLElement).offsetTop;
             requestAnimationFrame(() => {
                 helper.querySelectorAll('td').forEach((td, index) => {
                     if (tds[index]) {
                         td.style.width = getComputedStyle(tds[index]).width;
+                        td.parentElement.style.left = (oriOffsetLeft - splitViewLeftOffset) + 'px';
+                        td.parentElement.style.top = (oriOffsetTop - splitViewTopOffset) + 'px';
                     }
                 });
             });
