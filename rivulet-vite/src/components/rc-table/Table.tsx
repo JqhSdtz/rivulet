@@ -32,7 +32,7 @@ import {getTargetScrollBarSize} from 'rc-util/lib/getScrollBarSize';
 import pickAttrs from 'rc-util/lib/pickAttrs';
 import warning from 'rc-util/lib/warning';
 import * as React from 'react';
-import {useEffect} from 'react';
+import {useEffect, useRef} from 'react';
 import shallowEqual from 'shallowequal';
 import Body from './Body';
 import ColGroup from './ColGroup';
@@ -298,15 +298,19 @@ function Table<RecordType extends DefaultRecordType>(tableProps: TableProps<Reco
         /* eslint-enable */
         return false;
     }, [!!expandedRowRender, mergedData]);
+    const defaultExpandExecuted = useRef(false);
 
     const getInnerExpandedKeys = () => {
-        if (defaultExpandedRowKeys) {
+        const canExpand = !defaultExpandExecuted.current && mergedData.length != 0;
+        if (defaultExpandedRowKeys && canExpand) {
+            defaultExpandExecuted.current = true;
             return defaultExpandedRowKeys;
         }
-        if (defaultExpandAllRows) {
+        if (defaultExpandAllRows && canExpand) {
+            defaultExpandExecuted.current = true;
             return findAllChildrenKeys<RecordType>(mergedData, getRowKey, mergedChildrenColumnName);
         }
-        return [];
+        return innerExpandedKeys || [];
     };
 
     const [innerExpandedKeys, setInnerExpandedKeys] = React.useState<Key[]>();
