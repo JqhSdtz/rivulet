@@ -22,6 +22,8 @@ import org.laputa.rivulet.module.data_model.entity.constraint.RvPrimaryKey;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvUnique;
 
 import jakarta.persistence.*;
+import org.laputa.rivulet.module.data_model.entity.inter.WithBuiltInFlag;
+
 import java.util.List;
 
 /**
@@ -39,7 +41,7 @@ import java.util.List;
 @DynamicUpdate
 @TableComment("数据模型")
 @Table(name = "rv_prototype")
-public class RvPrototype extends RvEntity<String> {
+public class RvPrototype extends RvEntity<String> implements WithBuiltInFlag {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")

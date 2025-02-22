@@ -19,6 +19,8 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+import org.laputa.rivulet.module.data_model.entity.inter.WithBuiltInFlag;
+
 import java.util.List;
 
 /**
@@ -34,7 +36,7 @@ import java.util.List;
 @DynamicUpdate
 @TableComment("数据模型索引")
 @Table(name = "rv_index")
-public class RvIndex extends RvEntity<String> {
+public class RvIndex extends RvEntity<String> implements WithBuiltInFlag {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")

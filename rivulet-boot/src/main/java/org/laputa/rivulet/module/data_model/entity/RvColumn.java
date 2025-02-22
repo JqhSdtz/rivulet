@@ -15,6 +15,8 @@ import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+import org.laputa.rivulet.module.data_model.entity.inter.WithBuiltInFlag;
+
 import java.math.BigInteger;
 
 /**
@@ -30,7 +32,7 @@ import java.math.BigInteger;
 @DynamicUpdate
 @TableComment("数据模型字段")
 @Table(name = "rv_column")
-public class RvColumn extends RvEntity<String> {
+public class RvColumn extends RvEntity<String> implements WithBuiltInFlag {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")

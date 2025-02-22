@@ -20,6 +20,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.persistence.*;
+import org.laputa.rivulet.module.data_model.entity.inter.WithBuiltInFlag;
+
 import java.util.List;
 
 /**
@@ -34,7 +36,7 @@ import java.util.List;
 @DynamicInsert
 @DynamicUpdate
 @Table(name = "rv_unique")
-public class RvUnique extends RvEntity<String> {
+public class RvUnique extends RvEntity<String> implements WithBuiltInFlag {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")
