@@ -36,12 +36,12 @@ public class UniqueConstraintSnapshotGenerator extends RivuletSnapshotGenerator 
         }
         for (RvUnique rvUnique : prototype.getUniques()) {
             UniqueConstraint uniqueConstraint = new UniqueConstraint();
-            uniqueConstraint.setName(rvUnique.getName());
+            uniqueConstraint.setName(rvUnique.getCode());
             uniqueConstraint.setRelation(table);
             uniqueConstraint.setClustered(false); // No way to set true via Hibernate
             int i = 0;
             for (RvUniqueColumn rvUniqueColumn : rvUnique.getUniqueColumns()) {
-                uniqueConstraint.addColumn(i++, new Column(rvUniqueColumn.getColumn().getName()).setRelation(table));
+                uniqueConstraint.addColumn(i++, new Column(rvUniqueColumn.getColumn().getCode()).setRelation(table));
             }
             Index index = getBackingIndex(uniqueConstraint, rvUnique);
             uniqueConstraint.setBackingIndex(index);
@@ -54,7 +54,7 @@ public class UniqueConstraintSnapshotGenerator extends RivuletSnapshotGenerator 
         index.setRelation(uniqueConstraint.getRelation());
         index.setColumns(uniqueConstraint.getColumns());
         index.setUnique(true);
-        index.setName(rvUnique.getBackingIndex().getName());
+        index.setName(rvUnique.getBackingIndex().getCode());
         return index;
     }
 

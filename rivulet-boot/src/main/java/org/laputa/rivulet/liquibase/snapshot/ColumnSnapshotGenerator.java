@@ -57,7 +57,7 @@ public class ColumnSnapshotGenerator extends RivuletSnapshotGenerator {
             }
             for (RvColumn rvColumn : prototype.getColumns()) {
                 Column column = new Column();
-                column.setName(rvColumn.getName());
+                column.setName(rvColumn.getCode());
                 column.setRelation((Table) foundObject);
                 snapshotColumn(column, snapshot);
                 ((Table) foundObject).getColumns().add(column);
@@ -72,7 +72,7 @@ public class ColumnSnapshotGenerator extends RivuletSnapshotGenerator {
             return;
         }
         for (RvColumn rvColumn : prototype.getColumns()) {
-            if (rvColumn.getName().equalsIgnoreCase(column.getName())) {
+            if (rvColumn.getCode().equalsIgnoreCase(column.getName())) {
                 String rvColumnDataType = rvColumn.getDataType();
                 String rvColumnDefaultValue = rvColumn.getDefaultValue();
                 Matcher defaultValueMatcher = Pattern.compile("(?i) DEFAULT\\s+(.*)").matcher(rvColumnDataType);
@@ -83,7 +83,7 @@ public class ColumnSnapshotGenerator extends RivuletSnapshotGenerator {
                 Integer sqlTypeCode = database.resolveSqlTypeCode(rvColumnDataType);
                 DataType dataType = toDataType(rvColumnDataType, sqlTypeCode);
                 if (dataType == null) {
-                    throw new DatabaseException("Unable to find column data type for column " + rvColumn.getName());
+                    throw new DatabaseException("Unable to find column data type for column " + rvColumn.getCode());
                 }
                 column.setType(dataType);
                 column.setRemarks(rvColumn.getRemark());

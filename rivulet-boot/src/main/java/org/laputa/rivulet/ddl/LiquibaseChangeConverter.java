@@ -37,7 +37,7 @@ public class LiquibaseChangeConverter {
 
     public ColumnConfig toColumnConfig(RvColumn rvColumn) {
         ColumnConfig columnConfig = new ColumnConfig();
-        columnConfig.setName(rvColumn.getName())
+        columnConfig.setName(rvColumn.getCode())
                 .setType(rvColumn.getDataType())
                 .setDefaultValue(rvColumn.getDefaultValue());
         return columnConfig;
@@ -45,82 +45,82 @@ public class LiquibaseChangeConverter {
 
     public AddColumnConfig addColumnConfig(RvColumn rvColumn) {
         AddColumnConfig config = new AddColumnConfig();
-        config.setName(rvColumn.getName()).setType(rvColumn.getDataType())
+        config.setName(rvColumn.getCode()).setType(rvColumn.getDataType())
                 .setDefaultValue(rvColumn.getDefaultValue());
         return config;
     }
 
     public AddForeignKeyConstraintChange addForeignKeyConstraint(RvForeignKey rvForeignKey) {
         AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();
-        change.setConstraintName(rvForeignKey.getName());
+        change.setConstraintName(rvForeignKey.getCode());
         change.setDeleteCascade(rvForeignKey.getCascadeDelete());
-        change.setReferencedTableName(rvForeignKey.getTargetPrototype().getName());
+        change.setReferencedTableName(rvForeignKey.getTargetPrototype().getCode());
         change.setReferencedColumnNames(rvForeignKey.getForeignKeyForeignColumns()
-                .stream().map(column -> column.getColumn().getName()).collect(Collectors.joining(",")));
-        change.setBaseTableName(rvForeignKey.getPrototype().getName());
+                .stream().map(column -> column.getColumn().getCode()).collect(Collectors.joining(",")));
+        change.setBaseTableName(rvForeignKey.getPrototype().getCode());
         change.setBaseColumnNames(rvForeignKey.getForeignKeyTargetColumns()
-                .stream().map(column -> column.getColumn().getName()).collect(Collectors.joining(",")));
+                .stream().map(column -> column.getColumn().getCode()).collect(Collectors.joining(",")));
         return change;
     }
 
     public DropForeignKeyConstraintChange dropForeignKeyConstraint(RvForeignKey rvForeignKey) {
         DropForeignKeyConstraintChange change = new DropForeignKeyConstraintChange();
-        change.setBaseTableName(rvForeignKey.getPrototype().getName());
-        change.setConstraintName(rvForeignKey.getName());
+        change.setBaseTableName(rvForeignKey.getPrototype().getCode());
+        change.setConstraintName(rvForeignKey.getCode());
         return change;
     }
 
     public AddPrimaryKeyChange addPrimaryKey(RvPrimaryKey rvPrimaryKey) {
         AddPrimaryKeyChange change = new AddPrimaryKeyChange();
-        change.setTableName(rvPrimaryKey.getPrototype().getName());
-        change.setConstraintName(rvPrimaryKey.getName());
+        change.setTableName(rvPrimaryKey.getPrototype().getCode());
+        change.setConstraintName(rvPrimaryKey.getCode());
         change.setColumnNames(rvPrimaryKey.getPrimaryKeyColumns()
-                .stream().map(column -> column.getColumn().getName()).collect(Collectors.joining(",")));
+                .stream().map(column -> column.getColumn().getCode()).collect(Collectors.joining(",")));
         return change;
     }
 
     public DropPrimaryKeyChange dropPrimaryKey(RvPrimaryKey rvPrimaryKey) {
         DropPrimaryKeyChange change = new DropPrimaryKeyChange();
-        change.setTableName(rvPrimaryKey.getPrototype().getName());
-        change.setConstraintName(rvPrimaryKey.getName());
+        change.setTableName(rvPrimaryKey.getPrototype().getCode());
+        change.setConstraintName(rvPrimaryKey.getCode());
         return change;
     }
 
     public AddNotNullConstraintChange addNotNullConstraint(RvNotNull rvNotNull) {
         AddNotNullConstraintChange change = new AddNotNullConstraintChange();
-        change.setTableName(rvNotNull.getPrototype().getName());
-        change.setConstraintName(rvNotNull.getName());
-        change.setColumnName(rvNotNull.getColumn().getName());
+        change.setTableName(rvNotNull.getPrototype().getCode());
+        change.setConstraintName(rvNotNull.getCode());
+        change.setColumnName(rvNotNull.getColumn().getCode());
         return change;
     }
 
     public DropNotNullConstraintChange dropNotNullConstraint(RvNotNull rvNotNull) {
         DropNotNullConstraintChange change = new DropNotNullConstraintChange();
-        change.setTableName(rvNotNull.getPrototype().getName());
-        change.setConstraintName(rvNotNull.getName());
+        change.setTableName(rvNotNull.getPrototype().getCode());
+        change.setConstraintName(rvNotNull.getCode());
         return change;
     }
 
     public AddUniqueConstraintChange addUniqueConstraint(RvUnique rvUnique) {
         AddUniqueConstraintChange change = new AddUniqueConstraintChange();
-        change.setTableName(rvUnique.getPrototype().getName());
-        change.setConstraintName(rvUnique.getName());
+        change.setTableName(rvUnique.getPrototype().getCode());
+        change.setConstraintName(rvUnique.getCode());
         change.setColumnNames(rvUnique.getUniqueColumns()
-                .stream().map(column -> column.getColumn().getName()).collect(Collectors.joining(",")));
+                .stream().map(column -> column.getColumn().getCode()).collect(Collectors.joining(",")));
         return change;
     }
 
     public DropUniqueConstraintChange dropUniqueConstraint(RvUnique rvUnique) {
         DropUniqueConstraintChange change = new DropUniqueConstraintChange();
-        change.setTableName(rvUnique.getPrototype().getName());
-        change.setConstraintName(rvUnique.getName());
+        change.setTableName(rvUnique.getPrototype().getCode());
+        change.setConstraintName(rvUnique.getCode());
         return change;
     }
 
     public CreateIndexChange createIndex(RvIndex rvIndex) {
         CreateIndexChange change = new CreateIndexChange();
-        change.setTableName(rvIndex.getPrototype().getName());
-        change.setIndexName(rvIndex.getName());
+        change.setTableName(rvIndex.getPrototype().getCode());
+        change.setIndexName(rvIndex.getCode());
         change.setColumns(rvIndex.getIndexColumns().stream().map(rvIndexColumn -> {
             RvColumn rvColumn = rvIndexColumn.getColumn();
             return addColumnConfig(rvColumn);
@@ -130,15 +130,15 @@ public class LiquibaseChangeConverter {
 
     public DropIndexChange dropIndex(RvIndex rvIndex) {
         DropIndexChange change = new DropIndexChange();
-        change.setTableName(rvIndex.getPrototype().getName());
-        change.setIndexName(rvIndex.getName());
+        change.setTableName(rvIndex.getPrototype().getCode());
+        change.setIndexName(rvIndex.getCode());
         return change;
     }
 
     public AddColumnChange addColumn(List<RvColumn> rvColumnList) {
         AddColumnChange change = new AddColumnChange();
         if (rvColumnList == null || rvColumnList.size() == 0) return change;
-        change.setTableName(rvColumnList.get(0).getPrototype().getName());
+        change.setTableName(rvColumnList.get(0).getPrototype().getCode());
         change.setColumns(rvColumnList.stream().map(rvColumn -> addColumnConfig(rvColumn))
                 .collect(Collectors.toList()));
         return change;
@@ -147,7 +147,7 @@ public class LiquibaseChangeConverter {
     public DropColumnChange dropColumn(List<RvColumn> rvColumnList) {
         DropColumnChange change = new DropColumnChange();
         if (rvColumnList == null || rvColumnList.size() == 0) return change;
-        change.setTableName(rvColumnList.get(0).getPrototype().getName());
+        change.setTableName(rvColumnList.get(0).getPrototype().getCode());
         change.setColumns(rvColumnList.stream().map(rvColumn -> addColumnConfig(rvColumn))
                 .collect(Collectors.toList()));
         return change;
@@ -155,7 +155,7 @@ public class LiquibaseChangeConverter {
 
     public CreateTableChange createTable(RvPrototype rvPrototype) {
         CreateTableChange change = new CreateTableChange();
-        change.setTableName(rvPrototype.getName());
+        change.setTableName(rvPrototype.getCode());
         change.setRemarks(rvPrototype.getRemark());
         change.setColumns(rvPrototype.getColumns().stream().map(rvColumn -> addColumnConfig(rvColumn))
                 .collect(Collectors.toList()));
@@ -164,7 +164,7 @@ public class LiquibaseChangeConverter {
 
     public DropTableChange dropTable(RvPrototype rvPrototype) {
         DropTableChange change = new DropTableChange();
-        change.setTableName(rvPrototype.getName());
+        change.setTableName(rvPrototype.getCode());
         return change;
     }
 

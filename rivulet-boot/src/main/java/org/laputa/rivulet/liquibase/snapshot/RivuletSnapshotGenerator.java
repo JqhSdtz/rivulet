@@ -87,7 +87,7 @@ public abstract class RivuletSnapshotGenerator implements SnapshotGenerator {
         RivuletDatabase database = (RivuletDatabase) snapshot.getDatabase();
         List<RvPrototype> prototypes = database.getPrototypes();
         for (RvPrototype prototype : prototypes) {
-            if (prototype.getName().equalsIgnoreCase(example.getName())) {
+            if (prototype.getCode().equalsIgnoreCase(example.getName())) {
                 return prototype;
             }
         }

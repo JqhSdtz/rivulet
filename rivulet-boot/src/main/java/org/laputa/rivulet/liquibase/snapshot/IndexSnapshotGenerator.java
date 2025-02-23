@@ -1,8 +1,6 @@
 package org.laputa.rivulet.liquibase.snapshot;
 
-import liquibase.Scope;
 import liquibase.exception.DatabaseException;
-import liquibase.ext.hibernate.GlobalSetting;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
@@ -59,11 +57,11 @@ public class IndexSnapshotGenerator extends RivuletSnapshotGenerator {
     private Index handleRvIndex(Relation table, RvIndex rvIndex) {
         Index index = new Index();
         index.setRelation(table);
-        index.setName(rvIndex.getName());
+        index.setName(rvIndex.getCode());
         index.setUnique(rvIndex.getUniqueIndex());
         for (RvIndexColumn rvIndexColumn : rvIndex.getIndexColumns()) {
             Boolean descending = rvIndexColumn.getColumn().getDescending();
-            Column column = new Column(rvIndexColumn.getColumn().getName());
+            Column column = new Column(rvIndexColumn.getColumn().getCode());
             index.getColumns().add(column.setRelation(table).setDescending(descending));
         }
         return index;

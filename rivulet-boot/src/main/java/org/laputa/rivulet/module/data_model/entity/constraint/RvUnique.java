@@ -17,7 +17,6 @@ import org.laputa.rivulet.module.data_model.entity.column_relation.RvUniqueColum
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.persistence.*;
 import org.laputa.rivulet.module.data_model.entity.inter.WithBuiltInFlag;
@@ -60,8 +59,8 @@ public class RvUnique extends RvEntity<String> implements WithBuiltInFlag {
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+    @Column(name = "code", nullable = false)
+    private String code;
 
     @JsonManagedReference("uniqueColumns")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "unique")

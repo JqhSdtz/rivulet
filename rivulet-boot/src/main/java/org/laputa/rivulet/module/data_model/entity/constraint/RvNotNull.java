@@ -14,7 +14,6 @@ import org.laputa.rivulet.module.data_model.entity.RvPrototype;
 
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import org.laputa.rivulet.module.data_model.entity.inter.WithBuiltInFlag;
 
@@ -51,8 +50,8 @@ public class RvNotNull extends RvEntity<String> implements WithBuiltInFlag {
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+    @Column(name = "code", nullable = false)
+    private String code;
 
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)

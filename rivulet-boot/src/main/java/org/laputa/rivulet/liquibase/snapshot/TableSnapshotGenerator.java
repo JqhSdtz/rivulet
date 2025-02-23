@@ -26,7 +26,7 @@ public class TableSnapshotGenerator extends RivuletSnapshotGenerator {
         if (prototype == null) {
             return example;
         }
-        Table table = new Table().setName(prototype.getName());
+        Table table = new Table().setName(prototype.getCode());
         table.setSchema(example.getSchema());
         if (prototype.getRemark() != null && !prototype.getRemark().isEmpty()) {
             table.setRemarks(prototype.getRemark());
@@ -49,7 +49,7 @@ public class TableSnapshotGenerator extends RivuletSnapshotGenerator {
     }
 
     private void addDatabaseObjectToSchema(RvPrototype join, Schema schema, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        Table joinTable = new Table().setName(join.getName());
+        Table joinTable = new Table().setName(join.getCode());
         joinTable.setSchema(schema);
         schema.addDatabaseObject(snapshotObject(joinTable, snapshot));
     }

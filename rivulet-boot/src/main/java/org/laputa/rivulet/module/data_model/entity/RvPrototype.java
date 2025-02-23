@@ -6,11 +6,13 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import liquibase.ext.hibernate.annotation.DefaultValue;
 import liquibase.ext.hibernate.annotation.TableComment;
+import liquibase.ext.hibernate.annotation.Title;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
@@ -39,20 +41,23 @@ import java.util.List;
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @DynamicInsert
 @DynamicUpdate
-@TableComment("数据模型")
+@Title("数据模型")
+@TableComment("数据模型和数据库表对应，包含属性、索引、外键等，用于描述一个结构化的数据")
 @Table(name = "rv_prototype")
 public class RvPrototype extends RvEntity<String> implements WithBuiltInFlag {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")
+    @Title("模型ID")
+    @Comment("模型ID使用UUID策略，生成的ID绝对唯一")
     @Column(name = "id", nullable = false, length = 64)
     private String id;
 
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+    @Column(name = "code", nullable = false)
+    private String code;
 
     @Column(name = "remark")
     private String remark;

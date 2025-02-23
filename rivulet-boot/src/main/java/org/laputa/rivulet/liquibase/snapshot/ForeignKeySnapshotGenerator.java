@@ -2,7 +2,6 @@ package org.laputa.rivulet.liquibase.snapshot;
 
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
-import liquibase.ext.hibernate.snapshot.HibernateSnapshotGenerator;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
@@ -37,24 +36,24 @@ public class ForeignKeySnapshotGenerator extends RivuletSnapshotGenerator {
         RivuletDatabase database = (RivuletDatabase) snapshot.getDatabase();
         for (RvPrototype prototype : database.getPrototypes()) {
             for (RvForeignKey rvForeignKey : prototype.getForeignKeys()) {
-                Table currentTable = new Table().setName(prototype.getName());
+                Table currentTable = new Table().setName(prototype.getCode());
                 currentTable.setSchema(database.getDefaultCatalogName(), database.getDefaultSchemaName());
                 RvPrototype targetPrototype = rvForeignKey.getTargetPrototype();
-                Table targetTable = new Table().setName(targetPrototype.getName());
+                Table targetTable = new Table().setName(targetPrototype.getCode());
                 targetTable.setSchema(database.getDefaultCatalogName(), database.getDefaultSchemaName());
                 ForeignKey fk = new ForeignKey();
-                fk.setName(rvForeignKey.getName());
+                fk.setName(rvForeignKey.getCode());
                 fk.setPrimaryKeyTable(targetTable);
                 fk.setForeignKeyTable(currentTable);
                 for (RvForeignKeyForeignColumn keyForeignColumn : rvForeignKey.getForeignKeyForeignColumns()) {
-                    fk.addForeignKeyColumn(new Column((keyForeignColumn.getColumn().getName())));
+                    fk.addForeignKeyColumn(new Column((keyForeignColumn.getColumn().getCode())));
                 }
                 for (RvForeignKeyTargetColumn keyTargetColumn : rvForeignKey.getForeignKeyTargetColumns()) {
-                    fk.addPrimaryKeyColumn(new Column((keyTargetColumn).getColumn().getName()));
+                    fk.addPrimaryKeyColumn(new Column((keyTargetColumn).getColumn().getCode()));
                 }
                 if (fk.getPrimaryKeyColumns() == null || fk.getPrimaryKeyColumns().isEmpty()) {
                     for (RvPrimaryKeyColumn primaryKeyColumn : targetPrototype.getPrimaryKey().getPrimaryKeyColumns()) {
-                        fk.addPrimaryKeyColumn(new Column(primaryKeyColumn.getColumn().getName()));
+                        fk.addPrimaryKeyColumn(new Column(primaryKeyColumn.getColumn().getCode()));
                     }
                 }
                 fk.setDeferrable(false);

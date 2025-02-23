@@ -1,9 +1,6 @@
 package org.laputa.rivulet.liquibase.snapshot;
 
-import liquibase.Scope;
 import liquibase.exception.DatabaseException;
-import liquibase.ext.hibernate.GlobalSetting;
-import liquibase.ext.hibernate.snapshot.HibernateSnapshotGenerator;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
@@ -48,15 +45,15 @@ public class PrimaryKeySnapshotGenerator extends RivuletSnapshotGenerator {
             return;
         }
         PrimaryKey pk = new PrimaryKey();
-        pk.setName(rvPrimaryKey.getName());
+        pk.setName(rvPrimaryKey.getCode());
         pk.setTable(table);
         for (RvPrimaryKeyColumn rvPrimaryKeyColumn : rvPrimaryKey.getPrimaryKeyColumns()) {
-            pk.getColumns().add(new Column(rvPrimaryKeyColumn.getColumn().getName()).setRelation(table));
+            pk.getColumns().add(new Column(rvPrimaryKeyColumn.getColumn().getCode()).setRelation(table));
         }
         table.setPrimaryKey(pk);
         Index index = new Index();
         RvIndex backingIndex = rvPrimaryKey.getBackingIndex();
-        index.setName(backingIndex.getName());
+        index.setName(backingIndex.getCode());
         index.setRelation(table);
         index.setColumns(pk.getColumns());
         index.setUnique(true);
