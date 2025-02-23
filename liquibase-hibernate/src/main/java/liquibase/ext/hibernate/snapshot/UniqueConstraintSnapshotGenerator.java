@@ -2,7 +2,10 @@ package liquibase.ext.hibernate.snapshot;
 
 import liquibase.Scope;
 import liquibase.exception.DatabaseException;
+import liquibase.ext.hibernate.DatabaseObjectAttrName;
 import liquibase.ext.hibernate.GlobalSetting;
+import liquibase.ext.hibernate.annotation.Title;
+import liquibase.ext.hibernate.util.IndexStoreUtil;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
@@ -13,6 +16,7 @@ import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtil;
 import org.hibernate.HibernateException;
 
+import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -47,9 +51,18 @@ public class UniqueConstraintSnapshotGenerator extends HibernateSnapshotGenerato
                 uniqueConstraint.setClustered(false); // No way to set true via Hibernate
 
                 int i = 0;
+                // !!!给unique设置title
+                StringBuilder stringBuilder = new StringBuilder();
                 for (var hibernateColumn : hibernateUnique.getColumns()) {
                     uniqueConstraint.addColumn(i++, new Column(hibernateColumn.getName()).setRelation(table));
+                    Field columnField = getColumnField(table.getName(), hibernateColumn.getName());
+                    if (columnField != null && columnField.isAnnotationPresent(Title.class)) {
+                        Title title = columnField.getAnnotation(Title.class);
+                        stringBuilder.append(title.value()).append('、');
+                    }
                 }
+                stringBuilder.append("的唯一性约束");
+                uniqueConstraint.setAttribute(DatabaseObjectAttrName.Title, stringBuilder.toString());
 
                 Index index = getBackingIndex(uniqueConstraint, hibernateTable, snapshot);
                 uniqueConstraint.setBackingIndex(index);
@@ -77,6 +90,12 @@ public class UniqueConstraintSnapshotGenerator extends HibernateSnapshotGenerato
                     }
                     table.getUniqueConstraints().add(uniqueConstraint);
 
+                    //!!!给unique设置title
+                    Field columnField = getColumnField(table.getName(), column.getName());
+                    if (columnField != null && columnField.isAnnotationPresent(Title.class)) {
+                        Title title = columnField.getAnnotation(Title.class);
+                        uniqueConstraint.setAttribute(DatabaseObjectAttrName.Title, title.value() + "的唯一性约束");
+                    }
                     Index index = getBackingIndex(uniqueConstraint, hibernateTable, snapshot);
                     uniqueConstraint.setBackingIndex(index);
 
@@ -110,11 +129,25 @@ public class UniqueConstraintSnapshotGenerator extends HibernateSnapshotGenerato
     }
 
     protected Index getBackingIndex(UniqueConstraint uniqueConstraint, org.hibernate.mapping.Table hibernateTable, DatabaseSnapshot snapshot) {
-        Index index = new Index();
-        index.setRelation(uniqueConstraint.getRelation());
+        // !!!不知道为啥，之前没有将这个索引加到table里，修改了一下，都加到table的索引里
+        Index index;
+        // 如果此前已经有对应的index，则直接获取原本的index。该index可能是由foreignKey或primaryKey创建而来
+        Index oriIndex = IndexStoreUtil.getIndex(uniqueConstraint.getColumns());
+        if (oriIndex != null) {
+            oriIndex.setUnique(true);
+            index = oriIndex;
+        } else {
+            index = new Index();
+            IndexStoreUtil.addIndex(uniqueConstraint.getColumns(), index);
+        }
+        Table table = (Table) uniqueConstraint.getRelation();
+        index.setRelation(table);
         index.setColumns(uniqueConstraint.getColumns());
         index.setUnique(true);
-        index.setName(String.format("%s_%s_IX",hibernateTable.getName(), StringUtil.randomIdentifer(4)));
+        index.setName(String.format("%s_%s_IX",hibernateTable.getName(), StringUtil.randomIdentifier(4)));
+        index.setAttribute(DatabaseObjectAttrName.Title, uniqueConstraint.getAttribute(DatabaseObjectAttrName.Title, String.class) + "的索引");
+        table.getIndexes().add(index);
+
 
         return index;
     }

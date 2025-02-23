@@ -3,7 +3,9 @@ package liquibase.ext.hibernate.snapshot;
 import liquibase.Scope;
 import liquibase.exception.DatabaseException;
 import liquibase.ext.hibernate.GlobalSetting;
+import liquibase.ext.hibernate.DatabaseObjectAttrName;
 import liquibase.ext.hibernate.annotation.TableComment;
+import liquibase.ext.hibernate.annotation.Title;
 import liquibase.ext.hibernate.database.HibernateDatabase;
 import liquibase.ext.hibernate.snapshot.extension.ExtendedSnapshotGenerator;
 import liquibase.ext.hibernate.snapshot.extension.TableGeneratorSnapshotGenerator;
@@ -67,6 +69,10 @@ public class TableSnapshotGenerator extends HibernateSnapshotGenerator {
             TableRemarkMetaInfo metaInfo = new TableRemarkMetaInfo();
             metaInfo.setBuiltIn(true);
             table.setRemarks(TableRemarkMetaInfoUtil.setMetaInfo(table.getRemarks(), metaInfo));
+        }
+        if (tableClass != null && tableClass.isAnnotationPresent(Title.class)) {
+            Title title = (Title) tableClass.getAnnotation(Title.class);
+            table.setAttribute(DatabaseObjectAttrName.Title, title.value());
         }
 
         return table;

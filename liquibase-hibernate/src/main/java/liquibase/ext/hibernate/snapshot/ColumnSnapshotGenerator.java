@@ -7,8 +7,10 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import liquibase.ext.hibernate.DatabaseObjectAttrName;
 import liquibase.ext.hibernate.GlobalSetting;
 import liquibase.ext.hibernate.annotation.DefaultValue;
+import liquibase.ext.hibernate.annotation.Title;
 import org.hibernate.boot.spi.MetadataImplementor;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.PostgreSQLDialect;
@@ -111,6 +113,10 @@ public class ColumnSnapshotGenerator extends HibernateSnapshotGenerator {
                 if (columnField != null && columnField.isAnnotationPresent(DefaultValue.class)) {
                     DefaultValue annotatedDefaultValue = columnField.getAnnotation(DefaultValue.class);
                     defaultValue = annotatedDefaultValue.value();
+                }
+                if (columnField != null && columnField.isAnnotationPresent(Title.class)) {
+                    Title title = columnField.getAnnotation(Title.class);
+                    column.setAttribute(DatabaseObjectAttrName.Title, title.value());
                 }
                 Matcher defaultValueMatcher = Pattern.compile("(?i) DEFAULT\\s+(.*)").matcher(hibernateType);
                 if (defaultValueMatcher.find()) {

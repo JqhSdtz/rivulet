@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Table;
 import liquibase.ext.hibernate.annotation.DefaultValue;
 import liquibase.ext.hibernate.annotation.TableComment;
 import liquibase.ext.hibernate.annotation.Title;
@@ -12,10 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import org.hibernate.annotations.Comment;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.*;
 import org.laputa.rivulet.common.constant.Strings;
 import org.laputa.rivulet.common.entity.RvEntity;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvForeignKey;
@@ -24,7 +23,7 @@ import org.laputa.rivulet.module.data_model.entity.constraint.RvPrimaryKey;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvUnique;
 
 import jakarta.persistence.*;
-import org.laputa.rivulet.module.data_model.entity.inter.WithBuiltInFlag;
+import org.laputa.rivulet.module.data_model.entity.inter.DataModelEntityInterface;
 
 import java.util.List;
 
@@ -35,7 +34,6 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@Accessors(chain = true)
 @ToString
 @RequiredArgsConstructor
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
@@ -44,31 +42,45 @@ import java.util.List;
 @Title("数据模型")
 @TableComment("数据模型和数据库表对应，包含属性、索引、外键等，用于描述一个结构化的数据")
 @Table(name = "rv_prototype")
-public class RvPrototype extends RvEntity<String> implements WithBuiltInFlag {
+public class RvPrototype extends RvEntity<String> implements DataModelEntityInterface {
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid")
+    @UuidGenerator
     @Title("模型ID")
     @Comment("模型ID使用UUID策略，生成的ID绝对唯一")
     @Column(name = "id", nullable = false, length = 64)
     private String id;
 
+    @Title("模型名称")
+    @Comment("模型名称在数据库中并不存在对应的内容，是为了便于中文展示而单独设置的")
     @Column(name = "title", nullable = false)
     private String title;
 
+    @Title("模型编码")
+    @Comment("模型编码对应数据库中表的名称，即表的Name，但对于应用来说叫编码更为合适，因为不会直接在应用中展示这个名字")
     @Column(name = "code", nullable = false)
     private String code;
 
-    @Column(name = "remark")
-    private String remark;
+    @Title("系统内置")
+    @Comment("系统内置标记用于标记该模型是否是系统内置")
+    @Column(name = "built_in", nullable = false)
+    @DefaultValue(Strings.FALSE)
+    private Boolean builtIn;
 
+    @Title("同步标记")
+    @Comment("同步标记用于标识在系统中展示的模型结构是否已经同步到数据库表当中")
     @Column(name = "db_sync_flag", nullable = false)
     @DefaultValue(Strings.FALSE)
     private Boolean syncFlag;
 
-    @Column(name = "built_in", nullable = false)
-    @DefaultValue(Strings.FALSE)
-    private Boolean builtIn;
+    @Title("备注")
+    @Comment("模型备注对应数据库中表的注释，即表的Comment。对于应用内置的模型，备注中会有一段用于区分是否内置的标识。")
+    @Column(name = "remark")
+    private String remark;
+
+    @Column(name = "order_num")
+    @Title("排序号")
+    @Comment("排序号用于按设定的顺序展示属性，与数据库中实际的顺序无关联")
+    private Integer orderNum;
 
     @JsonManagedReference("columns")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "prototype")
@@ -97,7 +109,7 @@ public class RvPrototype extends RvEntity<String> implements WithBuiltInFlag {
     }
 
     @JsonManagedReference("primaryKey")
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "prototype")
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "prototype")
     private RvPrimaryKey primaryKey;
 
     @JsonSetter("primaryKey")

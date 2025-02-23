@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import liquibase.ext.hibernate.annotation.DefaultValue;
+import liquibase.ext.hibernate.annotation.TableComment;
+import liquibase.ext.hibernate.annotation.Title;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -19,7 +21,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.*;
-import org.laputa.rivulet.module.data_model.entity.inter.WithBuiltInFlag;
+import org.laputa.rivulet.module.data_model.entity.inter.DataModelEntityInterface;
 
 import java.util.List;
 
@@ -34,11 +36,14 @@ import java.util.List;
 @RequiredArgsConstructor
 @DynamicInsert
 @DynamicUpdate
+@Title("主键")
+@TableComment("数据模型的主键对应数据库表的主键，用于唯一标识一条数据记录，主键不可更改且一定唯一")
 @Table(name = "rv_primary_key")
-public class RvPrimaryKey extends RvEntity<String> implements WithBuiltInFlag {
+public class RvPrimaryKey extends RvEntity<String> implements DataModelEntityInterface {
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid")
+    @UuidGenerator
+    @Title("主键ID")
+    @Comment("主键ID使用UUID策略，生成的ID绝对唯一")
     @Column(name = "id", nullable = false, length = 64)
     private String id;
 
@@ -49,18 +54,36 @@ public class RvPrimaryKey extends RvEntity<String> implements WithBuiltInFlag {
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     @OneToOne
+    @Title("对应模型ID")
+    @Comment("主键所对应的数据模型的ID，使用外键关联")
     @JoinColumn(name = "prototype_id")
     private RvPrototype prototype;
 
+    @Title("系统内置")
+    @Comment("系统内置标记用于标记该主键是否是系统内置")
     @Column(name = "built_in", nullable = false)
     @DefaultValue(Strings.FALSE)
     private Boolean builtIn;
 
+    @Title("主键名称")
+    @Comment("主键名称在数据库中并不存在对应的内容，是为了便于中文展示而单独设置的")
     @Column(name = "title", nullable = false)
     private String title;
 
+    @Title("主键编码")
+    @Comment("主键编码对应数据库中主键的名称，即主键的Name")
     @Column(name = "code", nullable = false)
     private String code;
+
+    @Title("备注")
+    @Comment("主键备注对应数据库中主键的注释，即主键的Comment")
+    @Column(name = "remark")
+    private String remark;
+
+    @Title("排序号")
+    @Comment("排序号用于按设定的顺序展示主键，与数据库中实际的顺序无关联")
+    @Column(name = "order_num")
+    private Integer orderNum;
 
     @JsonManagedReference("primaryKeyColumns")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "primaryKey")
@@ -70,12 +93,6 @@ public class RvPrimaryKey extends RvEntity<String> implements WithBuiltInFlag {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "backing_index_id")
     private RvIndex backingIndex;
-
-    @Column(name = "remark")
-    private String remark;
-
-    @Column(name = "order_num")
-    private Integer orderNum;
 
     @JsonSetter("primaryKeyColumns")
     public void setPrimaryKeyColumns(List<RvPrimaryKeyColumn> primaryKeyColumns) {

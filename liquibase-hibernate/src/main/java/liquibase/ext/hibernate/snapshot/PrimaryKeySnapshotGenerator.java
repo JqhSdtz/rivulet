@@ -2,6 +2,7 @@ package liquibase.ext.hibernate.snapshot;
 
 import liquibase.Scope;
 import liquibase.exception.DatabaseException;
+import liquibase.ext.hibernate.DatabaseObjectAttrName;
 import liquibase.ext.hibernate.GlobalSetting;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
@@ -42,6 +43,9 @@ public class PrimaryKeySnapshotGenerator extends HibernateSnapshotGenerator {
             if (hibernatePrimaryKey != null) {
                 PrimaryKey pk = new PrimaryKey();
                 String hbnTableName = hibernateTable.getName();
+                // !!!设置primaryKey的title
+                String tableTitle = table.getAttribute(DatabaseObjectAttrName.Title, String.class);
+                pk.setAttribute(DatabaseObjectAttrName.Title, tableTitle + "的主键");
 
                 String pkName = PK_NAME_ALIAS.toAliasString(hbnTableName);
                 if (pkName.length() == PK_NAME_LENGTH) {
@@ -62,6 +66,8 @@ public class PrimaryKeySnapshotGenerator extends HibernateSnapshotGenerator {
                 table.setPrimaryKey(pk);
                 Index index = new Index();
                 index.setName("IX_" + pk.getName());
+                // !!!设置index的title
+                index.setAttribute(DatabaseObjectAttrName.Title, tableTitle + "的主键对应的索引");
                 index.setRelation(table);
                 index.setColumns(pk.getColumns());
                 index.setUnique(true);

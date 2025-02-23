@@ -2,11 +2,15 @@ package liquibase.ext.hibernate.snapshot;
 
 import liquibase.Scope;
 import liquibase.exception.DatabaseException;
+import liquibase.ext.hibernate.DatabaseObjectAttrName;
 import liquibase.ext.hibernate.GlobalSetting;
+import liquibase.ext.hibernate.annotation.Title;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
+
+import java.lang.reflect.Field;
 
 public class IndexSnapshotGenerator extends HibernateSnapshotGenerator {
 
@@ -76,6 +80,19 @@ public class IndexSnapshotGenerator extends HibernateSnapshotGenerator {
                     ? Boolean.FALSE
                     : (HIBERNATE_ORDER_DESC.equals(hibernateOrder) ? Boolean.TRUE : null);
             index.getColumns().add(new Column(hibernateColumn.getName()).setRelation(table).setDescending(descending));
+        }
+        // !!!获取column的title，以设置index的title
+        if (!index.getAttributes().contains(DatabaseObjectAttrName.Title)) {
+            StringBuilder stringBuilder = new StringBuilder();
+            for (var hibernateColumn : hibernateIndex.getColumns()) {
+                Field columnField = getColumnField(table.getName(), hibernateColumn.getName());
+                if (columnField != null && columnField.isAnnotationPresent(Title.class)) {
+                    Title title = columnField.getAnnotation(Title.class);
+                    stringBuilder.append(title.value()).append('、');
+                }
+            }
+            stringBuilder.append("的索引");
+            index.setAttribute(DatabaseObjectAttrName.Title, stringBuilder.toString());
         }
         return index;
     }

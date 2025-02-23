@@ -31,6 +31,7 @@ public class ChangedColumnChangeGenerator extends liquibase.diff.output.changelo
 
     @Override
     protected void handleTypeDifferences(Column column, ObjectDifferences differences, DiffOutputControl control, List<Change> changes, Database referenceDatabase, Database comparisonDatabase) {
+        DifferenceFilter.filter(differences);
         if (referenceDatabase instanceof HibernateDatabase || comparisonDatabase instanceof HibernateDatabase) {
             handleSizeChange(column, differences, control, changes, referenceDatabase, comparisonDatabase);
         } else {

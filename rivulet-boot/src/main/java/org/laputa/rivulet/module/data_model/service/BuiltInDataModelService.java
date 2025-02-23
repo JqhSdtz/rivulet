@@ -47,6 +47,7 @@ import org.laputa.rivulet.module.data_model.entity.constraint.RvForeignKey;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvNotNull;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvPrimaryKey;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvUnique;
+import org.laputa.rivulet.module.data_model.entity.inter.DataModelEntityInterface;
 import org.laputa.rivulet.module.data_model.repository.*;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
@@ -64,6 +65,7 @@ import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static liquibase.structure.core.ForeignKeyConstraintType.importedKeyCascade;
@@ -160,8 +162,8 @@ public class BuiltInDataModelService implements ApplicationRunner {
         // springboot 3.4.2版本中没有SpringPhysicalNamingStrategy 参考https://github.com/openrewrite/rewrite-spring/issues/339
         hibernateProperties.put("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
         hibernateProperties.put("hibernate.implicit_naming_strategy", "org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy");
-        // temp.use_jdbc_metadata_defaults属性用于跳过数据库连接检查，因为这里的reference，即hibernate不是真正的数据库
-        hibernateProperties.put("hibernate.temp.use_jdbc_metadata_defaults", "false");
+        // boot.allow_jdbc_metadata_access属性用于跳过数据库连接检查，因为这里的reference，即hibernate不是真正的数据库
+        hibernateProperties.put("hibernate.boot.allow_jdbc_metadata_access", "false");
         // 禁止liquibase-hibernate显示found column/index/...的信息，太多了
         hibernateProperties.put("liquibase.show_found_info", "false");
         hibernateProperties.put("liquibase.show_converted_info", "false");
@@ -304,20 +306,29 @@ public class BuiltInDataModelService implements ApplicationRunner {
                 rvPrototypeMap.put(table.getName(), new RvPrototype());
             }
         });
-        tableSet.forEach(table -> toSaveRvPrototypeList.add(buildRvPrototype(table, rvPrototypeMap)));
+        AtomicInteger index = new AtomicInteger();
+        tableSet.forEach(table -> toSaveRvPrototypeList.add(buildRvPrototype(table, index.getAndIncrement(), rvPrototypeMap)));
         // 每次启动都全量覆盖保存内部数据模型
         rvPrototypeRepository.saveAll(toSaveRvPrototypeList);
         gitService.addBuiltInRvPrototypes(toSaveRvPrototypeList);
         return Result.succeed();
     }
 
-    private RvPrototype buildRvPrototype(Table table, Map<String, RvPrototype> rvPrototypeMap) {
-        RvPrototype rvPrototype = rvPrototypeMap.get(table.getName());
-        rvPrototype.setCode(table.getName());
-        rvPrototype.setBuiltIn(true);
-        if (rvPrototype.getTitle() == null) {
-            rvPrototype.setTitle(table.getAttribute(DatabaseObjectAttrName.Title, String.class));
+    private void setCodeAndTitleAndBuiltIn(DataModelEntityInterface dataModelEntity, DatabaseObject databaseObject) {
+        dataModelEntity.setCode(databaseObject.getName());
+        if (dataModelEntity.getTitle() == null) {
+            dataModelEntity.setTitle(databaseObject.getAttribute(DatabaseObjectAttrName.Title, String.class));
         }
+        if (dataModelEntity.getTitle() == null) {
+            dataModelEntity.setTitle(databaseObject.getName());
+        }
+        dataModelEntity.setBuiltIn(true);
+    }
+
+    private RvPrototype buildRvPrototype(Table table, int tableIndex, Map<String, RvPrototype> rvPrototypeMap) {
+        RvPrototype rvPrototype = rvPrototypeMap.get(table.getName());
+        setCodeAndTitleAndBuiltIn(rvPrototype, table);
+        rvPrototype.setOrderNum(tableIndex);
         if (rvPrototype.getRemark() == null) {
             rvPrototype.setRemark(table.getRemarks());
         }
@@ -428,8 +439,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
             rvColumn = new RvColumn();
             rvColumnMap.put(column.getName(), rvColumn);
         }
-        rvColumn.setBuiltIn(true);
-        rvColumn.setCode(column.getName());
+        setCodeAndTitleAndBuiltIn(rvColumn, column);
         rvColumn.setDataType(column.getType().toString());
         rvColumn.setDefaultValue(String.valueOf(column.getDefaultValue()));
         rvColumn.setNullable(column.isNullable());
@@ -437,9 +447,6 @@ public class BuiltInDataModelService implements ApplicationRunner {
         if (column.isAutoIncrement()) {
             rvColumn.setIncrementBy(column.getAutoIncrementInformation().getIncrementBy());
             rvColumn.setStartWith(column.getAutoIncrementInformation().getStartWith());
-        }
-        if (rvColumn.getTitle() == null) {
-            rvColumn.setTitle(column.getAttribute(DatabaseObjectAttrName.Title, String.class));
         }
         if (rvColumn.getOrderNum() == null) {
             rvColumn.setOrderNum(column.getOrder());
@@ -460,11 +467,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
             rvIndex = new RvIndex();
             rvIndexMap.put(index.getName(), rvIndex);
         }
-        rvIndex.setBuiltIn(true);
-        if (rvIndex.getTitle() == null) {
-            rvIndex.setTitle(index.getAttribute(DatabaseObjectAttrName.Title, String.class));
-        }
-        rvIndex.setCode(index.getName());
+        setCodeAndTitleAndBuiltIn(rvIndex, index);
         rvIndex.setUniqueIndex(index.isUnique());
         final RvIndex targetRvIndex = rvIndex;
         rvIndex.setIndexColumns(Streams.mapWithIndex(index.getColumns().stream(), (column, idx) -> {
@@ -494,11 +497,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
         if (rvPrimaryKey == null) {
             rvPrimaryKey = new RvPrimaryKey();
         }
-        rvPrimaryKey.setBuiltIn(true);
-        if (rvPrimaryKey.getTitle() == null) {
-            rvPrimaryKey.setTitle(primaryKey.getAttribute(DatabaseObjectAttrName.Title, String.class));
-        }
-        rvPrimaryKey.setCode(primaryKey.getName());
+        setCodeAndTitleAndBuiltIn(rvPrimaryKey, primaryKey);
         if (primaryKey.getBackingIndex() != null) {
             rvPrimaryKey.setBackingIndex(rvIndexMap.get(primaryKey.getBackingIndex().getName()));
         }
@@ -529,11 +528,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
             rvForeignKey = new RvForeignKey();
             rvForeignKeyMap.put(foreignKey.getName(), rvForeignKey);
         }
-        rvForeignKey.setBuiltIn(true);
-        if (rvForeignKey.getTitle() == null) {
-            rvForeignKey.setTitle(foreignKey.getAttribute(DatabaseObjectAttrName.Title, String.class));
-        }
-        rvForeignKey.setCode(foreignKey.getName());
+        setCodeAndTitleAndBuiltIn(rvForeignKey, foreignKey);
         // 是否级联删除
         rvForeignKey.setCascadeDelete(importedKeyCascade.equals(foreignKey.getDeleteRule()));
         if (foreignKey.getBackingIndex() != null) {
@@ -583,11 +578,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
             rvUnique = new RvUnique();
             rvUniqueMap.put(uniqueConstraint.getName(), rvUnique);
         }
-        rvUnique.setBuiltIn(true);
-        if (rvUnique.getTitle() == null) {
-            rvUnique.setTitle(uniqueConstraint.getAttribute(DatabaseObjectAttrName.Title, String.class));
-        }
-        rvUnique.setCode(uniqueConstraint.getColumnNames());
+        setCodeAndTitleAndBuiltIn(rvUnique, uniqueConstraint);
         if (uniqueConstraint.getBackingIndex() != null) {
             rvUnique.setBackingIndex(rvIndexMap.get(uniqueConstraint.getBackingIndex().getName()));
         }
@@ -617,12 +608,15 @@ public class BuiltInDataModelService implements ApplicationRunner {
             rvNotNull = new RvNotNull();
             rvNotNullMap.put(notNullConstraint.getConstraintName(), rvNotNull);
         }
+        // NotNullConstraint比较特殊，不是DatabaseObject的子类
         rvNotNull.setBuiltIn(true);
-        if (rvNotNull.getTitle() == null) {
-            rvNotNull.setTitle(notNullConstraint.getConstraintName());
+        if (rvNotNull.getCode() == null) {
+            rvNotNull.setCode(notNullConstraint.getConstraintName());
         }
         String columnName = notNullConstraint.getColumnName();
-        rvNotNull.setCode(columnName);
+        if (rvNotNull.getTitle() == null) {
+            rvNotNull.setTitle(columnName);
+        }
         rvNotNull.setColumn(rvColumnMap.get(columnName));
         return rvNotNull;
     }

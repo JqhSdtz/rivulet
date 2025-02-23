@@ -2,11 +2,14 @@ package liquibase.ext.hibernate.snapshot;
 
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
+import liquibase.ext.hibernate.DatabaseObjectAttrName;
 import liquibase.ext.hibernate.database.HibernateDatabase;
+import liquibase.ext.hibernate.util.IndexStoreUtil;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import org.hibernate.boot.spi.MetadataImplementor;
 
@@ -35,12 +38,8 @@ public class ForeignKeySnapshotGenerator extends HibernateSnapshotGenerator {
             MetadataImplementor metadata = (MetadataImplementor) database.getMetadata();
 
             Collection<org.hibernate.mapping.Table> tmapp = metadata.collectTableMappings();
-            Iterator<org.hibernate.mapping.Table> tableMappings = tmapp.iterator();
-            while (tableMappings.hasNext()) {
-                org.hibernate.mapping.Table hibernateTable = (org.hibernate.mapping.Table) tableMappings.next();
-                Iterator fkIterator = hibernateTable.getForeignKeyIterator();
-                while (fkIterator.hasNext()) {
-                    org.hibernate.mapping.ForeignKey hibernateForeignKey = (org.hibernate.mapping.ForeignKey) fkIterator.next();
+            for (org.hibernate.mapping.Table hibernateTable : tmapp) {
+                for (var hibernateForeignKey : hibernateTable.getForeignKeys().values()) {
                     Table currentTable = new Table().setName(hibernateTable.getName());
                     currentTable.setSchema(hibernateTable.getCatalog(), hibernateTable.getSchema());
 
@@ -50,6 +49,11 @@ public class ForeignKeySnapshotGenerator extends HibernateSnapshotGenerator {
 
                     if (hibernateForeignKey.isCreationEnabled() && hibernateForeignKey.isPhysicalConstraint()) {
                         ForeignKey fk = new ForeignKey();
+                        // !!!设置foreignKey的title
+                        String currentTableTitle = currentTable.getAttribute(DatabaseObjectAttrName.Title, String.class);
+                        String referencedTableTitle = referencedTable.getAttribute(DatabaseObjectAttrName.Title, String.class);
+                        fk.setAttribute(DatabaseObjectAttrName.Title, "从" + currentTableTitle + "到" + referencedTableTitle + "的外键关联");
+
                         fk.setName(hibernateForeignKey.getName());
                         fk.setPrimaryKeyTable(referencedTable);
                         fk.setForeignKeyTable(currentTable);
@@ -68,12 +72,24 @@ public class ForeignKeySnapshotGenerator extends HibernateSnapshotGenerator {
                         fk.setDeferrable(false);
                         fk.setInitiallyDeferred(false);
 
-//			Index index = new Index();
-//			index.setName("IX_" + fk.getName());
-//			index.setTable(fk.getForeignKeyTable());
-//			index.setColumns(fk.getForeignKeyColumns());
-//			fk.setBackingIndex(index);
-//			table.getIndexes().add(index);
+                        // !!!这段原来被注释掉了，但是我觉得为外键创建索引还是有必要的
+                        Index index;
+                        // 如果此前已经有对应的index，则直接获取原本的index。该index可能是由foreignKey或primaryKey创建而来
+                        Index oriIndex = IndexStoreUtil.getIndex(fk.getForeignKeyColumns());
+                        if (oriIndex != null) {
+                            index = oriIndex;
+                        } else {
+                            index = new Index();
+                            index.setName("IX_" + fk.getName());
+                            index.setAttribute(DatabaseObjectAttrName.Title, fk.getAttribute(DatabaseObjectAttrName.Title, String.class) + "的索引");
+                            index.setRelation(fk.getForeignKeyTable());
+                            index.setColumns(fk.getForeignKeyColumns());
+                            // unique默认为false，如果有唯一性约束的话，在UniqueConstrainSnapshotGenerator里会拿出来这个索引并修改unique值
+                            index.setUnique(false);
+                            IndexStoreUtil.addIndex(fk.getForeignKeyColumns(), index);
+                            table.getIndexes().add(index);
+                        }
+                        fk.setBackingIndex(index);
 
                         if (DatabaseObjectComparatorFactory.getInstance().isSameObject(currentTable, table, null, database)) {
                             table.getOutgoingForeignKeys().add(fk);

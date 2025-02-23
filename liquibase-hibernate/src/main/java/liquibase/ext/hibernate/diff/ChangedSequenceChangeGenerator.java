@@ -43,6 +43,7 @@ public class ChangedSequenceChangeGenerator extends liquibase.diff.output.change
     @Override
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control,
             Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
+        DifferenceFilter.filter(differences);
         if (!(referenceDatabase instanceof HibernateDatabase || comparisonDatabase instanceof HibernateDatabase)) {
             return super.fixChanged(changedObject, differences, control, referenceDatabase, comparisonDatabase, chain);
         }

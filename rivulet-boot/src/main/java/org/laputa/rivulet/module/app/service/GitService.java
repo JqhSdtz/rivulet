@@ -88,6 +88,7 @@ public class GitService implements ApplicationRunner {
             String filePath = "/prototypes/builtIn/" + rvPrototype.getCode() + ".js";
             File rvPrototypeFile = FileUtil.touch(FileUtil.normalize(gitProperty.getLocalDir() + File.separator + filePath));
             String content = rvPrototype.getTitle();
+            if (content == null) content = rvPrototype.getCode();
             FileUtil.writeString(content, rvPrototypeFile, StandardCharsets.UTF_8);
             addCommand.addFilepattern(filePath);
         });
