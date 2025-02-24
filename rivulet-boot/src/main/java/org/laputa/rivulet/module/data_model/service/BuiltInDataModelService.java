@@ -144,14 +144,21 @@ public class BuiltInDataModelService implements ApplicationRunner {
     }
 
     @SneakyThrows
-    public Result<Void> confirmUpdateStructureSql(String key) {
+    public Result<String> confirmUpdateStructureSql(String key) {
         String confirmKey = confirmKeyBucket.get();
         if (confirmKey == null) {
-            return Result.fail("ConfirmKeyExpired", "确认密钥已过期，请重启服务");
+            return Result.fail("ConfirmKeyExpired", "确认密钥已过期，请重启服务").ofClass(String.class);
         } else if (!confirmKey.equals(key)) {
-            return Result.fail("WrongConfirmKey", "确认密钥不正确");
+            return Result.fail("WrongConfirmKey", "确认密钥不正确").ofClass(String.class);
         }
         doStructureUpdate();
+        refreshStructureUpdateSql();
+        if (!appState.isBuiltInDataModelSynced())  {
+            String currentStructureUpdateSql = getCurrentStructureUpdateSql();
+            Result<String> updateStructureResult = Result.fail(String.class, "requireConfirmUpdateSql", "需要确认内部数据模型更新的SQL");
+            updateStructureResult.setPayload(currentStructureUpdateSql);
+            return updateStructureResult;
+        }
         return Result.succeedWithMessage("内部数据模型更新成功");
     }
 

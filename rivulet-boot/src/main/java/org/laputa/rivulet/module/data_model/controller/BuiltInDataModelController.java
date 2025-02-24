@@ -18,7 +18,7 @@ public class BuiltInDataModelController {
     private BuiltInDataModelService builtInDataModelService;
 
     @PostMapping("/confirmUpdateSql")
-    public Result<Void> confirmStructureUpdateSql(@RequestBody Map<String, String> params) {
+    public Result<String> confirmStructureUpdateSql(@RequestBody Map<String, String> params) {
         return builtInDataModelService.confirmUpdateStructureSql(params.get("confirmKey"));
     }
 }

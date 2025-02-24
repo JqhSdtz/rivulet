@@ -31,6 +31,7 @@ const ConfirmUpdateSqlModal = (props: {
     onUpdateSucceed: () => void
 }) => {
     const rvModal = useRvModal();
+    const [displaySql, setDisplaySql] = useState<string>(props.sql);
     const [isModalOpen, setModalOpen] = useState<boolean>(true);
     const [confirmKey, setConfirmKey] = useState<string>();
     const [inputStatus, setInputStatus] = useState<InputStatus>('');
@@ -44,6 +45,8 @@ const ConfirmUpdateSqlModal = (props: {
             if (confirmResult.successful) {
                 setModalOpen(false);
                 props.onUpdateSucceed();
+            } else if (confirmResult.errorCode === 'requireConfirmUpdateSql') {
+                setDisplaySql(confirmResult.payload);
             }
             rvModal.result(confirmResult);
         }
@@ -60,7 +63,7 @@ const ConfirmUpdateSqlModal = (props: {
             onOk={onOk}
         >
             <SyntaxHighlighter language="sql" wrapLongLines={true}>
-                {props.sql}
+                {displaySql}
             </SyntaxHighlighter>
             <Input placeholder="请输入确认密钥" status={inputStatus} maxLength={64} value={confirmKey}
                    onChange={e => setConfirmKey(e.target.value)}/>
