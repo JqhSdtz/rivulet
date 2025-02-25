@@ -48,7 +48,7 @@ public class RvPrimaryKeyColumn extends RvEntity<String> {
     @JsonBackReference("primaryKeyColumns")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @Title("对应主键ID")
     @Comment("该关联记录所对应的主键的ID，使用外键关联")
     @JoinColumn(name = "primary_key_id")

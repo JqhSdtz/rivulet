@@ -48,7 +48,7 @@ public class RvIndexColumn extends RvEntity<String> {
     @JsonBackReference("indexColumns")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @Title("对应索引ID")
     @Comment("该关联记录所对应的索引的ID，使用外键关联")
     @JoinColumn(name = "index_id")

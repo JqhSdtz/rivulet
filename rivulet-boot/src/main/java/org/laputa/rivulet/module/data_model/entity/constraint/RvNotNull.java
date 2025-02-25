@@ -1,6 +1,7 @@
 package org.laputa.rivulet.module.data_model.entity.constraint;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.CascadeType;
 import liquibase.ext.hibernate.annotation.DefaultValue;
 import liquibase.ext.hibernate.annotation.TableComment;
 import liquibase.ext.hibernate.annotation.Title;
@@ -44,7 +45,7 @@ public class RvNotNull extends RvEntity<String> implements DataModelEntityInterf
     @JsonBackReference("notNulls")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @Title("对应模型ID")
     @Comment("非空约束所对应的数据模型的ID，使用外键关联")
     @JoinColumn(name = "prototype_id")
@@ -76,7 +77,7 @@ public class RvNotNull extends RvEntity<String> implements DataModelEntityInterf
     @Column(name = "order_num")
     private Integer orderNum;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "column_id")
     @Title("对应属性ID")

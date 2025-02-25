@@ -48,7 +48,7 @@ public class RvForeignKeyForeignColumn extends RvEntity<String> {
     @JsonBackReference("foreignKeyForeignColumns")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @Title("对应外键ID")
     @Comment("该关联记录所对应的外键的ID")
     @JoinColumn(name = "foreign_key_id")

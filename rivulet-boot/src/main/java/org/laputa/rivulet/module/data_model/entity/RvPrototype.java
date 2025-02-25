@@ -83,7 +83,7 @@ public class RvPrototype extends RvEntity<String> implements DataModelEntityInte
     private Integer orderNum;
 
     @JsonManagedReference("columns")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "prototype")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "prototype")
     private List<RvColumn> columns;
 
     @JsonSetter("columns")
@@ -96,7 +96,7 @@ public class RvPrototype extends RvEntity<String> implements DataModelEntityInte
     }
 
     @JsonManagedReference("indexes")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "prototype")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "prototype")
     private List<RvIndex> indexes;
 
     @JsonSetter("indexes")
@@ -109,7 +109,7 @@ public class RvPrototype extends RvEntity<String> implements DataModelEntityInte
     }
 
     @JsonManagedReference("primaryKey")
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "prototype")
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "prototype")
     private RvPrimaryKey primaryKey;
 
     @JsonSetter("primaryKey")
@@ -122,7 +122,7 @@ public class RvPrototype extends RvEntity<String> implements DataModelEntityInte
     }
 
     @JsonManagedReference("foreignKeys")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "prototype")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "prototype")
     private List<RvForeignKey> foreignKeys;
 
     @JsonSetter("foreignKeys")
@@ -135,7 +135,7 @@ public class RvPrototype extends RvEntity<String> implements DataModelEntityInte
     }
 
     @JsonManagedReference("uniques")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "prototype")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "prototype")
     private List<RvUnique> uniques;
 
     @JsonSetter("uniques")
@@ -148,7 +148,7 @@ public class RvPrototype extends RvEntity<String> implements DataModelEntityInte
     }
 
     @JsonManagedReference("notNulls")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "prototype")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "prototype")
     private List<RvNotNull> notNulls;
 
     @JsonSetter("notNulls")

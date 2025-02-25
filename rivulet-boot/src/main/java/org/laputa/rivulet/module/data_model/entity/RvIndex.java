@@ -51,7 +51,7 @@ public class RvIndex extends RvEntity<String> implements DataModelEntityInterfac
     @JsonBackReference("indexes")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @Title("对应模型ID")
     @Comment("索引所对应的数据模型的ID，使用外键关联")
     @JoinColumn(name = "prototype_id")
@@ -89,7 +89,7 @@ public class RvIndex extends RvEntity<String> implements DataModelEntityInterfac
     private Integer orderNum;
 
     @JsonManagedReference("indexColumns")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "index")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "index")
     private List<RvIndexColumn> indexColumns;
 
     @JsonSetter("indexColumns")

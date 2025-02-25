@@ -53,7 +53,7 @@ public class RvUnique extends RvEntity<String> implements DataModelEntityInterfa
     @JsonBackReference("uniques")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @Title("对应模型ID")
     @Comment("唯一性约束所对应的数据模型的ID，使用外键关联")
     @JoinColumn(name = "prototype_id")
@@ -91,7 +91,7 @@ public class RvUnique extends RvEntity<String> implements DataModelEntityInterfa
     private RvIndex backingIndex;
 
     @JsonManagedReference("uniqueColumns")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "unique")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "unique")
     private List<RvUniqueColumn> uniqueColumns;
 
     @JsonSetter("uniqueColumns")

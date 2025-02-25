@@ -86,7 +86,7 @@ public class RvPrimaryKey extends RvEntity<String> implements DataModelEntityInt
     private Integer orderNum;
 
     @JsonManagedReference("primaryKeyColumns")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "primaryKey")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "primaryKey")
     private List<RvPrimaryKeyColumn> primaryKeyColumns;
 
     @OneToOne

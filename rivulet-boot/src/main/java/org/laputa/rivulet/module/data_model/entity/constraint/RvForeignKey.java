@@ -58,7 +58,7 @@ public class RvForeignKey extends RvEntity<String> implements DataModelEntityInt
     @JsonBackReference("foreignKeys")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @Title("对应模型ID")
     @Comment("外键所对应的数据模型的ID，使用外键关联")
     @JoinColumn(name = "prototype_id")
@@ -87,7 +87,7 @@ public class RvForeignKey extends RvEntity<String> implements DataModelEntityInt
 
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @Title("目标模型ID")
     @Comment("外键目标所对应的数据模型的ID")
     @JoinColumn(name = "target_prototype_id")
@@ -109,7 +109,7 @@ public class RvForeignKey extends RvEntity<String> implements DataModelEntityInt
     private RvIndex backingIndex;
 
     @JsonManagedReference("foreignKeyTargetColumns")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "foreignKey")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "foreignKey")
     private List<RvForeignKeyTargetColumn> foreignKeyTargetColumns;
 
     @JsonSetter("foreignKeyTargetColumns")
@@ -122,7 +122,7 @@ public class RvForeignKey extends RvEntity<String> implements DataModelEntityInt
     }
 
     @JsonManagedReference("foreignKeyForeignColumns")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "foreignKey")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "foreignKey")
     private List<RvForeignKeyForeignColumn> foreignKeyForeignColumns;
 
     @JsonSetter("foreignKeyForeignColumns")

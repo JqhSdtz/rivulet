@@ -48,7 +48,7 @@ public class RvUniqueColumn extends RvEntity<String> {
     @JsonBackReference("uniqueColumns")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @Title("对应唯一性约束ID")
     @Comment("该关联记录所对应的唯一性约束的ID，使用外键关联")
     @JoinColumn(name = "unique_id")

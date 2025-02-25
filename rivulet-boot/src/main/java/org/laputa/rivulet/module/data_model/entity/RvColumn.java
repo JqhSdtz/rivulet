@@ -47,7 +47,7 @@ public class RvColumn extends RvEntity<String> implements DataModelEntityInterfa
     @JsonBackReference("columns")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @Title("对应模型ID")
     @Comment("属性所对应的数据模型的ID，使用外键关联")
     @JoinColumn(name = "prototype_id")
