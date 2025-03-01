@@ -1,5 +1,6 @@
 package org.laputa.rivulet.module.dict.entity;
 
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -8,10 +9,7 @@ import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
-import org.laputa.rivulet.common.entity.RvEntity;
 import org.laputa.rivulet.common.entity.RvTree;
-
-import jakarta.persistence.*;
 
 /**
  * @author JQH

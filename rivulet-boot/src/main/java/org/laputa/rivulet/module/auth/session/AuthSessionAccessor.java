@@ -1,10 +1,9 @@
 package org.laputa.rivulet.module.auth.session;
 
-import org.laputa.rivulet.module.auth.entity.RvUser;
-import org.springframework.stereotype.Component;
-
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
+import org.laputa.rivulet.module.auth.entity.RvUser;
+import org.springframework.stereotype.Component;
 
 /**
  * @author JQH

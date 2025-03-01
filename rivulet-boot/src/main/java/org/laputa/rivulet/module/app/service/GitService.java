@@ -1,6 +1,7 @@
 package org.laputa.rivulet.module.app.service;
 
 import cn.hutool.core.io.FileUtil;
+import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.AddCommand;
@@ -17,7 +18,6 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

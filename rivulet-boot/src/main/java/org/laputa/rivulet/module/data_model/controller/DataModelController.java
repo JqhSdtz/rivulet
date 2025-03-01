@@ -1,5 +1,6 @@
 package org.laputa.rivulet.module.data_model.controller;
 
+import jakarta.annotation.Resource;
 import org.laputa.rivulet.common.model.Pagination;
 import org.laputa.rivulet.common.model.Result;
 import org.laputa.rivulet.common.mvc.annotation.RequestBodyParam;
@@ -9,8 +10,6 @@ import org.laputa.rivulet.module.data_model.service.DataModelService;
 import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.annotation.Resource;
 
 /**
  * @author JQH

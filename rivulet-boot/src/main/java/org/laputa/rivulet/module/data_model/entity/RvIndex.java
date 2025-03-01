@@ -3,6 +3,9 @@ package org.laputa.rivulet.module.data_model.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import liquibase.ext.hibernate.annotation.DefaultValue;
 import liquibase.ext.hibernate.annotation.TableComment;
 import liquibase.ext.hibernate.annotation.Title;
@@ -14,11 +17,6 @@ import org.hibernate.annotations.*;
 import org.laputa.rivulet.common.constant.Strings;
 import org.laputa.rivulet.common.entity.RvEntity;
 import org.laputa.rivulet.module.data_model.entity.column_relation.RvIndexColumn;
-
-import jakarta.persistence.*;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import org.laputa.rivulet.module.data_model.entity.inter.DataModelEntityInterface;
 
 import java.util.List;

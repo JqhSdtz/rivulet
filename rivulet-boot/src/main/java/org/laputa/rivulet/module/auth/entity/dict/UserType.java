@@ -2,8 +2,8 @@ package org.laputa.rivulet.module.auth.entity.dict;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-
 import jakarta.persistence.AttributeConverter;
+
 import java.util.Arrays;
 
 /**

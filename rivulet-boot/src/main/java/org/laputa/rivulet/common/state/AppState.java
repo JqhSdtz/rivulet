@@ -1,6 +1,5 @@
 package org.laputa.rivulet.common.state;
 
-import lombok.Getter;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

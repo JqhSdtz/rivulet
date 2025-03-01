@@ -1,14 +1,9 @@
 package org.laputa.rivulet.ddl;
 
 import cn.hutool.core.lang.UUID;
+import jakarta.annotation.Nullable;
 import liquibase.Contexts;
 import liquibase.Liquibase;
-import liquibase.change.ColumnConfig;
-import liquibase.change.ConstraintsConfig;
-import liquibase.change.core.AddForeignKeyConstraintChange;
-import liquibase.change.core.AddNotNullConstraintChange;
-import liquibase.change.core.AddUniqueConstraintChange;
-import liquibase.change.core.CreateTableChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
@@ -16,16 +11,13 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import lombok.SneakyThrows;
-import org.laputa.rivulet.module.data_model.entity.RvColumn;
 import org.laputa.rivulet.module.data_model.entity.RvPrototype;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.Nullable;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 
 /**
  * @author JQH

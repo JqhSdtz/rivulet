@@ -1,5 +1,6 @@
 package org.laputa.rivulet.module.data_model.service;
 
+import jakarta.annotation.Resource;
 import org.laputa.rivulet.common.model.Result;
 import org.laputa.rivulet.ddl.LiquibaseDdlExecutor;
 import org.laputa.rivulet.module.data_model.entity.RvPrototype;
@@ -9,8 +10,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
-import java.util.List;
 import java.util.Optional;
 
 /**

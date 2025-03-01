@@ -1,6 +1,5 @@
 package org.laputa.rivulet.liquibase.snapshot.extension;
 
-import org.laputa.rivulet.liquibase.snapshot.extension.ExtendedSnapshotGenerator;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 import liquibase.structure.core.PrimaryKey;

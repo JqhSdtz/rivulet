@@ -1,11 +1,11 @@
 package org.laputa.rivulet.common.util;
 
+import jakarta.annotation.Resource;
 import org.laputa.rivulet.common.model.Result;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 

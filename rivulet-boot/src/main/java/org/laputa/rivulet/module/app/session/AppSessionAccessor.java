@@ -1,9 +1,8 @@
 package org.laputa.rivulet.module.app.session;
 
-import org.springframework.stereotype.Component;
-
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.stereotype.Component;
 
 /**
  * @author JQH

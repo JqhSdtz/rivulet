@@ -2,6 +2,8 @@ package org.laputa.rivulet.common.script;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.graalvm.polyglot.Context;
@@ -12,8 +14,6 @@ import org.laputa.rivulet.common.model.Result;
 import org.laputa.rivulet.module.app.property.GitProperty;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.Resource;
 import java.io.File;
 import java.nio.file.NoSuchFileException;
 

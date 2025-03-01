@@ -1,5 +1,6 @@
 package org.laputa.rivulet.module.app.controller;
 
+import jakarta.annotation.Resource;
 import org.laputa.rivulet.common.entity.RvEntity;
 import org.laputa.rivulet.common.model.Result;
 import org.laputa.rivulet.module.app.model.AppInitialData;
@@ -8,7 +9,6 @@ import org.laputa.rivulet.module.auth.entity.RvUser;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import java.util.Map;
 
 /**

@@ -1,13 +1,17 @@
 package org.laputa.rivulet.module.app.service;
 
-import cn.hutool.core.util.RandomUtil;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
 import org.laputa.rivulet.common.model.Result;
+import org.laputa.rivulet.common.state.AppState;
 import org.laputa.rivulet.common.util.RedissonLockUtil;
 import org.laputa.rivulet.common.util.TerminalKeyUtil;
 import org.laputa.rivulet.common.util.TimeUnitUtil;
 import org.laputa.rivulet.module.app.model.AppInitialData;
-import org.laputa.rivulet.common.state.AppState;
 import org.laputa.rivulet.module.app.property.TerminalKeyProperty;
 import org.laputa.rivulet.module.app.session.AppSessionAccessor;
 import org.laputa.rivulet.module.auth.entity.RvUser;
@@ -21,12 +25,6 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.Resource;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
 
 /**
  * @author JQH

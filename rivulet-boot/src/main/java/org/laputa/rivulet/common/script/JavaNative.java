@@ -1,11 +1,10 @@
 package org.laputa.rivulet.common.script;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.stereotype.Component;
-
 import jakarta.annotation.Resource;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.stereotype.Component;
 
 /**
  * @author JQH

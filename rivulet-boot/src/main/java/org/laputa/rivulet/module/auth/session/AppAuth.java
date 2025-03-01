@@ -1,12 +1,11 @@
 package org.laputa.rivulet.module.auth.session;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import org.laputa.rivulet.module.auth.entity.RvUser;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
-
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.Resource;
 
 /**
  * @author JQH

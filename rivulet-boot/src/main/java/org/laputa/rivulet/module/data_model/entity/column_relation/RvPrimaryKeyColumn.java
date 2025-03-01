@@ -1,6 +1,9 @@
 package org.laputa.rivulet.module.data_model.entity.column_relation;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import liquibase.ext.hibernate.annotation.DefaultValue;
 import liquibase.ext.hibernate.annotation.TableComment;
 import liquibase.ext.hibernate.annotation.Title;
@@ -13,12 +16,6 @@ import org.laputa.rivulet.common.constant.Strings;
 import org.laputa.rivulet.common.entity.RvEntity;
 import org.laputa.rivulet.module.data_model.entity.RvColumn;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvPrimaryKey;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.*;
-import org.laputa.rivulet.module.data_model.entity.inter.DataModelEntityInterface;
 
 /**
  * @author JQH

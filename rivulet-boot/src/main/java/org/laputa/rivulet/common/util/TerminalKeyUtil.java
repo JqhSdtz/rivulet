@@ -1,11 +1,10 @@
 package org.laputa.rivulet.common.util;
 
 import cn.hutool.core.util.RandomUtil;
+import jakarta.annotation.Resource;
 import org.laputa.rivulet.module.app.property.TerminalKeyProperty;
 import org.redisson.api.RBucket;
 import org.springframework.stereotype.Component;
-
-import jakarta.annotation.Resource;
 
 /**
  * 产生一个终端密钥，存放于Redis中

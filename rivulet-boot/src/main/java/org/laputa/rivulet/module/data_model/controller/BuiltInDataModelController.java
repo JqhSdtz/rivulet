@@ -1,10 +1,13 @@
 package org.laputa.rivulet.module.data_model.controller;
 
+import jakarta.annotation.Resource;
 import org.laputa.rivulet.common.model.Result;
 import org.laputa.rivulet.module.data_model.service.BuiltInDataModelService;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.annotation.Resource;
 import java.util.Map;
 
 /**

@@ -1,15 +1,12 @@
 package org.laputa.rivulet.liquibase.database;
 
 import cn.hutool.core.util.ReflectUtil;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
 import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import org.hibernate.boot.internal.MetadataImpl;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.MySQLDialect;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;

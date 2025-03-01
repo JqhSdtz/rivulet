@@ -1,5 +1,8 @@
 package org.laputa.rivulet.common.config;
 
+import jakarta.annotation.Resource;
+import jakarta.persistence.Column;
+import jakarta.persistence.criteria.Order;
 import org.laputa.rivulet.ddl.LiquibaseDdlExecutor;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -11,10 +14,6 @@ import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
-import jakarta.annotation.Resource;
-import jakarta.persistence.Column;
-import jakarta.persistence.criteria.Order;
-import jakarta.persistence.spi.PersistenceUnitInfo;
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
 

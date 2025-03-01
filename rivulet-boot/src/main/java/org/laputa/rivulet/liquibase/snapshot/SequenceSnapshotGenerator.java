@@ -1,16 +1,12 @@
 package org.laputa.rivulet.liquibase.snapshot;
 
 import liquibase.exception.DatabaseException;
-import liquibase.ext.hibernate.database.HibernateDatabase;
 import liquibase.ext.hibernate.snapshot.HibernateSnapshotGenerator;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Sequence;
-import org.laputa.rivulet.liquibase.database.RivuletDatabase;
-
-import java.math.BigInteger;
 
 /**
  * Sequence snapshots are not yet supported, but this class needs to be implemented in order to prevent the default SequenceSnapshotGenerator from running.
