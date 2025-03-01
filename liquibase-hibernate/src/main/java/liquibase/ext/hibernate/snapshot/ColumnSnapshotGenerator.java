@@ -109,7 +109,7 @@ public class ColumnSnapshotGenerator extends HibernateSnapshotGenerator {
                 String defaultValue = null;
                 String hibernateType = hibernateColumn.getSqlType(metadata.getTypeConfiguration(), dialect, metadata);
                 // !!!此处增加根据@DefaultValue注解设置默认值的功能
-                Field columnField = getColumnField(hibernateTable.getName(), hibernateColumn.getName());
+                Field columnField = getColumnField(snapshot, hibernateTable.getName(), hibernateColumn.getName());
                 if (columnField != null && columnField.isAnnotationPresent(DefaultValue.class)) {
                     DefaultValue annotatedDefaultValue = columnField.getAnnotation(DefaultValue.class);
                     defaultValue = annotatedDefaultValue.value();

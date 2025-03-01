@@ -33,7 +33,7 @@ public class IndexSnapshotGenerator extends HibernateSnapshotGenerator {
             return example;
         }
         for (var hibernateIndex : hibernateTable.getIndexes().values()) {
-            Index index = handleHibernateIndex(table, hibernateIndex);
+            Index index = handleHibernateIndex(snapshot, table, hibernateIndex);
             if (index.getColumnNames().equalsIgnoreCase(((Index) example).getColumnNames())) {
                 // !!!全局控制found信息输出
                 if (GlobalSetting.isShowFoundInfo()) {
@@ -59,7 +59,7 @@ public class IndexSnapshotGenerator extends HibernateSnapshotGenerator {
                 return;
             }
             for (var hibernateIndex : hibernateTable.getIndexes().values()) {
-                Index index = handleHibernateIndex(table, hibernateIndex);
+                Index index = handleHibernateIndex(snapshot, table, hibernateIndex);
                 // !!!全局控制found信息输出
                 if (GlobalSetting.isShowFoundInfo()) {
                     Scope.getCurrentScope().getLog(getClass()).info("Found index " + index.getName());
@@ -69,7 +69,7 @@ public class IndexSnapshotGenerator extends HibernateSnapshotGenerator {
         }
     }
 
-    private Index handleHibernateIndex(Relation table, org.hibernate.mapping.Index hibernateIndex) {
+    private Index handleHibernateIndex(DatabaseSnapshot snapshot, Relation table, org.hibernate.mapping.Index hibernateIndex) {
         Index index = new Index();
         index.setRelation(table);
         index.setName(hibernateIndex.getName());
@@ -85,7 +85,7 @@ public class IndexSnapshotGenerator extends HibernateSnapshotGenerator {
         if (!index.getAttributes().contains(DatabaseObjectAttrName.Title)) {
             StringBuilder stringBuilder = new StringBuilder();
             for (var hibernateColumn : hibernateIndex.getColumns()) {
-                Field columnField = getColumnField(table.getName(), hibernateColumn.getName());
+                Field columnField = getColumnField(snapshot, table.getName(), hibernateColumn.getName());
                 if (columnField != null && columnField.isAnnotationPresent(Title.class)) {
                     Title title = columnField.getAnnotation(Title.class);
                     stringBuilder.append(title.value()).append('、');

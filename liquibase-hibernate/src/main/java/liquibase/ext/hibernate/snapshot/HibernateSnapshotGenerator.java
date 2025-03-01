@@ -3,9 +3,6 @@ package liquibase.ext.hibernate.snapshot;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.ext.hibernate.database.HibernateDatabase;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogService;
-import liquibase.logging.Logger;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGenerator;
@@ -13,7 +10,6 @@ import liquibase.snapshot.SnapshotGeneratorChain;
 import liquibase.structure.DatabaseObject;
 import org.hibernate.MappingException;
 import org.hibernate.boot.internal.MetadataImpl;
-import org.hibernate.boot.spi.MetadataImplementor;
 import org.hibernate.mapping.Column;
 import org.hibernate.mapping.PersistentClass;
 import org.hibernate.mapping.Property;
@@ -35,9 +31,11 @@ public abstract class HibernateSnapshotGenerator implements SnapshotGenerator {
 
 
     // !!!为了获取字段上的注解，提前保存字段和Field对象的映射关系
-    private Map<String, Field> columnFieldMap = new HashMap<>();
+    private static final String ColumnFieldMapKey = "ColumnFieldMap";
     // !!!为了方便设置表的注释，提前保存表名和实体类的映射关系
-    private Map<String, Class> tableClassMap = new HashMap<>();
+    private static final String TableClassMapKey = "TableClassMap";
+    // !!!为了保存Liquibase的Table对象，用于在构造外键Snapshot时获取对应的Table
+    private static final String TableMapKey = "TableMap";
 
     protected HibernateSnapshotGenerator(Class<? extends DatabaseObject> defaultFor) {
         this.defaultFor = defaultFor;
@@ -82,6 +80,12 @@ public abstract class HibernateSnapshotGenerator implements SnapshotGenerator {
             DatabaseObject result = snapshotObject(example, snapshot);
             return result;
         }
+
+        // !!!在Metadata中设置保存对应类、对应字段和对应LiquibaseTable的Map
+        snapshot.getMetadata().computeIfAbsent(ColumnFieldMapKey, k -> new HashMap<>());
+        snapshot.getMetadata().computeIfAbsent(TableClassMapKey, k -> new HashMap<>());
+        snapshot.getMetadata().computeIfAbsent(TableMapKey, k -> new HashMap<>());
+
         DatabaseObject chainResponse = chain.snapshot(example, snapshot);
         if (chainResponse == null) {
             return null;
@@ -113,7 +117,7 @@ public abstract class HibernateSnapshotGenerator implements SnapshotGenerator {
         entityBindingMap.values().forEach(entity -> {
             Class entityClass = entity.getMappedClass();
             if (entityClass == null) return;
-            this.tableClassMap.put(entity.getTable().getName(), entityClass);
+            ((Map<String, Class>) snapshot.getMetadata().get(TableClassMapKey)).put(entity.getTable().getName(), entityClass);
             for (Field field: entityClass.getDeclaredFields()) {
                 Property property;
                 try {
@@ -126,7 +130,7 @@ public abstract class HibernateSnapshotGenerator implements SnapshotGenerator {
                 List<Column> columnList = property.getValue().getColumns();
                 if (columnList.isEmpty()) continue;
                 String columnName = columnList.get(0).getText();
-                this.columnFieldMap.put(tableName + "." + columnName, field);
+                ((Map<String, Field>) snapshot.getMetadata().get(ColumnFieldMapKey)).put(tableName + "." + columnName, field);
             }
         });
 
@@ -141,12 +145,22 @@ public abstract class HibernateSnapshotGenerator implements SnapshotGenerator {
     }
 
     // !!!增加获取ColumnField的方法
-    protected Field getColumnField(String tableName, String columnName) {
-        return this.columnFieldMap.get(tableName + "." + columnName);
+    protected Field getColumnField(DatabaseSnapshot snapshot, String tableName, String columnName) {
+        return  ((Map<String, Field>) snapshot.getMetadata().get(ColumnFieldMapKey)).get(tableName + "." + columnName);
     }
 
     // !!!增加获取TableClass的方法
-    protected Class getTableClass(String tableName) {
-        return this.tableClassMap.get(tableName);
+    protected Class getTableClass(DatabaseSnapshot snapshot, String tableName) {
+        return ((Map<String, Class>) snapshot.getMetadata().get(TableClassMapKey)).get(tableName);
+    }
+
+    // !!!增加设置LiquibaseTable的方法
+    protected void setLiquibaseTable(DatabaseSnapshot snapshot, String tableName, liquibase.structure.core.Table table) {
+        ((Map<String, liquibase.structure.core.Table>) snapshot.getMetadata().get(TableMapKey)).put(tableName, table);
+    }
+
+    // !!!增加获取LiquibaseTable的方法
+    protected liquibase.structure.core.Table getLiquibaseTable(DatabaseSnapshot snapshot, String tableName) {
+        return ((Map<String, liquibase.structure.core.Table>) snapshot.getMetadata().get(TableMapKey)).get(tableName);
     }
 }
