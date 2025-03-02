@@ -84,11 +84,13 @@ public class IndexSnapshotGenerator extends HibernateSnapshotGenerator {
         // !!!获取column的title，以设置index的title
         if (!index.getAttributes().contains(DatabaseObjectAttrName.Title)) {
             StringBuilder stringBuilder = new StringBuilder();
+            boolean first = true;
             for (var hibernateColumn : hibernateIndex.getColumns()) {
                 Field columnField = getColumnField(snapshot, table.getName(), hibernateColumn.getName());
                 if (columnField != null && columnField.isAnnotationPresent(Title.class)) {
                     Title title = columnField.getAnnotation(Title.class);
-                    stringBuilder.append(title.value()).append('、');
+                    stringBuilder.append(first ? "" : "、").append(title.value());
+                    first = false;
                 }
             }
             stringBuilder.append("的索引");

@@ -53,12 +53,14 @@ public class UniqueConstraintSnapshotGenerator extends HibernateSnapshotGenerato
                 int i = 0;
                 // !!!给unique设置title
                 StringBuilder stringBuilder = new StringBuilder();
+                boolean first = true;
                 for (var hibernateColumn : hibernateUnique.getColumns()) {
                     uniqueConstraint.addColumn(i++, new Column(hibernateColumn.getName()).setRelation(table));
                     Field columnField = getColumnField(snapshot, table.getName(), hibernateColumn.getName());
                     if (columnField != null && columnField.isAnnotationPresent(Title.class)) {
                         Title title = columnField.getAnnotation(Title.class);
-                        stringBuilder.append(title.value()).append('、');
+                        stringBuilder.append(first ? "" : "、").append(title.value());
+                        first = false;
                     }
                 }
                 stringBuilder.append("的唯一性约束");
