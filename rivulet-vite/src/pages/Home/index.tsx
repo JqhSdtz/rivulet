@@ -8,7 +8,7 @@ import {useState} from 'react';
 
 export default () => {
     const rvModal = useRvModal();
-    const [reqLoading, setReqLoading] = useState<boolean>(true);
+    const [reqLoading, setReqLoading] = useState<boolean>(false);
     const clearScriptCache = async () => {
         const {data, loading} = useRequest(() => RvRequest.clearJsCache());
         setReqLoading(loading);
