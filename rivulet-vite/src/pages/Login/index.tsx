@@ -63,14 +63,14 @@ const formLayout: FormProps = {
 
 export default () => {
     const rvModal = useRvModal();
-    const userDispatchers = store.useModelDispatchers('user');
+    const adminDispatchers = store.useModelDispatchers('admin');
     const authDispatchers = store.useModelDispatchers('auth');
 
     async function onSubmit(data) {
         data.password = md5(data.password);
         const result = await RvRequest.do(() => axios.post('/auth/login', data));
         if (result.successful) {
-            userDispatchers.setState(result.payload);
+            adminDispatchers.setState(result.payload);
             rvModal.success({
                 content: '登录成功！',
                 onOk() {
