@@ -53,7 +53,7 @@ interface IVerifyInitKeyProps {
 
 export default (props: IVerifyInitKeyProps) => {
     const rvModal = useRvModal();
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(false);
     return (
         <div
             style={{
