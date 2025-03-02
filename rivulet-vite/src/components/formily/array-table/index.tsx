@@ -296,6 +296,10 @@ const InnerArrayTable = observer((props: TableProps<any>) => {
     const field = useField<ArrayField>();
     const prefixCls = usePrefixCls('formily-array-table');
     const dataSource = Array.isArray(field.value) ? field.value.slice() : [];
+    const schema = useFieldSchema();
+    const componentProps = schema['x-component-props'] || {};
+    // 没有onChange的话就强行赋值一个onChange，目的是覆盖掉从Form组件一路传过来的onChange属性，Form的onChange会扰乱Table的onChange，导致排序和筛选异常
+    if (!componentProps.onChange) componentProps.onChange = () => {};
     const sources = useArrayTableSources();
     const columns = useArrayTableColumns(field, sources);
     const addition = useAddition();
@@ -383,6 +387,7 @@ const InnerArrayTable = observer((props: TableProps<any>) => {
                             loading={loading}
                             {...props}
                             {...additionalProps}
+                            {...componentProps}
                             pagination={false}
                             columns={columns}
                             dataSource={tableDataSource}

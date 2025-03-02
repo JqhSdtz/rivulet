@@ -18,7 +18,7 @@ export default () => {
     const {data, loading} = useRequest(() => RvRequest.runJsSchema('DataModelIndex.mjs'));
     return loading ? <PageLoading/> : (
         <FormProvider form={form}>
-            <SchemaField schema={JSON.parse(data.data.payload)}/>
+            <SchemaField schema={data.data.payload}/>
         </FormProvider>
     );
 }

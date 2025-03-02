@@ -7,7 +7,7 @@ import {allComponents} from '@/utils/formilyUtil';
 import {useFormInstance} from '@/components/formily/hooks';
 import useUrlState from '@ahooksjs/use-url-state';
 import RvRequest from '@/utils/rvRequest';
-import {GeneralField} from '@formily/core';
+import {GeneralField, onFormValuesChange} from '@formily/core';
 import {IFieldProps} from '@formily/core/esm/types';
 
 const SchemaField = createSchemaField({
@@ -44,5 +44,5 @@ const FormComponent = (props) => {
 export default () => {
     const [urlState] = useUrlState();
     const {data, loading} = useRequest(() => RvRequest.runJsSchema('ModelDetail/index.mjs', urlState));
-    return loading ? <PageLoading/> : <FormComponent {...JSON.parse(data.data.payload)}/>;
+    return loading ? <PageLoading/> : <FormComponent {...data.data.payload}/>;
 }

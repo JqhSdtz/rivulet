@@ -130,7 +130,15 @@ export default {
         );
     },
     async runJsSchema(filename: string, param: any = {}) {
-        return await this.runJs('/src/schemas/' + filename, param);
+        const rawResponse = await this.runJs('/src/schemas/' + filename, param);
+        const result = rawResponse.data;
+        result.payload = JSON.parse(result.payload, (_key, value) => {
+            if (typeof value === 'string' && value.length > 7 && value.substring(0, 7) === '$RvFun$') {
+                return eval(value.substring(7, value.length));
+            }
+            return value;
+        });
+        return rawResponse;
     },
     async clearJsCache() {
         return await this.doRaw(() => axios.post('/js/clearCache'));
