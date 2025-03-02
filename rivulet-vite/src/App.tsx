@@ -15,15 +15,14 @@ const AppRoutes = () => useRoutes(routesConfig);
 const getInitialData = async () => {
     const result: Result = await RvRequest.do(() => axios.get('/app/initialData'));
     const appInitialData = result.payload;
-    const currentUser = appInitialData.currentUser;
-    const initialStates = {
+    const currentAdmin = appInitialData.currentAdmin;
+    return {
         app: appInitialData.appState,
-        user: appInitialData.currentUser,
+        admin: appInitialData.currentAdmin,
         auth: {
-            hasLoggedIn: !!currentUser
+            hasLoggedIn: !!currentAdmin
         }
     };
-    return initialStates;
 };
 
 export default () => {
