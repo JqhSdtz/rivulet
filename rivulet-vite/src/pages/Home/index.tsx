@@ -8,18 +8,19 @@ import {useState} from 'react';
 
 export default () => {
     const rvModal = useRvModal();
-    const [reqLoading, setReqLoading] = useState<boolean>(false);
+    const {loading, runAsync} = useRequest(() => RvRequest.clearJsCache(), {
+        manual: true
+    });
     const clearScriptCache = async () => {
-        const {data, loading} = useRequest(() => RvRequest.clearJsCache());
-        setReqLoading(loading);
-        rvModal.result(data);
+        const data = await runAsync();
+        rvModal.result(data.data);
     };
     return (
         <>
             <div className={styles.container}>
                 <h2>Home page</h2>
             </div>
-            <Button style={{marginLeft: '1rem'}} onClick={clearScriptCache} loading={reqLoading}>
+            <Button style={{marginLeft: '1rem'}} onClick={clearScriptCache} loading={loading}>
                 清除脚本缓存
             </Button>
         </>
