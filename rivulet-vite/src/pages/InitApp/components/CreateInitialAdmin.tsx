@@ -79,10 +79,13 @@ interface ICreateInitialAdminProps {
 export default (props: ICreateInitialAdminProps) => {
     const rvModal = useRvModal();
     const authDispatchers = store.useModelDispatchers('auth');
+    const [loading, setLoading] = React.useState<boolean>(false);
 
     async function onSubmit(data) {
+        setLoading(true);
         data.password = md5(data.password);
         const result: Result = await RvRequest.do(() => axios.post('/app/initialAdmin', data));
+        setLoading(false);
         if (result.successful) {
             rvModal.success({
                 content: '创建初始用户成功！',
@@ -128,7 +131,7 @@ export default (props: ICreateInitialAdminProps) => {
                     onAutoSubmit={onSubmit}
                 >
                     <SchemaField schema={schema}/>
-                    <Submit block size="large">
+                    <Submit block size="large" loading={loading}>
                         创建用户
                     </Submit>
                 </Form>

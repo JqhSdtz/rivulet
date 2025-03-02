@@ -35,14 +35,17 @@ const ConfirmUpdateSqlModal = (props: {
     const [isModalOpen, setModalOpen] = useState<boolean>(true);
     const [confirmKey, setConfirmKey] = useState<string>();
     const [inputStatus, setInputStatus] = useState<InputStatus>('');
+    const [loading, setLoading] = useState<boolean>(false);
 
     async function onOk() {
         if (!confirmKey) {
             setInputStatus('error');
         } else {
+            setLoading(true);
             const request = () => axios.post('/builtInDataModel/confirmUpdateSql', {confirmKey});
             const confirmResult = await wrapRequestFunction(request)();
             if (confirmResult.successful) {
+                setLoading(false);
                 setModalOpen(false);
                 props.onUpdateSucceed();
             } else if (confirmResult.errorCode === 'requireConfirmUpdateSql') {
@@ -60,6 +63,7 @@ const ConfirmUpdateSqlModal = (props: {
             title="确认执行SQL"
             okText="确认执行"
             cancelButtonProps={{hidden: true}}
+            okButtonProps={{loading}}
             onOk={onOk}
         >
             <SyntaxHighlighter language="sql" wrapLongLines={true}>

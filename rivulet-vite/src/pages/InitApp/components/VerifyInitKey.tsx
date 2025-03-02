@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {createForm} from '@formily/core';
 import {createSchemaField} from '@formily/react';
 import {Form, FormItem, Input, Password, Submit} from '@formily/antd';
@@ -53,6 +53,7 @@ interface IVerifyInitKeyProps {
 
 export default (props: IVerifyInitKeyProps) => {
     const rvModal = useRvModal();
+    const [loading, setLoading] = useState<boolean>(true);
     return (
         <div
             style={{
@@ -76,7 +77,9 @@ export default (props: IVerifyInitKeyProps) => {
                     form={form}
                     {...formLayout}
                     onAutoSubmit={async (data) => {
+                        setLoading(true);
                         const result: Result = await RvRequest.do(() => axios.post('/app/verifyInitKey', data));
+                        setLoading(false);
                         if (result.successful) {
                             rvModal.success({
                                 content: '密钥验证成功！',
@@ -95,7 +98,7 @@ export default (props: IVerifyInitKeyProps) => {
                     }}
                 >
                     <SchemaField schema={schema}/>
-                    <Submit block size="large">
+                    <Submit block size="large" loading={loading}>
                         验证密钥
                     </Submit>
                 </Form>
