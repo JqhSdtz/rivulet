@@ -16,6 +16,7 @@ const SplitView = (props: { splitView: SplitViewType }) => {
     const width = 100 / splitViewContainer.splitViews.length + '%';
     const ref = useRef<HTMLDivElement>();
     useEventListener('click', () => {
+        if (splitView.isActive) return;
         splitViewContainer.splitViews.forEach(tmpSplitView => tmpSplitView.isActive = false);
         splitView.isActive = true;
         activeNode(activeTab.name);

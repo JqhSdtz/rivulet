@@ -298,7 +298,7 @@ export default (props) => {
         updateTabs();
     };
     const activeNode = (targetKey) => {
-        if (!targetKey) return;
+        if (!targetKey || targetKey === currentTabKey) return;
         const targetNode = findNode(targetKey) ?? {} as TabNodeType;
         targetNode.splitView.tabNodes.forEach(node => {
             setTabNodeAttributes(node.name, {
