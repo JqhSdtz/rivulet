@@ -17,7 +17,7 @@ import org.laputa.rivulet.access_limit.annotation.AccessLimits;
 import org.laputa.rivulet.common.constant.RedisPrefix;
 import org.laputa.rivulet.common.entity.RvEntity;
 import org.laputa.rivulet.common.model.Result;
-import org.laputa.rivulet.module.auth.entity.RvUser;
+import org.laputa.rivulet.module.auth.entity.RvAdmin;
 import org.laputa.rivulet.module.auth.session.AppAuth;
 import org.redisson.api.RScript;
 import org.redisson.api.RedissonClient;
@@ -118,8 +118,8 @@ public class AccessLimitAspect implements ApplicationRunner {
 
     @Around("requireLoginPoint()")
     public Result<?> testIfLogin(ProceedingJoinPoint joinPoint) throws Throwable {
-        RvUser currentUser = appAuth.getCurrentUser();
-        if (currentUser != null && currentUser.getId() != null) {
+        RvAdmin currentAdmin = appAuth.getCurrentAdmin();
+        if (currentAdmin != null && currentAdmin.getId() != null) {
             return (Result<?>) joinPoint.proceed();
         } else {
             return Result.fail("requestNeedLogin", "请求失败，该请求需要登录");
@@ -290,7 +290,7 @@ public class AccessLimitAspect implements ApplicationRunner {
 
     private String getCurrentUserIdOrIpAddress() {
         // 登录的情况下根据用户ID限制访问，未登录的情况下根据IP地址限制访问
-        RvUser currentUser = appAuth.getCurrentUser();
+        RvAdmin currentUser = appAuth.getCurrentAdmin();
         if (currentUser != null) {
             return "US:" + currentUser.getId();
         } else {

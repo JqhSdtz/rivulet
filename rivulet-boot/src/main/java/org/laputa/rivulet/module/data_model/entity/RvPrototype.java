@@ -18,12 +18,14 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UuidGenerator;
 import org.laputa.rivulet.common.constant.Strings;
 import org.laputa.rivulet.common.entity.RvEntity;
+import org.laputa.rivulet.module.auth.entity.RvAdmin;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvForeignKey;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvNotNull;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvPrimaryKey;
 import org.laputa.rivulet.module.data_model.entity.constraint.RvUnique;
 import org.laputa.rivulet.module.data_model.entity.inter.DataModelEntityInterface;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -80,6 +82,30 @@ public class RvPrototype extends RvEntity<String> implements DataModelEntityInte
     @Title("排序号")
     @Comment("排序号用于按设定的顺序展示属性，与数据库中实际的顺序无关联")
     private Integer orderNum;
+
+    @Column(name = "create_time")
+    @Title("创建时间")
+    @Comment("创建时间表示该数据模型新建的时间，类型为TimeStamp")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createTime;
+
+    @Column(name = "update_time")
+    @Title("更新时间")
+    @Comment("更新时间表示该数据模型最近一次修改的时间，类型为TimeStamp")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updateTime;
+
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @Title("创建人ID")
+    @Comment("创建人ID为创建该数据模型的管理员的ID，使用外键关联")
+    @JoinColumn(name = "created_by_id")
+    private RvAdmin createdBy;
+
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @Title("更新人ID")
+    @Comment("更新人ID为最近一次更新该数据模型的管理员的ID，使用外键关联")
+    @JoinColumn(name = "updated_by_id")
+    private RvAdmin updatedBy;
 
     @JsonManagedReference("columns")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "prototype")

@@ -38,7 +38,11 @@ import org.laputa.rivulet.common.util.RedissonLockUtil;
 import org.laputa.rivulet.common.util.TerminalKeyUtil;
 import org.laputa.rivulet.common.util.TimeUnitUtil;
 import org.laputa.rivulet.module.app.property.TerminalKeyProperty;
+import org.laputa.rivulet.module.app.service.AppInitService;
 import org.laputa.rivulet.module.app.service.GitService;
+import org.laputa.rivulet.module.auth.entity.RvAdmin;
+import org.laputa.rivulet.module.auth.entity.dict.AdminType;
+import org.laputa.rivulet.module.auth.util.PasswordUtil;
 import org.laputa.rivulet.module.data_model.entity.RvColumn;
 import org.laputa.rivulet.module.data_model.entity.RvIndex;
 import org.laputa.rivulet.module.data_model.entity.RvPrototype;
@@ -96,6 +100,8 @@ public class BuiltInDataModelService implements ApplicationRunner {
     private RedissonLockUtil redissonLockUtil;
     @Resource
     private GitService gitService;
+    @Resource
+    private AppInitService appInitService;
     @Resource
     private RvPrototypeRepository rvPrototypeRepository;
     @Resource
@@ -192,12 +198,13 @@ public class BuiltInDataModelService implements ApplicationRunner {
         DiffOutputControl diffOutputControl = new DiffOutputControl(false, false, false, null);
         DiffToChangeLog diffToChangeLog = new DiffToChangeLog(this.diffResult, diffOutputControl);
         List<ChangeSet> changeSets = diffToChangeLog.generateChangeSets();
+        String initialAdminId = appInitService.getInitialAdminId();
         changeSets.forEach(changeSet -> {
             // 加上这句可以防止因为update操作抛异常引起回滚而意外地将update操作应用到数据库上，具体源码怎么做的我也不知道
             changeSet.getRollback().getChanges().clear();
             changeSet.setFilePath(changeSet.getId());
             // 因为没法直接设置changeLog，而不设置changeLog就会报错
-            ChangeSet newChangeSet = new ChangeSet(changeSet.getId(), changeSet.getAuthor(), changeSet.isAlwaysRun(), changeSet.isRunOnChange(), changeSet.getFilePath(),
+            ChangeSet newChangeSet = new ChangeSet(changeSet.getId(), initialAdminId, changeSet.isAlwaysRun(), changeSet.isRunOnChange(), changeSet.getFilePath(),
                     changeSet.getContextFilter().getOriginalString(), changeSet.getDbmsOriginalString(), changeSet.getRunWith(), changeSet.getRunWithSpoolFile(),
                     changeSet.isRunInTransaction(), changeSet.getObjectQuotingStrategy(), databaseChangeLog);
             changeSet.getChanges().forEach(newChangeSet::addChange);
@@ -313,8 +320,13 @@ public class BuiltInDataModelService implements ApplicationRunner {
                 rvPrototypeMap.put(table.getName(), new RvPrototype());
             }
         });
+        RvAdmin initialAdmin = new RvAdmin();
+        // 临时设置的初始管理员的用户名和密码，否则rv_prototype无法保存。在正式创建初始管理员时会被替换掉。
+        initialAdmin.setAdminName("admin");
+        initialAdmin.setPassword(PasswordUtil.encode(RandomUtil.randomString(32)));
+        initialAdmin.setAdminType(AdminType.INITIAL_ADMIN);
         AtomicInteger index = new AtomicInteger();
-        tableSet.forEach(table -> toSaveRvPrototypeList.add(buildRvPrototype(table, index.getAndIncrement(), rvPrototypeMap)));
+        tableSet.forEach(table -> toSaveRvPrototypeList.add(buildRvPrototype(table, index.getAndIncrement(), rvPrototypeMap, initialAdmin)));
         // 每次启动都全量覆盖保存内部数据模型
         rvPrototypeRepository.saveAll(toSaveRvPrototypeList);
         gitService.addBuiltInRvPrototypes(toSaveRvPrototypeList);
@@ -332,13 +344,17 @@ public class BuiltInDataModelService implements ApplicationRunner {
         dataModelEntity.setBuiltIn(true);
     }
 
-    private RvPrototype buildRvPrototype(Table table, int tableIndex, Map<String, RvPrototype> rvPrototypeMap) {
+    private RvPrototype buildRvPrototype(Table table, int tableIndex, Map<String, RvPrototype> rvPrototypeMap, RvAdmin initialAdmin) {
         RvPrototype rvPrototype = rvPrototypeMap.get(table.getName());
         setCodeAndTitleAndBuiltIn(rvPrototype, table);
         rvPrototype.setOrderNum(tableIndex);
         if (rvPrototype.getRemark() == null) {
             rvPrototype.setRemark(table.getRemarks());
         }
+        rvPrototype.setCreateTime(new Date());
+        rvPrototype.setUpdateTime(new Date());
+        rvPrototype.setCreatedBy(initialAdmin);
+        rvPrototype.setUpdatedBy(initialAdmin);
 
         Map<String, RvColumn> rvColumnMap = new HashMap<>(table.getColumns().size());
         List<String> deletedColumnIdList = new ArrayList<>();

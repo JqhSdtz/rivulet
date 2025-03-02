@@ -32,7 +32,7 @@ const SchemaField = createSchemaField({
 const schema = {
     type: 'object',
     properties: {
-        username: {
+        adminName: {
             type: 'string',
             title: '用户名',
             required: true,

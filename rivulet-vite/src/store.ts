@@ -1,11 +1,11 @@
 import {createStore} from '@ice/store';
-import user from '@/models/user';
+import admin from '@/models/admin';
 import app from '@/models/app';
 import auth from '@/models/auth';
 
 const store = createStore(
     {
-        user,
+        admin,
         app,
         auth
     },

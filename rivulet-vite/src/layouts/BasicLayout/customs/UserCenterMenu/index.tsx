@@ -13,7 +13,7 @@ export default (props: SiderMenuProps) => {
     const rvModal = useRvModal();
     const {prefixCls} = props;
     const authDispatchers = store.useModelDispatchers('auth');
-    const userState = store.useModelState('user');
+    const adminState = store.useModelState('admin');
 
     function logout() {
         rvModal.confirm({
@@ -36,7 +36,7 @@ export default (props: SiderMenuProps) => {
     const items = [
         {
             key: 'userCenterMenu',
-            label: userState.username,
+            label: adminState.adminName,
             icon: <UserOutlined/>,
             children: [
                 {

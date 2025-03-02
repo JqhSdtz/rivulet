@@ -2,7 +2,7 @@ package org.laputa.rivulet.module.auth.controller;
 
 import jakarta.annotation.Resource;
 import org.laputa.rivulet.common.model.Result;
-import org.laputa.rivulet.module.auth.entity.RvUser;
+import org.laputa.rivulet.module.auth.entity.RvAdmin;
 import org.laputa.rivulet.module.auth.service.AuthService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,8 +21,8 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/login")
-    public Result<RvUser> login(@RequestBody @Validated(RvUser.Login.class) RvUser rvUser) {
-        return authService.login(rvUser);
+    public Result<RvAdmin> login(@RequestBody @Validated(RvAdmin.Login.class) RvAdmin rvAdmin) {
+        return authService.login(rvAdmin);
     }
 
     @PostMapping("/logout")

@@ -2,7 +2,7 @@ package org.laputa.rivulet.module.app.model;
 
 import lombok.Data;
 import org.laputa.rivulet.common.state.AppState;
-import org.laputa.rivulet.module.auth.entity.RvUser;
+import org.laputa.rivulet.module.auth.entity.RvAdmin;
 
 /**
  * @author JQH
@@ -11,5 +11,5 @@ import org.laputa.rivulet.module.auth.entity.RvUser;
 @Data
 public class AppInitialData {
     private AppState appState;
-    private RvUser currentUser;
+    private RvAdmin currentAdmin;
 }

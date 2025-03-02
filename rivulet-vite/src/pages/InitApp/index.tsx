@@ -1,7 +1,7 @@
 import {Steps} from 'antd';
 import React from 'react';
 import VerifyInitKey from '@/pages/InitApp/components/VerifyInitKey';
-import CreateInitialUser from '@/pages/InitApp/components/CreateInitialUser';
+import CreateInitialAdmin from '@/pages/InitApp/components/CreateInitialAdmin';
 import SuccessResult from '@/pages/InitApp/components/SuccessResult';
 
 const {Step} = Steps;
@@ -19,7 +19,7 @@ export default () => {
         },
         {
             title: '创建初始帐号',
-            content: <CreateInitialUser onPass={next}/>
+            content: <CreateInitialAdmin onPass={next}/>
         },
         {
             title: '初始化完成',

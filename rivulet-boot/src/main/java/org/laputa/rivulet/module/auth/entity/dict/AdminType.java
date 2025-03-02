@@ -7,25 +7,25 @@ import jakarta.persistence.AttributeConverter;
 import java.util.Arrays;
 
 /**
- * 用户类别
+ * 管理员类别
  *
  * @author JQH
  * @since 下午 12:08 22/04/04
  */
-public enum UserType {
+public enum AdminType {
     /**
-     * 0.初始用户
+     * 0.初始管理员
      */
-    INITIAL_USER(0),
+    INITIAL_ADMIN(0),
     /**
-     * 1.普通用户
+     * 1.普通管理员
      */
-    NORMAL_USER(1);
+    NORMAL_ADMIN(1);
 
-    private Integer value;
+    private final Integer value;
 
     @JsonCreator
-    UserType(Integer value) {
+    AdminType(Integer value) {
         this.value = value;
     }
 
@@ -34,15 +34,15 @@ public enum UserType {
         return value;
     }
 
-    public static class Converter implements AttributeConverter<UserType, Integer> {
+    public static class Converter implements AttributeConverter<AdminType, Integer> {
         @Override
-        public Integer convertToDatabaseColumn(UserType attribute) {
+        public Integer convertToDatabaseColumn(AdminType attribute) {
             return attribute.getValue();
         }
 
         @Override
-        public UserType convertToEntityAttribute(Integer dbData) {
-            return Arrays.stream(UserType.values()).filter(userType -> userType.getValue().equals(dbData))
+        public AdminType convertToEntityAttribute(Integer dbData) {
+            return Arrays.stream(AdminType.values()).filter(adminType -> adminType.getValue().equals(dbData))
                     .findFirst().orElse(null);
         }
     }

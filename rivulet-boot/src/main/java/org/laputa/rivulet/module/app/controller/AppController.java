@@ -5,7 +5,7 @@ import org.laputa.rivulet.common.entity.RvEntity;
 import org.laputa.rivulet.common.model.Result;
 import org.laputa.rivulet.module.app.model.AppInitialData;
 import org.laputa.rivulet.module.app.service.AppInitService;
-import org.laputa.rivulet.module.auth.entity.RvUser;
+import org.laputa.rivulet.module.auth.entity.RvAdmin;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,8 +33,8 @@ public class AppController {
         return Result.empty(isValid);
     }
 
-    @PostMapping("/initialUser")
-    public Result<Void> createInitialUser(@RequestBody @Validated(RvEntity.Persist.class) RvUser rvUser) {
-        return appService.createInitialUser(rvUser);
+    @PostMapping("/initialAdmin")
+    public Result<Void> createInitialAdmin(@RequestBody @Validated(RvEntity.Persist.class) RvAdmin rvAdmin) {
+        return appService.createInitialAdmin(rvAdmin);
     }
 }

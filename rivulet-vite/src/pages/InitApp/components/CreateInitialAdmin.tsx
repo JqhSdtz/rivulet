@@ -32,7 +32,7 @@ const SchemaField = createSchemaField({
 const schema = {
     type: 'object',
     properties: {
-        username: {
+        adminName: {
             type: 'string',
             title: '用户名',
             required: true,
@@ -71,18 +71,18 @@ const formLayout: FormProps = {
     size: 'large'
 };
 
-interface ICreateInitialUserProps {
+interface ICreateInitialAdminProps {
     onPass?: Function,
     onReject?: Function
 }
 
-export default (props: ICreateInitialUserProps) => {
+export default (props: ICreateInitialAdminProps) => {
     const rvModal = useRvModal();
     const authDispatchers = store.useModelDispatchers('auth');
 
     async function onSubmit(data) {
         data.password = md5(data.password);
-        const result: Result = await RvRequest.do(() => axios.post('/app/initialUser', data));
+        const result: Result = await RvRequest.do(() => axios.post('/app/initialAdmin', data));
         if (result.successful) {
             rvModal.success({
                 content: '创建初始用户成功！',

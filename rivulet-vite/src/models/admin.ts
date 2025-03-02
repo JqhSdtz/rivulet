@@ -1,7 +1,7 @@
 export default {
     state: {
         id: null,
-        username: null,
+        adminName: null,
         password: null,
         userType: null
     }
