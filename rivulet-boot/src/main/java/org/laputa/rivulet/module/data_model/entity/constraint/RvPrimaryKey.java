@@ -78,11 +78,6 @@ public class RvPrimaryKey extends RvEntity<String> implements DataModelEntityInt
     @Column(name = "remark")
     private String remark;
 
-    @Title("排序号")
-    @Comment("排序号用于按设定的顺序展示主键，与数据库中实际的顺序无关联")
-    @Column(name = "order_num")
-    private Integer orderNum;
-
     @JsonManagedReference("primaryKeyColumns")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "primaryKey")
     private List<RvPrimaryKeyColumn> primaryKeyColumns;
