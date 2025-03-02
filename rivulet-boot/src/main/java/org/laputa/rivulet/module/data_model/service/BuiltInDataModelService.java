@@ -325,8 +325,8 @@ public class BuiltInDataModelService implements ApplicationRunner {
         initialAdmin.setAdminName("admin");
         initialAdmin.setPassword(PasswordUtil.encode(RandomUtil.randomString(32)));
         initialAdmin.setAdminType(AdminType.INITIAL_ADMIN);
-        AtomicInteger index = new AtomicInteger();
-        tableSet.forEach(table -> toSaveRvPrototypeList.add(buildRvPrototype(table, index.getAndIncrement(), rvPrototypeMap, initialAdmin)));
+        AtomicInteger rvPrototypeOrderNum = new AtomicInteger(0);
+        tableSet.forEach(table -> toSaveRvPrototypeList.add(buildRvPrototype(table, rvPrototypeOrderNum.getAndIncrement(), rvPrototypeMap, initialAdmin)));
         // 每次启动都全量覆盖保存内部数据模型
         rvPrototypeRepository.saveAll(toSaveRvPrototypeList);
         gitService.addBuiltInRvPrototypes(toSaveRvPrototypeList);
@@ -368,8 +368,9 @@ public class BuiltInDataModelService implements ApplicationRunner {
             });
         }
         rvColumnRepository.deleteAllById(deletedColumnIdList);
-        rvPrototype.setColumns(table.getColumns().stream().map(column -> {
+        rvPrototype.setColumns(Streams.mapWithIndex(table.getColumns().stream(), (column, idx) -> {
             RvColumn rvColumn = buildRvColumn(column, rvColumnMap);
+            rvColumn.setOrderNum((int) idx);
             rvColumn.setPrototype(rvPrototype);
             return rvColumn;
         }).collect(Collectors.toList()));
