@@ -43,8 +43,6 @@ const FormComponent = (props) => {
 
 export default () => {
     const [urlState] = useUrlState();
-    const {data, loading} = useRequest(() => RvRequest.doRaw(() => axios.get('/dataModel/ModelDetailSchema', {
-        params: urlState
-    })));
+    const {data, loading} = useRequest(() => RvRequest.runJsSchema('ModelDetail/index.mjs', urlState));
     return loading ? <PageLoading/> : <FormComponent {...JSON.parse(data.data.payload)}/>;
 }

@@ -7,7 +7,7 @@ import {useRvModal} from '@/components/common/RvModal';
 export default () => {
     const rvModal = useRvModal();
     const clearScriptCache = async () => {
-        const result = await RvRequest.do(() => axios.post('/dataModel/clearScriptCache'));
+        const result = await RvRequest.clearJsCache();
         rvModal.result(result);
     }
     return (

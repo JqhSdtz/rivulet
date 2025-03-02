@@ -15,7 +15,7 @@ const SchemaField = createSchemaField({
 
 export default () => {
     const form = useFormInstance();
-    const {data, loading} = useRequest(() => RvRequest.doRaw(() => axios.get('/dataModel/DataModelIndexSchema')));
+    const {data, loading} = useRequest(() => RvRequest.runJsSchema('DataModelIndex.mjs'));
     return loading ? <PageLoading/> : (
         <FormProvider form={form}>
             <SchemaField schema={JSON.parse(data.data.payload)}/>

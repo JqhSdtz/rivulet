@@ -39,19 +39,4 @@ public class DataModelController {
     public Result<RvPrototype> queryOne(@PathVariable String id) {
         return dataModelService.queryOne(id);
     }
-
-    @GetMapping("/ModelDetailSchema")
-    public Result<Object> getModelDetailSchema() {
-        return jsRunner.runScript("/src/schemas/ModelDetail/index.mjs");
-    }
-
-    @GetMapping("/DataModelIndexSchema")
-    public Result<Object> getFormSchema() {
-        return jsRunner.runScript("/src/schemas/DataModelIndex.mjs");
-    }
-
-    @PostMapping("/clearScriptCache")
-    public Result<Void> clearScriptCache() {
-        return jsRunner.clearCache();
-    }
 }

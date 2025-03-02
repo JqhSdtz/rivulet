@@ -9,27 +9,26 @@ import {Result} from '@/types/result';
 import {useRvModal} from '@/components/common/RvModal';
 
 function wrapRequestFunction(oriRequest: () => Promise<AxiosResponse>): () => Promise<Result> {
-    return () => oriRequest().then(response => {
-        const successResult: Result = response.data;
-        successResult.rawResponse = response;
-        return Promise.resolve(successResult);
-    }).catch((error: AxiosError) => {
-        const errorResult: Result = {
-            successful: false,
-            rawResponse: error.response,
-            errorCode: 'UnexpectedError',
-            errorMessage: '网络或服务异常，请重试',
-            rawError: error
-        };
-        return Promise.resolve(errorResult);
-    });
+    return () =>
+        oriRequest()
+            .then(response => {
+                const successResult: Result = response.data;
+                successResult.rawResponse = response;
+                return Promise.resolve(successResult);
+            })
+            .catch((error: AxiosError) => {
+                const errorResult: Result = {
+                    successful: false,
+                    rawResponse: error.response,
+                    errorCode: 'UnexpectedError',
+                    errorMessage: '网络或服务异常，请重试',
+                    rawError: error
+                };
+                return Promise.resolve(errorResult);
+            });
 }
 
-const ConfirmUpdateSqlModal = (props: {
-    sql: string,
-    doRequest: () => Promise<Result>,
-    onUpdateSucceed: () => void
-}) => {
+const ConfirmUpdateSqlModal = (props: {sql: string; doRequest: () => Promise<Result>; onUpdateSucceed: () => void}) => {
     const rvModal = useRvModal();
     const [displaySql, setDisplaySql] = useState<string>(props.sql);
     const [isModalOpen, setModalOpen] = useState<boolean>(true);
@@ -53,7 +52,8 @@ const ConfirmUpdateSqlModal = (props: {
             }
             rvModal.result(confirmResult);
         }
-    };
+    }
+
     return (
         <Modal
             className="confirm-sql-modal"
@@ -69,12 +69,16 @@ const ConfirmUpdateSqlModal = (props: {
             <SyntaxHighlighter language="sql" wrapLongLines={true}>
                 {displaySql}
             </SyntaxHighlighter>
-            <Input placeholder="请输入确认密钥" status={inputStatus} maxLength={64} value={confirmKey}
-                   onChange={e => setConfirmKey(e.target.value)}/>
+            <Input
+                placeholder="请输入确认密钥"
+                status={inputStatus}
+                maxLength={64}
+                value={confirmKey}
+                onChange={e => setConfirmKey(e.target.value)}
+            />
         </Modal>
     );
 };
-
 
 async function onRequireConfirmUpdateSql(result: Result, doRequest: () => Promise<Result>) {
     const currentStructureUpdateSql = result.payload;
@@ -82,11 +86,13 @@ async function onRequireConfirmUpdateSql(result: Result, doRequest: () => Promis
     const onUpdateSucceed = () => {
         doRequest().then(curResolve).catch(curReject);
     };
-    const modal = <ConfirmUpdateSqlModal
-        sql={currentStructureUpdateSql}
-        doRequest={doRequest}
-        onUpdateSucceed={onUpdateSucceed}
-    />;
+    const modal = (
+        <ConfirmUpdateSqlModal
+            sql={currentStructureUpdateSql}
+            doRequest={doRequest}
+            onUpdateSucceed={onUpdateSucceed}
+        />
+    );
     const container = document.createDocumentFragment();
     ReactDOM.render(modal, container);
     return new Promise<Result>((resolve, reject) => {
@@ -96,10 +102,6 @@ async function onRequireConfirmUpdateSql(result: Result, doRequest: () => Promis
 }
 
 export default {
-    async doRaw(requestFunc: () => Promise<AxiosResponse>): Promise<AxiosResponse> {
-        const result = await this.do(requestFunc);
-        return result.rawResponse;
-    },
     async do(requestFunc: () => Promise<AxiosResponse>): Promise<Result> {
         const doRvRequest = wrapRequestFunction(requestFunc);
         let result = await doRvRequest();
@@ -112,5 +114,25 @@ export default {
             }
         }
         return result;
+    },
+    async doRaw(requestFunc: () => Promise<AxiosResponse>): Promise<AxiosResponse> {
+        const result = await this.do(requestFunc);
+        return result.rawResponse;
+    },
+    async runJs(filename: string, param: any) {
+        return await this.doRaw(() =>
+            axios.get('/js/run', {
+                params: {
+                    filename,
+                    ...param
+                }
+            })
+        );
+    },
+    async runJsSchema(filename: string, param: any = {}) {
+        return await this.runJs('/src/schemas/' + filename, param);
+    },
+    async clearJsCache() {
+        return await this.doRaw(() => axios.post('/js/clearCache'));
     }
 };
