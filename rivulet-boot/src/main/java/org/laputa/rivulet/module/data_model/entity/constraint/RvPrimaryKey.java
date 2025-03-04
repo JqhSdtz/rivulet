@@ -59,8 +59,8 @@ public class RvPrimaryKey extends RvEntity<String> implements DataModelEntityInt
 
     @Title("系统内置")
     @Comment("系统内置标记用于标记该主键是否是系统内置")
-    @Column(name = "built_in", nullable = false)
     @DefaultValue(Strings.FALSE)
+    @Column(name = "built_in", nullable = false)
     private Boolean builtIn;
 
     @Title("主键名称")

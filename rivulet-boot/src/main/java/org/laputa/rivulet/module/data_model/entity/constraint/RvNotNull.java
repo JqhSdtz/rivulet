@@ -40,12 +40,12 @@ public class RvNotNull extends RvEntity<String> implements DataModelEntityInterf
     @Column(name = "id", nullable = false, length = 64)
     private String id;
 
+    @Title("对应模型ID")
+    @Comment("非空约束所对应的数据模型的ID，使用外键关联")
     @JsonBackReference("notNulls")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne(cascade = CascadeType.PERSIST)
-    @Title("对应模型ID")
-    @Comment("非空约束所对应的数据模型的ID，使用外键关联")
     @JoinColumn(name = "prototype_id")
     private RvPrototype prototype;
 
@@ -75,11 +75,11 @@ public class RvNotNull extends RvEntity<String> implements DataModelEntityInterf
     @Column(name = "order_num")
     private Integer orderNum;
 
+    @Title("对应属性ID")
+    @Comment("非空约束所对应的数据模型的属性的ID，使用外键关联")
     @ManyToOne(cascade = CascadeType.PERSIST)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "column_id")
-    @Title("对应属性ID")
-    @Comment("非空约束所对应的数据模型的属性的ID，使用外键关联")
     private RvColumn column;
 
 }

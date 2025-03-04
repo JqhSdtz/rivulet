@@ -42,12 +42,12 @@ public class RvPrimaryKeyColumn extends RvEntity<String> {
     /**
      * 这里的@JoinColumn的nullable属性不能设为false，否则无法正确插入数据
      */
+    @Title("对应主键ID")
+    @Comment("该关联记录所对应的主键的ID，使用外键关联")
     @JsonBackReference("primaryKeyColumns")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne(cascade = CascadeType.PERSIST)
-    @Title("对应主键ID")
-    @Comment("该关联记录所对应的主键的ID，使用外键关联")
     @JoinColumn(name = "primary_key_id")
     private RvPrimaryKey primaryKey;
 
@@ -57,10 +57,10 @@ public class RvPrimaryKeyColumn extends RvEntity<String> {
     @DefaultValue(Strings.FALSE)
     private Boolean builtIn;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     @Title("对应属性ID")
     @Comment("该关联记录所对应的属性的ID，使用外键关联")
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "column_id")
     private RvColumn column;
 

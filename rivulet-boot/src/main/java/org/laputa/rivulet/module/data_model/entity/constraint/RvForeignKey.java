@@ -53,12 +53,12 @@ public class RvForeignKey extends RvEntity<String> implements DataModelEntityInt
     /**
      * 这里的@JoinColumn的nullable属性不能设为false，否则无法正确插入数据
      */
+    @Title("对应模型ID")
+    @Comment("外键所对应的数据模型的ID，使用外键关联")
     @JsonBackReference("foreignKeys")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne(cascade = CascadeType.PERSIST)
-    @Title("对应模型ID")
-    @Comment("外键所对应的数据模型的ID，使用外键关联")
     @JoinColumn(name = "prototype_id")
     private RvPrototype prototype;
 
@@ -83,11 +83,11 @@ public class RvForeignKey extends RvEntity<String> implements DataModelEntityInt
     @Column(name = "cascade_delete")
     private Boolean cascadeDelete;
 
+    @Title("目标模型ID")
+    @Comment("外键目标所对应的数据模型的ID")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne(cascade = CascadeType.PERSIST)
-    @Title("目标模型ID")
-    @Comment("外键目标所对应的数据模型的ID")
     @JoinColumn(name = "target_prototype_id")
     private RvPrototype targetPrototype;
 

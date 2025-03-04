@@ -42,12 +42,12 @@ public class RvUniqueColumn extends RvEntity<String> {
     /**
      * 这里的@JoinColumn的nullable属性不能设为false，否则无法正确插入数据
      */
+    @Title("对应唯一性约束ID")
+    @Comment("该关联记录所对应的唯一性约束的ID，使用外键关联")
     @JsonBackReference("uniqueColumns")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne(cascade = CascadeType.PERSIST)
-    @Title("对应唯一性约束ID")
-    @Comment("该关联记录所对应的唯一性约束的ID，使用外键关联")
     @JoinColumn(name = "unique_id")
     private RvUnique unique;
 
@@ -57,10 +57,10 @@ public class RvUniqueColumn extends RvEntity<String> {
     @DefaultValue(Strings.FALSE)
     private Boolean builtIn;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     @Title("对应属性ID")
     @Comment("该关联记录所对应的属性的ID，使用外键关联")
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "column_id")
     private RvColumn column;
 

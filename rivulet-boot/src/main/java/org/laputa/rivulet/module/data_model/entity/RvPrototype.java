@@ -63,14 +63,14 @@ public class RvPrototype extends RvEntity<String> implements DataModelEntityInte
 
     @Title("系统内置")
     @Comment("系统内置标记用于标记该模型是否是系统内置")
-    @Column(name = "built_in", nullable = false)
     @DefaultValue(Strings.FALSE)
+    @Column(name = "built_in", nullable = false)
     private Boolean builtIn;
 
     @Title("同步标记")
     @Comment("同步标记用于标识在系统中展示的模型结构是否已经同步到数据库表当中")
-    @Column(name = "db_sync_flag", nullable = false)
     @DefaultValue(Strings.FALSE)
+    @Column(name = "db_sync_flag", nullable = false)
     private Boolean syncFlag;
 
     @Title("备注")

@@ -112,13 +112,13 @@ public class RvColumn extends RvEntity<String> implements DataModelEntityInterfa
 
     @Title("可以为空")
     @Comment("可以为空标识用于标记该属性是否可以是空值")
-    @Column(name = "nullable")
     @DefaultValue(Strings.FALSE)
+    @Column(name = "nullable")
     private Boolean nullable;
 
     @Title("降序")
     @Comment("是否降序，MySQL8中有降序索引，如果为true，则在降序索引中该列标记为降序")
-    @Column(name = "descending")
     @DefaultValue(Strings.FALSE)
+    @Column(name = "descending")
     private Boolean descending;
 }
