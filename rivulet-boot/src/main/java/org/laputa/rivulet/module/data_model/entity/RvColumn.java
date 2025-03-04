@@ -77,48 +77,48 @@ public class RvColumn extends RvEntity<String> implements DataModelEntityInterfa
     private String dataType;
 
 
-    @Column(name = "auto_increment")
     @Title("自增")
     @Comment("自增标识用于标记当前属性在数据库中对应的字段是否为自增字段，即每插入一行数据，该字段自动在上一行的基础上+1，一般用于主键")
     @DefaultValue(Strings.FALSE)
+    @Column(name = "auto_increment")
     private Boolean autoIncrement;
 
-    @Column(name = "start_with")
     @Title("自增起点")
     @Comment("自增起点，仅自增标识为真时起作用")
     @DefaultValue("0")
+    @Column(name = "start_with")
     private BigInteger startWith;
 
-    @Column(name = "increment_by")
     @Title("自增步长")
     @Comment("自增步长，仅自增标识为真时起作用")
     @DefaultValue("1")
+    @Column(name = "increment_by")
     private BigInteger incrementBy;
 
-    @Column(name = "default_value")
     @Title("默认值")
     @Comment("属性默认值，新增一条数据时，若该属性为空，则自动赋默认值")
+    @Column(name = "default_value")
     private String defaultValue;
 
-    @Column(name = "remark")
     @Title("备注")
     @Comment("用于对该属性的作用作解释说明")
+    @Column(name = "remark")
     private String remark;
 
-    @Column(name = "order_num")
     @Title("排序号")
     @Comment("排序号用于按设定的顺序展示属性，与数据库中实际的顺序无关联")
+    @Column(name = "order_num")
     private Integer orderNum;
 
-    @Column(name = "nullable")
     @Title("可以为空")
     @Comment("可以为空标识用于标记该属性是否可以是空值")
+    @Column(name = "nullable")
     @DefaultValue(Strings.FALSE)
     private Boolean nullable;
 
-    @Column(name = "descending")
     @Title("降序")
     @Comment("是否降序，MySQL8中有降序索引，如果为true，则在降序索引中该列标记为降序")
+    @Column(name = "descending")
     @DefaultValue(Strings.FALSE)
     private Boolean descending;
 }

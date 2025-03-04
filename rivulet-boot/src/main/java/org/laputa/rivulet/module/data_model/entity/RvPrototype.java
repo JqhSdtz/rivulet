@@ -78,21 +78,21 @@ public class RvPrototype extends RvEntity<String> implements DataModelEntityInte
     @Column(name = "remark")
     private String remark;
 
-    @Column(name = "order_num")
     @Title("排序号")
     @Comment("排序号用于按设定的顺序展示属性，与数据库中实际的顺序无关联")
+    @Column(name = "order_num")
     private Integer orderNum;
 
-    @Column(name = "create_time")
     @Title("创建时间")
     @Comment("创建时间表示该数据模型新建的时间，类型为TimeStamp")
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "create_time")
     private Date createTime;
 
-    @Column(name = "update_time")
     @Title("更新时间")
     @Comment("更新时间表示该数据模型最近一次修改的时间，类型为TimeStamp")
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "update_time")
     private Date updateTime;
 
     @ManyToOne(cascade = CascadeType.PERSIST)
