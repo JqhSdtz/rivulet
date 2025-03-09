@@ -115,22 +115,19 @@ export default {
         }
         return result;
     },
+    async doPost(url: string, data: any): Promise<Result> {
+        return this.do(() => axios.post(url, data));
+    },
     async doRaw(requestFunc: () => Promise<AxiosResponse>): Promise<AxiosResponse> {
         const result = await this.do(requestFunc);
         return result.rawResponse;
     },
-    async runJs(filename: string, param: any) {
-        return await this.doRaw(() =>
-            axios.get('/js/run', {
-                params: {
-                    filename,
-                    ...param
-                }
-            })
-        );
+    async runJs(filename: string, data: any, withTransaction: boolean) {
+        const baseUrl = withTransaction ? '/js/runWithTransaction' : '/js/run';
+        return await this.doRaw(() => axios.post(baseUrl + '?filename=' + filename, data));
     },
-    async runJsSchema(filename: string, param: any = {}) {
-        const rawResponse = await this.runJs('/src/schemas/' + filename, param);
+    async runJsSchema(filename: string, data: any = {}) {
+        const rawResponse = await this.runJs('/src/schemas/' + filename, data, false);
         const result = rawResponse.data;
         result.payload = JSON.parse(result.payload, (_key, value) => {
             if (typeof value === 'string' && value.length > 7 && value.substring(0, 7) === '$RvFun$') {
@@ -139,6 +136,10 @@ export default {
             return value;
         });
         return rawResponse;
+    },
+    async runJsService(filename: string, data: any = {}): Promise<Result> {
+        const rawResponse = await this.runJs('/src/services/' + filename, data, true);
+        return rawResponse.data;
     },
     async clearJsCache() {
         return await this.doRaw(() => axios.post('/js/clearCache'));

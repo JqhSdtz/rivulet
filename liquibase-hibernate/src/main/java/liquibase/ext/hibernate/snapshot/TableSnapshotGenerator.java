@@ -56,6 +56,7 @@ public class TableSnapshotGenerator extends HibernateSnapshotGenerator {
         // !!!原本要给表加注释的话，需要用@org.hibernate.annotations.Table(appliesTo = "表名",comment="注释")
         // 的方式，太麻烦了，所以增加了一个注解，直接在这里添加注释
         Class tableClass = getTableClass(snapshot, hibernateTable.getName());
+        table.setAttribute(DatabaseObjectAttrName.TableClass, tableClass);
         if (tableClass != null && tableClass.isAnnotationPresent(TableComment.class)) {
             TableComment tableComment = (TableComment) tableClass.getAnnotation(TableComment.class);
             String oriComment = table.getRemarks();

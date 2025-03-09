@@ -4,6 +4,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
+import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.graalvm.polyglot.Context;
@@ -84,6 +85,11 @@ public class JsRunner {
             return Result.fail(Object.class, NOT_RUNNABLE, "脚本未设置运行接口");
         }
         return Result.succeed(result.asString());
+    }
+
+    @Transactional
+    public Result<Object> runScriptWithTransaction(String scriptPath) {
+        return runScript(scriptPath);
     }
 
     public Result<Void> clearCache() {

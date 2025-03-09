@@ -95,13 +95,13 @@ public class RvPrototype extends RvEntity<String> implements DataModelEntityInte
     @Column(name = "update_time")
     private Date updateTime;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.MERGE)
     @Title("创建人ID")
     @Comment("创建人ID为创建该数据模型的管理员的ID，使用外键关联")
     @JoinColumn(name = "created_by_id")
     private RvAdmin createdBy;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.MERGE)
     @Title("更新人ID")
     @Comment("更新人ID为最近一次更新该数据模型的管理员的ID，使用外键关联")
     @JoinColumn(name = "updated_by_id")

@@ -1,6 +1,8 @@
 package org.laputa.rivulet.module.app.service;
 
 import cn.hutool.core.io.FileUtil;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -17,11 +19,16 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author JQH
@@ -35,6 +42,8 @@ public class GitService implements ApplicationRunner {
 
     @Resource
     private GitProperty gitProperty;
+    @Resource
+    private FreeMarkerConfigurer freeMarkerConfigurer;
 
     /**
      * 业务代码git仓库
@@ -64,14 +73,12 @@ public class GitService implements ApplicationRunner {
             }
         } catch (IOException e) {
             throw new RuntimeException("git本地路径非法！");
-        } catch (GitAPIException e) {
-            throw e;
         }
     }
 
     @SneakyThrows
     public void removeBuiltInRvPrototypes(List<RvPrototype> rvPrototypes) {
-        if (rvPrototypes.size() == 0) return;
+        if (rvPrototypes.isEmpty()) return;
         RmCommand rmCommand = gitRepo.rm();
         rvPrototypes.forEach(rvPrototype -> {
             String filePath = "/prototypes/builtIn/" + rvPrototype.getCode();
@@ -81,17 +88,27 @@ public class GitService implements ApplicationRunner {
     }
 
     @SneakyThrows
-    public void addBuiltInRvPrototypes(List<RvPrototype> rvPrototypes) {
-        if (rvPrototypes.size() == 0) return;
+    public void addBuiltInRvPrototypes(List<Class> tableClasses) {
+        if (tableClasses.isEmpty()) return;
         AddCommand addCommand = gitRepo.add();
-        rvPrototypes.forEach(rvPrototype -> {
-            String filePath = "/prototypes/builtIn/" + rvPrototype.getCode() + ".js";
+        for (Class tableClass : tableClasses) {
+            String filePath = "/src/prototypes/builtIn/" + tableClass.getSimpleName() + ".js";
             File rvPrototypeFile = FileUtil.touch(FileUtil.normalize(gitProperty.getLocalDir() + File.separator + filePath));
-            String content = rvPrototype.getTitle();
-            if (content == null) content = rvPrototype.getCode();
+            String content = getContent(tableClass);
             FileUtil.writeString(content, rvPrototypeFile, StandardCharsets.UTF_8);
             addCommand.addFilepattern(filePath);
-        });
+        }
         addCommand.call();
+    }
+
+    @SneakyThrows
+    private String getContent(Class tableClass) {
+        Configuration configuration = freeMarkerConfigurer.getConfiguration();
+        Template template = configuration.getTemplate("script/builtInPrototype.ftlh");
+        Map<String, Object> dataModel = new HashMap<>();
+        dataModel.put("tableClass", tableClass);
+        StringWriter stringWriter = new StringWriter();
+        template.process(dataModel, stringWriter);
+        return stringWriter.toString();
     }
 }

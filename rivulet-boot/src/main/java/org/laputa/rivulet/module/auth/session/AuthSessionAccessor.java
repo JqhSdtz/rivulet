@@ -23,4 +23,8 @@ public class AuthSessionAccessor {
     public void invalidate() {
         httpSession.invalidate();
     }
+
+    public void test(Object test) {
+        System.out.println(test.getClass().getName());
+    }
 }

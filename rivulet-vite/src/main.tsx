@@ -5,6 +5,7 @@ import axios from 'axios';
 import remHelper from '@/utils/remHelper';
 import ReactDOM from 'react-dom';
 import moment from 'moment';
+import {registerRvValidateRules} from "@/utils/formilyUtil";
 
 moment.locale('zh-cn');
 
@@ -16,6 +17,8 @@ remHelper.initRem({
     pcOnly: true,
     responsive: true
 });
+
+registerRvValidateRules();
 
 const root = (
     <App/>

@@ -42,6 +42,7 @@ import org.laputa.rivulet.module.app.service.AppInitService;
 import org.laputa.rivulet.module.app.service.GitService;
 import org.laputa.rivulet.module.auth.entity.RvAdmin;
 import org.laputa.rivulet.module.auth.entity.dict.AdminType;
+import org.laputa.rivulet.module.auth.repository.RvAdminRepository;
 import org.laputa.rivulet.module.auth.util.PasswordUtil;
 import org.laputa.rivulet.module.data_model.entity.RvColumn;
 import org.laputa.rivulet.module.data_model.entity.RvIndex;
@@ -55,6 +56,7 @@ import org.laputa.rivulet.module.data_model.entity.inter.DataModelEntityInterfac
 import org.laputa.rivulet.module.data_model.repository.*;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
@@ -127,6 +129,8 @@ public class BuiltInDataModelService implements ApplicationRunner {
     @Getter
     private String currentStructureUpdateSql;
     private DatabaseChangeLog currentDatabaseChangeLog;
+    @Autowired
+    private RvAdminRepository rvAdminRepository;
 
     @PostConstruct
     private void postConstruct() {
@@ -325,11 +329,13 @@ public class BuiltInDataModelService implements ApplicationRunner {
         initialAdmin.setAdminName("admin");
         initialAdmin.setPassword(PasswordUtil.encode(RandomUtil.randomString(32)));
         initialAdmin.setAdminType(AdminType.INITIAL_ADMIN);
+        rvAdminRepository.save(initialAdmin);
         AtomicInteger rvPrototypeOrderNum = new AtomicInteger(0);
         tableSet.forEach(table -> toSaveRvPrototypeList.add(buildRvPrototype(table, rvPrototypeOrderNum.getAndIncrement(), rvPrototypeMap, initialAdmin)));
         // 每次启动都全量覆盖保存内部数据模型
+        List<Class> tableClasses = tableSet.stream().map(table -> table.getAttribute(DatabaseObjectAttrName.TableClass, Class.class)).toList();
         rvPrototypeRepository.saveAll(toSaveRvPrototypeList);
-        gitService.addBuiltInRvPrototypes(toSaveRvPrototypeList);
+        gitService.addBuiltInRvPrototypes(tableClasses);
         return Result.succeed();
     }
 

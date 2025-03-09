@@ -131,6 +131,7 @@ public class AppInitService implements ApplicationRunner {
         // 创建初始用户是一次性操作，所以如果已经被锁定则无需再执行任何操作
         return redissonLockUtil.doWithLock("createInitialAdmin", () -> {
             if (!testAppInitialized()) {
+                // 设置ID后，save就会执行update操作。jpa没有单独的update
                 rvAdmin.setId(getInitialAdminId());
                 rvAdmin.setPassword(PasswordUtil.encode(rvAdmin.getPassword()));
                 rvAdmin.setAdminType(AdminType.INITIAL_ADMIN);

@@ -17,6 +17,7 @@ import {getInitPagination, PaginationType, RvTableContext, RvTableContextType} f
 import {useUpdate} from 'ahooks';
 import {PlusOutlined} from '@ant-design/icons';
 import {TabsContext, TabsContextType} from "@/layouts/BasicLayout";
+import {ButtonProps} from "antd/lib/button";
 
 interface ObservableColumnSource {
     field: GeneralField;
@@ -454,7 +455,13 @@ ArrayTable.Column = () => {
 
 ArrayBase.mixin(ArrayTable);
 
-ArrayBase.Addition = (props) => {
+type RvArrayBaseAdditionProps = {
+    title?: string;
+    method?: 'push' | 'unshift';
+    defaultValue?: (items: any[]) => any;
+} & ButtonProps;
+
+ArrayBase.Addition = (props: RvArrayBaseAdditionProps) => {
     const self = useField();
     const array = ArrayBase.useArray();
     const prefixCls = usePrefixCls('formily-array-base');
@@ -471,16 +478,14 @@ ArrayBase.Addition = (props) => {
             className={cls(`${prefixCls}-addition`, props.className)}
             onClick={(e) => {
                 if (array.props?.disabled) return;
-                setTimeout(() => {
-                    const defaultValue = props.defaultValue ? props.defaultValue() : {};
-                    if (props.method === 'unshift') {
-                        array.field?.unshift?.(defaultValue);
-                        array.props?.onAdd?.(0);
-                    } else {
-                        array.field?.push?.(defaultValue);
-                        array.props?.onAdd?.(array?.field?.value?.length - 1);
-                    }
-                }, 0);
+                const defaultValue = props.defaultValue ? props.defaultValue(array.field.value) : {};
+                if (props.method === 'unshift') {
+                    array.field?.unshift?.(defaultValue);
+                    array.props?.onAdd?.(0);
+                } else {
+                    array.field?.push?.(defaultValue);
+                    array.props?.onAdd?.(array?.field?.value?.length - 1);
+                }
                 if (props.onClick) {
                     props.onClick(e);
                 }

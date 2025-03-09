@@ -1,42 +1,26 @@
 import {FormTab} from '@formily/antd';
-import {createSchemaField, FormProvider, useField} from '@formily/react';
-import axios from 'axios';
+import {createSchemaField, FormProvider} from '@formily/react';
 import {useMount, useRequest} from 'ahooks';
 import {PageLoading} from '@/layouts/BasicLayout';
 import {allComponents} from '@/utils/formilyUtil';
 import {useFormInstance} from '@/components/formily/hooks';
 import useUrlState from '@ahooksjs/use-url-state';
 import RvRequest from '@/utils/rvRequest';
-import {GeneralField, onFormValuesChange} from '@formily/core';
-import {IFieldProps} from '@formily/core/esm/types';
 
 const SchemaField = createSchemaField({
-    components: allComponents as any,
-    scope: {
-        getColumnOptions: (field: GeneralField & IFieldProps) => {
-            const columns = field.query('columns').value();
-            field.dataSource = columns.map(column => ({
-                label: column.title,
-                value: column.id
-            }));
-        },
-        findColumn: (form, id) => {
-            const columns = form.query('columns').value();
-            return columns.find(column => column.id === id);
-        }
-    }
+    components: allComponents as any
 });
 
 const formTab = FormTab.createFormTab();
 
-const FormComponent = (props) => {
+const FormComponent = props => {
     const form = useFormInstance();
     useMount(() => {
         form.setValues(props.values);
     });
     return (
         <FormProvider form={form}>
-            <SchemaField schema={props.schema} scope={{formTab}}/>
+            <SchemaField schema={props.schema} scope={{formTab}} />
         </FormProvider>
     );
 };
@@ -44,5 +28,5 @@ const FormComponent = (props) => {
 export default () => {
     const [urlState] = useUrlState();
     const {data, loading} = useRequest(() => RvRequest.runJsSchema('ModelDetail/index.mjs', urlState));
-    return loading ? <PageLoading/> : <FormComponent {...data.data.payload}/>;
-}
+    return loading ? <PageLoading /> : <FormComponent {...data.data.payload} />;
+};
