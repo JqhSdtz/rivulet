@@ -31,11 +31,11 @@ public class DataModelModifyConfirmInterceptor extends RvInterceptor {
     private AppState appState;
     @Resource
     private BuiltInDataModelService builtInDataModelService;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public List<String> getPathPatterns() {
-        return Arrays.asList("/**");
+        return List.of("/**");
     }
 
     @Override
@@ -64,8 +64,6 @@ public class DataModelModifyConfirmInterceptor extends RvInterceptor {
         try {
             String str = objectMapper.writeValueAsString(result);
             response.getWriter().write(str);
-        } catch (JsonProcessingException e) {
-            log.warn(e.getMessage());
         } catch (IOException e) {
             log.warn(e.getMessage());
         }

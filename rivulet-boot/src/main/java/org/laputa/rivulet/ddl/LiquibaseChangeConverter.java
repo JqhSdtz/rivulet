@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  */
 
 public class LiquibaseChangeConverter {
-    private Database database;
+    private final Database database;
 
     public LiquibaseChangeConverter(Database database) {
         this.database = database;

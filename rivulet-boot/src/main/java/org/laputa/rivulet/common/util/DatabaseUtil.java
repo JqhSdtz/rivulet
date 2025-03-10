@@ -20,10 +20,9 @@ public class DatabaseUtil {
     }
 
     public static String getTableNameByClass(Class<?> clazz) {
-        Annotation annotation = clazz.getAnnotation(Table.class);
+        Table annotation = clazz.getAnnotation(Table.class);
         if (annotation != null) {
-            Table table = (Table) annotation;
-            return table.name();
+            return annotation.name();
         }
         return null;
     }

@@ -145,7 +145,7 @@ public class AppInitService implements ApplicationRunner {
             } else {
                 return Result.fail("InitialAdminExists", "创建失败，已存在初始用户");
             }
-        }, Result.fail("InitialAdminIsLocked", "创建失败，其他线程或服务正在创建初始用户"));
+        }, Result.fail("InitialAdminIsLocked", "创建失败，其他线程或服务正在创建初始用户")).ofClass(Void.class);
     }
 
     public String getInitialAdminId() {

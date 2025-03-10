@@ -50,9 +50,9 @@ public class AccessLimitAspect implements ApplicationRunner {
     @Resource
     private HttpServletRequest request;
     private static final String GLOBAL_TARGET_REGISTER_SCRIPT = ResourceUtil.readUtf8Str("lua/access_limit/globalTargetRegister.lua");
-    private String methodRegisterKey = "METHOD";
-    private Map<String, Long> methodRegisterMap = new HashMap<>();
-    private Map<String, Map<String, String>> methodAccessMap = new HashMap<>();
+    private final String methodRegisterKey = "METHOD";
+    private final Map<String, Long> methodRegisterMap = new HashMap<>();
+    private final Map<String, Map<String, String>> methodAccessMap = new HashMap<>();
     private boolean initialized = false;
 
     /**

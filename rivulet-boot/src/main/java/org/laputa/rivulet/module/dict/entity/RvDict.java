@@ -1,14 +1,12 @@
 package org.laputa.rivulet.module.dict.entity;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Comment;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.*;
 import org.laputa.rivulet.common.entity.RvTree;
 
 /**
@@ -25,8 +23,7 @@ import org.laputa.rivulet.common.entity.RvTree;
 @Table(name = "rv_dict")
 public class RvDict extends RvTree<String> {
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid")
+    @UuidGenerator
     @Column(name = "id", nullable = false, length = 64)
     private String id;
 

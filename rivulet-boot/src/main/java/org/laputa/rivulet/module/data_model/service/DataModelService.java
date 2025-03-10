@@ -39,9 +39,6 @@ public class DataModelService {
 
     public Result<RvPrototype> queryOne(String id) {
         Optional<RvPrototype> rvPrototypeOptional = rvPrototypeRepository.findById(id);
-        if (rvPrototypeOptional.isEmpty()) {
-            return Result.fail(RvPrototype.class, "NoEntityFound", "未找到ID为" + id + "的实体");
-        }
-        return Result.succeed(rvPrototypeOptional.get());
+        return rvPrototypeOptional.map(Result::succeed).orElseGet(() -> Result.fail(RvPrototype.class, "NoEntityFound", "未找到ID为" + id + "的实体"));
     }
 }

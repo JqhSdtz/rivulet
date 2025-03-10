@@ -30,7 +30,7 @@ public abstract class RvEntity<PkType> implements Serializable {
             return false;
         }
         AbstractPersistable<?> that = (AbstractPersistable<?>) obj;
-        return null == this.getId() ? false : this.getId().equals(that.getId());
+        return null != this.getId() && this.getId().equals(that.getId());
     }
 
     @Override

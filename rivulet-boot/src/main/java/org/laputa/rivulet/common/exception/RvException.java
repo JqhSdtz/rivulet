@@ -1,21 +1,19 @@
 package org.laputa.rivulet.common.exception;
 
+import lombok.Getter;
 import org.laputa.rivulet.common.model.Result;
 
 /**
  * @author JQH
  * @since 下午 3:16 22/04/08
  */
+@Getter
 public class RvException extends RuntimeException {
 
-    private Result failResult;
+    private final Result<?> failResult;
 
-    public RvException(Result failResult) {
+    public RvException(Result<?> failResult) {
         this.failResult = failResult;
-    }
-
-    public Result getFailResult() {
-        return failResult;
     }
 
     /**

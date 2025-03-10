@@ -18,7 +18,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 /**
- * 来自 https://blog.csdn.net/qq_53316135/article/details/122195566
+ * 来自 <a href="https://blog.csdn.net/qq_53316135/article/details/122195566">...</a>
  * MultiRequestBody 解析器
  * 1、支持通过注解的 value 指定 JSON 的 key 来解析对象
  * 2、支持通过注解无 value，直接根据参数名来解析对象
@@ -29,7 +29,7 @@ import java.io.IOException;
  */
 public class RequestBodyParamResolver implements HandlerMethodArgumentResolver {
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final String JSON_REQUEST_BODY = "JSON_REQUEST_BODY";
 
     public RequestBodyParamResolver() {

@@ -27,7 +27,7 @@ import java.sql.SQLException;
 @Component
 public class LiquibaseDdlExecutor implements DisposableBean {
 
-    private LiquibaseChangeConverter converter;
+    private final LiquibaseChangeConverter converter;
     private final Database database;
 
     public LiquibaseDdlExecutor(DataSource dataSource) {

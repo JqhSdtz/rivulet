@@ -37,6 +37,7 @@ import org.laputa.rivulet.common.state.AppState;
 import org.laputa.rivulet.common.util.RedissonLockUtil;
 import org.laputa.rivulet.common.util.TerminalKeyUtil;
 import org.laputa.rivulet.common.util.TimeUnitUtil;
+import org.laputa.rivulet.common.util.TypeConvertUtil;
 import org.laputa.rivulet.module.app.property.TerminalKeyProperty;
 import org.laputa.rivulet.module.app.service.AppInitService;
 import org.laputa.rivulet.module.app.service.GitService;
@@ -163,7 +164,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
         }
         doStructureUpdate();
         refreshStructureUpdateSql();
-        if (!appState.isBuiltInDataModelSynced())  {
+        if (!appState.isBuiltInDataModelSynced()) {
             String currentStructureUpdateSql = getCurrentStructureUpdateSql();
             Result<String> updateStructureResult = Result.fail(String.class, "requireConfirmUpdateSql", "需要确认内部数据模型更新的SQL");
             updateStructureResult.setPayload(currentStructureUpdateSql);
@@ -333,7 +334,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
         AtomicInteger rvPrototypeOrderNum = new AtomicInteger(0);
         tableSet.forEach(table -> toSaveRvPrototypeList.add(buildRvPrototype(table, rvPrototypeOrderNum.getAndIncrement(), rvPrototypeMap, initialAdmin)));
         // 每次启动都全量覆盖保存内部数据模型
-        List<Class> tableClasses = tableSet.stream().map(table -> table.getAttribute(DatabaseObjectAttrName.TableClass, Class.class)).toList();
+        List<Class<?>> tableClasses = TypeConvertUtil.streamToList(tableSet.stream().map(table -> table.getAttribute(DatabaseObjectAttrName.TableClass, Class.class)));
         rvPrototypeRepository.saveAll(toSaveRvPrototypeList);
         gitService.addBuiltInRvPrototypes(tableClasses);
         return Result.succeed();
@@ -656,7 +657,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
         // columnFieldMap只需要初始化一次即可
         if (this.columnFieldMap.isEmpty()) {
             entityBindingMap.forEach((className, entity) -> {
-                Class entityClass = entity.getMappedClass();
+                Class<?> entityClass = entity.getMappedClass();
                 for (Field field : entityClass.getFields()) {
                     Property property = entity.getProperty(field.getName());
                     String tableName = entity.getTable().getName();

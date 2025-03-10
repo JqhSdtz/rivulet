@@ -88,10 +88,10 @@ public class GitService implements ApplicationRunner {
     }
 
     @SneakyThrows
-    public void addBuiltInRvPrototypes(List<Class> tableClasses) {
+    public void addBuiltInRvPrototypes(List<Class<?>> tableClasses) {
         if (tableClasses.isEmpty()) return;
         AddCommand addCommand = gitRepo.add();
-        for (Class tableClass : tableClasses) {
+        for (Class<?> tableClass : tableClasses) {
             String filePath = "/src/prototypes/builtIn/" + tableClass.getSimpleName() + ".js";
             File rvPrototypeFile = FileUtil.touch(FileUtil.normalize(gitProperty.getLocalDir() + File.separator + filePath));
             String content = getContent(tableClass);

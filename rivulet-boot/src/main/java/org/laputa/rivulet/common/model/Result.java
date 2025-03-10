@@ -1,8 +1,11 @@
 package org.laputa.rivulet.common.model;
 
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.lang.TypeReference;
 import lombok.Getter;
 import lombok.Setter;
 import org.laputa.rivulet.common.exception.RvException;
+import org.laputa.rivulet.common.util.TypeConvertUtil;
 
 /**
  * @author JQH
@@ -48,14 +51,14 @@ public class Result<ResultType> {
     }
 
     public static <T> Result<T> succeed(T payload, String returnMessage) {
-        Result result = new Result(true);
+        Result<T> result = new Result<>(true);
         result.setPayload(payload);
         result.setReturnMessage(returnMessage);
         return result;
     }
 
     public static <T> Result<T> fail(Class<T> clazz, String errorCode, String errorMessage, T payload) {
-        Result result = new Result<>(false);
+        Result<T> result = new Result<>(false);
         result.setErrorCode(errorCode);
         result.setErrorMessage(errorMessage);
         result.setPayload(payload);
@@ -79,10 +82,13 @@ public class Result<ResultType> {
      * @return
      */
     public <T> Result<T> ofClass(Class<T> clazz) {
+        T convertedPayload = TypeConvertUtil.convert(new TypeReference<>() {
+        }, this.payload);
         if (this.successful) {
-            return succeed((T) this.payload);
+            return succeed(Convert.convert(new TypeReference<>() {
+            }, convertedPayload));
         } else {
-            return fail(clazz, this.errorCode, this.errorMessage, (T) this.payload);
+            return fail(clazz, this.errorCode, this.errorMessage, convertedPayload);
         }
     }
 

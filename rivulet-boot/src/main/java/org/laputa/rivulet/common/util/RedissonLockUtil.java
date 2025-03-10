@@ -17,15 +17,15 @@ import java.util.Map;
 public class RedissonLockUtil {
     @Resource
     private RedissonClient redissonClient;
-    private Map<String, RLock> lockMap = new HashMap<>();
+    private final Map<String, RLock> lockMap = new HashMap<>();
     public interface DoInLockInterface {
-        Result doInLock();
+        Result<?> doInLock();
     }
-    public Result doWithLock(String name, DoInLockInterface doInLockInterface) {
-        Result failResult = Result.fail("lockWaitFail", "分布式锁等待超时");
+    public Result<?> doWithLock(String name, DoInLockInterface doInLockInterface) {
+        Result<?> failResult = Result.fail("lockWaitFail", "分布式锁等待超时");
         return doWithLock(name, doInLockInterface, failResult);
     }
-    public Result doWithLock(String name, DoInLockInterface doInLockInterface, Result failResult) {
+    public Result<?> doWithLock(String name, DoInLockInterface doInLockInterface, Result<?> failResult) {
         RLock lock = lockMap.get(name);
         if (lock == null) {
             lock = redissonClient.getLock(name);
