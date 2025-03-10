@@ -82,7 +82,7 @@ public class AccessLimitAspect implements ApplicationRunner {
             }
         }
         long maxRedisLevelMethodCode = 0L;
-        if (redisLevelMethodNameList.size() != 0) {
+        if (!redisLevelMethodNameList.isEmpty()) {
             List<List<Object>> resList = redissonClient.getScript()
                     .eval(RScript.Mode.READ_WRITE, GLOBAL_TARGET_REGISTER_SCRIPT, RScript.ReturnType.MULTI, Arrays.asList(methodRegisterKey), redisLevelMethodNameList.toArray());
             int successCnt = 0;
@@ -95,7 +95,7 @@ public class AccessLimitAspect implements ApplicationRunner {
             }
             log.info("注册Redis级别访问限制方法" + successCnt + "个");
         }
-        if (localLevelMethodNameList.size() != 0) {
+        if (!localLevelMethodNameList.isEmpty()) {
             for (int i = 0; i < localLevelMethodNameList.size(); ++i) {
                 // 从redis级别的方法编号的最大值往后排号
                 methodRegisterMap.put(localLevelMethodNameList.get(i), maxRedisLevelMethodCode + i + 1);
@@ -148,7 +148,7 @@ public class AccessLimitAspect implements ApplicationRunner {
             }
         }
         Parameter[] parameters = method.getParameters();
-        RvEntity target = null;
+        RvEntity<?> target = null;
         Object[] args = joinPoint.getArgs();
         for (int i = 0; i < parameters.length; ++i) {
             Parameter parameter = parameters[i];
@@ -156,10 +156,10 @@ public class AccessLimitAspect implements ApplicationRunner {
             if (parameter.isAnnotationPresent(AccessLimitTarget.class)) {
                 AccessLimitTarget limitTarget = parameter.getAnnotation(AccessLimitTarget.class);
                 if (argValue instanceof RvEntity) {
-                    target = (RvEntity) argValue;
+                    target = (RvEntity<?>) argValue;
                     if (!"".equals(limitTarget.byMethod())) {
                         String methodName = limitTarget.byMethod();
-                        target = (RvEntity) target.getClass().getDeclaredMethod(methodName).invoke(target);
+                        target = (RvEntity<?>) target.getClass().getDeclaredMethod(methodName).invoke(target);
                     }
                 }
             }
@@ -196,7 +196,7 @@ public class AccessLimitAspect implements ApplicationRunner {
      * @param limits
      * @return
      */
-    private boolean doAccessLimit(Method method, RvEntity target, AccessLimit[] limits) {
+    private boolean doAccessLimit(Method method, RvEntity<?> target, AccessLimit[] limits) {
         boolean isRedisLevel = false;
         if (method.isAnnotationPresent(AccessLimitLevel.class)) {
             AccessLimitLevel level = method.getAnnotation(AccessLimitLevel.class);
@@ -268,7 +268,7 @@ public class AccessLimitAspect implements ApplicationRunner {
             // 否则，没有超过限制访问间隔时间，且达到允许访问次数，则禁止访问
             result = false;
         }
-        String accessStr = "";
+        StringBuilder accessStr = new StringBuilder();
         boolean isFirst = true;
         for (Map.Entry<String, Long[]> entry : accessMap.entrySet()) {
             String timeUnit = entry.getKey();
@@ -276,14 +276,14 @@ public class AccessLimitAspect implements ApplicationRunner {
             Long accessTime = accessValue[0];
             Long accessCount = accessValue[1];
             String str = timeUnit + "@" + accessTime + "@" + accessCount;
-            accessStr += (isFirst ? "" : "#") + str;
+            accessStr.append(isFirst ? "" : "#").append(str);
             isFirst = false;
         }
         if (isRedisLevel) {
-            redissonClient.getMap(redisAccessMapKey).put(targetId, accessStr);
+            redissonClient.getMap(redisAccessMapKey).put(targetId, accessStr.toString());
         } else {
             // 在getLocalLastAccessStr中已经初始化了对应的Map，所以可以直接调用put
-            methodAccessMap.get(redisAccessMapKey).put(targetId, accessStr);
+            methodAccessMap.get(redisAccessMapKey).put(targetId, accessStr.toString());
         }
         return result;
     }
@@ -299,11 +299,7 @@ public class AccessLimitAspect implements ApplicationRunner {
     }
 
     private String getLocalLastAccessStr(String accessMapKey, String targetId) {
-        Map<String, String> accessMap = methodAccessMap.get(accessMapKey);
-        if (accessMap == null) {
-            accessMap = new HashMap<>();
-            methodAccessMap.put(accessMapKey, accessMap);
-        }
+        Map<String, String> accessMap = methodAccessMap.computeIfAbsent(accessMapKey, k -> new HashMap<>());
         return accessMap.get(targetId);
     }
 
