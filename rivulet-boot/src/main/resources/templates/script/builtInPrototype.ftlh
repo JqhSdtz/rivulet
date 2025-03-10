@@ -11,7 +11,7 @@ export class ${tableClass.getSimpleName()} {
 
     getJavaObject() {return this.javaObject;}
 
-<#list tableClass.getMethods() as method>
+<#list sortedMethods as method>
     ${method.getName()}(<#list method.getParameters() as param>${(param?index != 0)?string(',' ,'')}${param.getName()}</#list>) {return this.javaObject.${method.getName()}(<#list method.getParameters() as param>${(param?index != 0)?string(',' ,'')}${param.getName()}</#list>);}
 </#list>
 }
