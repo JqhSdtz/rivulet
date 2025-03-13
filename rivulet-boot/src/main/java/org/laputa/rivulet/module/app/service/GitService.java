@@ -26,9 +26,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author JQH
@@ -102,10 +100,12 @@ public class GitService implements ApplicationRunner {
     }
 
     @SneakyThrows
-    private String getContent(Class tableClass) {
+    private String getContent(Class<?> tableClass) {
         Configuration configuration = freeMarkerConfigurer.getConfiguration();
         Template template = configuration.getTemplate("script/builtInPrototype.ftlh");
         Map<String, Object> dataModel = new HashMap<>();
+        List<Method> sortedMethods = Arrays.stream(tableClass.getMethods()).sorted(Comparator.comparing(Method::getName)).toList();
+        dataModel.put("sortedMethods", sortedMethods);
         dataModel.put("tableClass", tableClass);
         StringWriter stringWriter = new StringWriter();
         template.process(dataModel, stringWriter);
