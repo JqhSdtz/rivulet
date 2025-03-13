@@ -11,8 +11,6 @@ const SchemaField = createSchemaField({
     components: allComponents as any
 });
 
-const formTab = FormTab.createFormTab();
-
 const FormComponent = props => {
     const form = useFormInstance();
     useMount(() => {
@@ -20,7 +18,7 @@ const FormComponent = props => {
     });
     return (
         <FormProvider form={form}>
-            <SchemaField schema={props.schema} scope={{formTab}} />
+            <SchemaField schema={props.schema} />
         </FormProvider>
     );
 };

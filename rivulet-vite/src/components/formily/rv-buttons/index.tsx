@@ -7,9 +7,9 @@ import {RecursionField, Schema, useForm, useParentForm} from '@formily/react';
 import {RvTableContext} from '@/components/formily';
 import {useRvModal} from '@/components/common/RvModal';
 import RvRequest from '@/utils/rvRequest';
-import axios from 'axios';
 import {Form, ObjectField} from '@formily/core';
 import {Result} from '@/types/result';
+import {useFormInstance} from "@/components/formily/hooks";
 
 type LinkButtonProps = {
     to: string;
@@ -60,7 +60,7 @@ type SubmitButtonProps = {
     url: string;
 } & ButtonProps;
 export const RvSubmitButton = (props: SubmitButtonProps) => {
-    const form = useForm();
+    const form = useFormInstance();
     const rvModal = useRvModal();
     let [isLoading, setLoading] = useState(false);
     const onClick = () => {

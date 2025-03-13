@@ -1,12 +1,14 @@
 import {FormTab} from '@formily/antd';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Button, TabsProps} from 'antd';
 import {markRaw, model} from '@formily/reactive';
-import {RecursionField, Schema, useParentForm} from '@formily/react';
+import {RecursionField, Schema, useForm, useParentForm} from '@formily/react';
 import axios from 'axios';
 import RvRequest from '@/utils/rvRequest';
 import {useRvModal} from '@/components/common/RvModal';
 import {useCreation} from 'ahooks';
+import {useFormInstance} from '@/components/formily/hooks';
+import {Form, onFieldValueChange, onFormValuesChange} from '@formily/core';
 
 // 来自formily/antd中的form-tab组件
 const createFormTab = (defaultActiveKey?: string) => {
@@ -19,13 +21,24 @@ const createFormTab = (defaultActiveKey?: string) => {
     return markRaw(formTab);
 };
 
-export const RvFormTab: React.FC<TabsProps & {formTab: any; extraList: Schema[]}> = props => {
-    const tabProps = {...props};
+type RvFormTabProps = {
+    formTab: any;
+    extraList: Schema[];
+    onFormValuesChangeCallback?: (form: Form) => void;
+} & TabsProps;
+export const RvFormTab: React.FC<RvFormTabProps> = props => {
+    const {onFormValuesChangeCallback, extraList, ...tabProps} = props;
+    const form = useFormInstance();
+    useEffect(() => {
+        form.addEffects(form.id, () => {
+            onFormValuesChange(onFormValuesChangeCallback);
+        });
+    }, [form]);
     // 手动设置formTab，防止所有formTab共用一个实例，导致无法在不同的标签页下打开不同的tab
     tabProps.formTab = useCreation(() => createFormTab(), []);
     tabProps.tabBarExtraContent = (
         <>
-            {tabProps.extraList.map((extra, index) => (
+            {extraList.map((extra, index) => (
                 <div key={index} style={{display: 'inline-block', marginRight: '1rem'}}>
                     <RecursionField schema={extra} />
                 </div>

@@ -6,6 +6,7 @@ import {filterEmptyString} from '@/utils/formilyUtil';
 import {Result} from '@/types/result';
 import RvRequest from '@/utils/rvRequest';
 import {useRvModal} from '@/components/common/RvModal';
+import {useFormInstance} from "@/components/formily/hooks";
 
 interface RvTableProps {
     baseUrl: string;
@@ -46,7 +47,7 @@ export const RvTable: React.FC<RvTableProps> = (props) => {
     const [pagination, setPagination] = useState<PaginationType>(initPagination);
     const {data, loading, runAsync} = useRequest<any, any[]>(queryRequest);
     const result = data?.data as Result;
-    const form = useForm();
+    const form = useFormInstance();
     const query = (queryPagination) => {
         const params = {
             payload: form.getValuesIn('toolbar'),
