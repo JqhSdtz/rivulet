@@ -1,7 +1,7 @@
 package org.laputa.rivulet.module.data_model.interceptor;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -46,7 +46,7 @@ public class DataModelModifyConfirmInterceptor extends RvInterceptor {
     @SneakyThrows
     @Override
     @AccessLimit(times = 40, duration = 10, unit = LimitTimeUnit.SECOND)
-    public boolean preHandle(@NotNull HttpServletRequest request, HttpServletResponse response, Object handler) {
+    public boolean preHandle(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull Object handler) {
         if (appState.isBuiltInDataModelSynced()) return true;
         builtInDataModelService.refreshStructureUpdateSql();
         // 执行getStructureUpdateSql会再进行一次对比，有可能已经同步完成

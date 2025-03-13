@@ -1,5 +1,6 @@
 package org.laputa.rivulet.common.mvc.config;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Resource;
 import jakarta.validation.constraints.NotNull;
 import org.laputa.rivulet.common.mvc.interceptor.RvInterceptor;
@@ -23,7 +24,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private DataModelModifyConfirmInterceptor dataModelModifyConfirmInterceptor;
 
     @Override
-    public void addInterceptors(@NotNull InterceptorRegistry registry) {
+    public void addInterceptors(@Nonnull InterceptorRegistry registry) {
         registerInterceptor(registry, dataModelModifyConfirmInterceptor);
     }
 
