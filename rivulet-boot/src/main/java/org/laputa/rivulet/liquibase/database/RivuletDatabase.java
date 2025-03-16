@@ -1,5 +1,6 @@
 package org.laputa.rivulet.liquibase.database;
 
+import cn.hutool.core.lang.TypeReference;
 import cn.hutool.core.util.ReflectUtil;
 import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
@@ -14,10 +15,12 @@ import org.hibernate.engine.jdbc.connections.spi.DatabaseConnectionInfo;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.hibernate.type.spi.TypeConfiguration;
 import org.laputa.rivulet.common.util.SpringBeanUtil;
+import org.laputa.rivulet.common.util.TypeConvertUtil;
 import org.laputa.rivulet.liquibase.database.connection.RvDriver;
 import org.laputa.rivulet.module.data_model.entity.RvPrototype;
 import org.laputa.rivulet.module.data_model.repository.RvPrototypeRepository;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
+import org.springframework.lang.NonNull;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -70,7 +73,8 @@ public abstract class RivuletDatabase extends AbstractJdbcDatabase {
         this.typeConfiguration = new TypeConfiguration();
         String dialectClassName = jpaProperties.getProperties().get("hibernate.dialect");
         if (dialectClassName != null) {
-            Class<? extends Dialect> dialectClass = (Class<? extends Dialect>) Class.forName(dialectClassName);
+            Class<? extends Dialect> dialectClass = TypeConvertUtil.convert(new TypeReference<>() {
+            }, Class.forName(dialectClassName));
             dbmsDialect = dialectClass.getDeclaredConstructor().newInstance();
             this.resolveSqlTypeCodeMethod = ReflectUtil.getMethodByName(dialectClass, "resolveSqlTypeCode");
         }
@@ -180,12 +184,12 @@ public abstract class RivuletDatabase extends AbstractJdbcDatabase {
         }
 
         @Override
-        public boolean isUnwrappableAs(Class unwrapType) {
+        public boolean isUnwrappableAs(@NonNull Class unwrapType) {
             return false;
         }
 
         @Override
-        public <T> T unwrap(Class<T> unwrapType) {
+        public <T> T unwrap(@NonNull Class<T> unwrapType) {
             return null;
         }
 
