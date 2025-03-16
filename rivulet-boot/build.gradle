@@ -87,15 +87,18 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-freemarker'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.springframework.session:spring-session-core:3.4.1'
     implementation 'org.springframework.session:spring-session-data-redis:3.4.1'
     implementation 'org.postgresql:postgresql:42.7.2'
-    implementation 'com.alibaba:druid-spring-boot-starter:1.2.14'
+    implementation 'com.alibaba:druid-spring-boot-3-starter:1.2.24'
     implementation 'org.redisson:redisson-spring-boot-starter:3.44.0'
     implementation 'org.liquibase:liquibase-core:4.31.0'
     implementation 'org.liquibase.ext:liquibase-hibernate6:4.31.0-SNAPSHOT'
 //    springboot jpa中的hibernate还是6.6.5，所以这里版本也设置为6.6.5
     implementation 'org.hibernate:hibernate-envers:6.6.5.Final'
+    implementation 'org.hibernate.orm:hibernate-jcache:6.6.5.Final'
+    implementation "org.ehcache:ehcache:3.10.8"
     implementation 'org.eclipse.jgit:org.eclipse.jgit:6.6.1.202309021850-r'
     implementation 'cn.hutool:hutool-core:5.8.35'
     implementation 'cn.hutool:hutool-crypto:5.8.35'
@@ -108,6 +111,8 @@ dependencies {
     implementation "org.graalvm.js:js:24.1.2"
     implementation "jakarta.persistence:jakarta.persistence-api:3.1.0"
     implementation 'org.yaml:snakeyaml:2.0'
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    implementation 'com.sun.xml.bind:jaxb-impl:2.3.1'
 //    implementation 'org.liquibase.gradle:org.liquibase.gradle.gradle.plugin:3.0.0'
     compileOnly 'org.projectlombok:lombok'
     compileOnly 'org.springframework.boot:spring-boot-configuration-processor'

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Table;
 import liquibase.ext.hibernate.annotation.DefaultValue;
 import liquibase.ext.hibernate.annotation.TableComment;
 import liquibase.ext.hibernate.annotation.Title;
@@ -12,10 +14,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Comment;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.annotations.*;
+import org.hibernate.annotations.Cache;
 import org.laputa.rivulet.common.constant.Strings;
 import org.laputa.rivulet.common.entity.RvEntity;
 import org.laputa.rivulet.module.auth.entity.RvAdmin;
@@ -37,6 +37,8 @@ import java.util.List;
 @Setter
 @ToString
 @RequiredArgsConstructor
+@Cacheable
+@Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @DynamicInsert
 @DynamicUpdate
@@ -96,17 +98,20 @@ public class RvPrototype extends RvEntity<String> implements DataModelEntityInte
     private Date updateTime;
 
     @ManyToOne(cascade = CascadeType.MERGE)
+    @Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     @Title("创建人ID")
     @Comment("创建人ID为创建该数据模型的管理员的ID，使用外键关联")
     @JoinColumn(name = "created_by_id")
     private RvAdmin createdBy;
 
     @ManyToOne(cascade = CascadeType.MERGE)
+    @Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     @Title("更新人ID")
     @Comment("更新人ID为最近一次更新该数据模型的管理员的ID，使用外键关联")
     @JoinColumn(name = "updated_by_id")
     private RvAdmin updatedBy;
 
+    @Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     @JsonManagedReference("columns")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "prototype")
     private List<RvColumn> columns;
@@ -120,6 +125,7 @@ public class RvPrototype extends RvEntity<String> implements DataModelEntityInte
         columns.forEach(column -> column.setPrototype(this));
     }
 
+    @Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     @JsonManagedReference("indexes")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "prototype")
     private List<RvIndex> indexes;
@@ -133,6 +139,7 @@ public class RvPrototype extends RvEntity<String> implements DataModelEntityInte
         indexes.forEach(index -> index.setPrototype(this));
     }
 
+    @Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     @JsonManagedReference("primaryKey")
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "prototype")
     private RvPrimaryKey primaryKey;
@@ -146,6 +153,7 @@ public class RvPrototype extends RvEntity<String> implements DataModelEntityInte
         primaryKey.setPrototype(this);
     }
 
+    @Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     @JsonManagedReference("foreignKeys")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "prototype")
     private List<RvForeignKey> foreignKeys;
@@ -159,6 +167,7 @@ public class RvPrototype extends RvEntity<String> implements DataModelEntityInte
         foreignKeys.forEach(foreignKey -> foreignKey.setPrototype(this));
     }
 
+    @Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     @JsonManagedReference("uniques")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "prototype")
     private List<RvUnique> uniques;
@@ -172,6 +181,7 @@ public class RvPrototype extends RvEntity<String> implements DataModelEntityInte
         uniques.forEach(unique -> unique.setPrototype(this));
     }
 
+    @Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     @JsonManagedReference("notNulls")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "prototype")
     private List<RvNotNull> notNulls;

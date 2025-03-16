@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.*;
+import org.hibernate.annotations.Cache;
 import org.laputa.rivulet.common.constant.Strings;
 import org.laputa.rivulet.common.entity.RvEntity;
 import org.laputa.rivulet.module.data_model.entity.inter.DataModelEntityInterface;
@@ -27,6 +28,8 @@ import java.math.BigInteger;
 @Setter
 @ToString
 @RequiredArgsConstructor
+@Cacheable
+@Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
 @DynamicInsert
 @DynamicUpdate
 @Title("数据模型属性")

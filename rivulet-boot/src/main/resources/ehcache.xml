@@ -1,0 +1,24 @@
+<config
+        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+        xmlns='http://www.ehcache.org/v3'
+        xmlns:jsr107='http://www.ehcache.org/v3/jsr107'>
+
+    <service>
+        <jsr107:defaults enable-statistics="true"/>
+    </service>
+
+    <cache-template name="defaultTemplate">
+        <expiry>
+            <ttl unit="minutes">720</ttl>
+        </expiry>
+        <resources>
+            <heap>5000</heap>
+        </resources>
+    </cache-template>
+
+    <cache alias="defaultCache" uses-template="defaultTemplate">
+        <expiry>
+            <none/>
+        </expiry>
+    </cache>
+</config>

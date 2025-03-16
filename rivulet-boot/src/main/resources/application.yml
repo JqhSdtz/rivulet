@@ -1,7 +1,10 @@
 logging:
     level:
-        root: info
+        root: warn
         liquibase: warn
+        org.hibernate.sql: warn
+        org.hibernate.type.descriptor.sql.BasicBinder: warn
+        org.hibernate.orm.cache: trace
 
 server:
     port: 8081
@@ -35,10 +38,22 @@ spring:
         hibernate:
             ddl-auto: validate
         properties:
+            javax.persistence.sharedCache.mode: ENABLE_SELECTIVE
             hibernate:
                 dialect: org.hibernate.dialect.PostgreSQLDialect
                 new_generator_mappings: false
-                format_sql: true
+                format_sql: false
+                generate_statistics: true
+                javax.cache:
+                    missing_cache_strategy: create
+                    provider: org.ehcache.jsr107.EhcacheCachingProvider
+                    uri: classpath:ehcache.xml
+                cache:
+                    use_second_level_cache: true
+                    use_query_cache: true
+#                    org.hibernate.cache.jcache.internal.JCacheRegionFactory是JCacheRegionFactory最新的位置，在github搜这个路径
+#                    可以避免搜到过时的代码
+                    region.factory_class: org.hibernate.cache.jcache.internal.JCacheRegionFactory
     datasource:
         # 因为MySQL和MariaDB无法部分更新Column属性，会导致更新一个属性，丢失另一个属性，所以不用
         # 详见 https://github.com/liquibase/liquibase/pull/3045
