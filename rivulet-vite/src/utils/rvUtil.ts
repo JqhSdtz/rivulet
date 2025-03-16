@@ -8,7 +8,7 @@ function fillFlattedItemList(flattedItemList: any[], itemList: any[], linkField:
 }
 
 export default {
-    equalAndNotEmpty(obj1, obj2) {
+    equalAndNotEmpty(obj1: any, obj2: any) {
         if (obj1 === null || typeof obj1 === 'undefined') {
             return false;
         } else if (obj2 === null || typeof obj2 === 'undefined') {
@@ -17,7 +17,7 @@ export default {
             return obj1 === obj2;
         }
     },
-    mergeObject(target, obj, preserveTarget: boolean = false) {
+    mergeObject(target: any, obj: any, preserveTarget: boolean = false) {
         if (!target || !obj) return;
         for (const [key, value] of Object.entries(obj)) {
             if (preserveTarget && typeof target[key] !== 'undefined') {
@@ -30,5 +30,8 @@ export default {
         const flattedItemList = [];
         fillFlattedItemList(flattedItemList, itemList, linkField);
         return flattedItemList;
+    },
+    isUndefined(obj: any) {
+        return typeof obj === 'undefined';
     }
 };

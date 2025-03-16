@@ -7,6 +7,7 @@ import ReactDOM from 'react-dom';
 import './index.less';
 import {Result} from '@/types/result';
 import {useRvModal} from '@/components/common/RvModal';
+import rvUtil from "@/utils/rvUtil";
 
 function wrapRequestFunction(oriRequest: () => Promise<AxiosResponse>): () => Promise<Result> {
     return () =>
@@ -129,6 +130,10 @@ export default {
     async runJsSchema(filename: string, data: any = {}) {
         const rawResponse = await this.runJs('/src/schemas/' + filename, data, false);
         const result = rawResponse.data;
+        // 这里是为schema中通过wrapFunctionToStr包裹的函数传递上下文，因为其函数最终都是在当前上下文中执行，所以直接通过this就可以设置上下文
+        this.$rvScope = {
+            rvUtil
+        };
         result.payload = JSON.parse(result.payload, (_key, value) => {
             if (typeof value === 'string' && value.length > 7 && value.substring(0, 7) === '$RvFun$') {
                 return eval(value.substring(7, value.length));
