@@ -2,7 +2,7 @@ logging:
     level:
         root: warn
         liquibase: warn
-        org.hibernate.sql: warn
+        org.hibernate.sql: trace
         org.hibernate.type.descriptor.sql.BasicBinder: warn
         org.hibernate.orm.cache: trace
 
@@ -33,7 +33,7 @@ spring:
     liquibase:
         enabled: false # 禁止springboot自动调用liquibase
     jpa:
-        show-sql: false
+        show-sql: true
         open-in-view: true
         hibernate:
             ddl-auto: validate
@@ -61,21 +61,8 @@ spring:
         username: username
         password: password
         driver-class-name: org.postgresql.Driver
-        druid:
-            #initial-size: 5 # 连接池初始化大小
-            #min-idle: 10 # 最小空闲连接数
-            #max-active: 20 # 最大连接数
-            filters: stat,wall,slf4j
-            web-stat-filter:
-                enabled: true
-                url-pattern: /*
-                exclusions: "*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*"
-            stat-view-servlet:
-                enabled: true
-                url-pattern: /druid/*
-                reset-enable: false
-                login-username: username
-                login-password: password
+        hikari:
+            maximum-pool-size: 10
     servlet:
         multipart:
             max-file-size: 10MB
