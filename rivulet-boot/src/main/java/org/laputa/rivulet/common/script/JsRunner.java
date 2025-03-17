@@ -11,6 +11,7 @@ import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
+import org.laputa.rivulet.common.exception.RvException;
 import org.laputa.rivulet.common.model.Result;
 import org.laputa.rivulet.module.app.property.GitProperty;
 import org.springframework.stereotype.Component;
@@ -43,31 +44,37 @@ public class JsRunner {
     }
 
     private Value doRun(String scriptPath) throws Exception {
+        if (scriptPath == null || scriptPath.isEmpty()) {
+            throw new RvException(Result.fail("EmptyScriptPath", "脚本路径为空"));
+        }
+        String[] parts = scriptPath.split("#");
+        String filePath = parts.length > 1 ? parts[0] : scriptPath;
+        String methodName = parts.length > 1 ? parts[1] : "run";
         Source source = sourceCache.getIfPresent(scriptPath);
         Context context = contextPool.borrowObject();
         Value value;
         if (source == null) {
             try {
-                source = Source.newBuilder("js", new File(gitProperty.getLocalDir() + scriptPath))
+                source = Source.newBuilder("js", new File(gitProperty.getLocalDir() + filePath))
                         .mimeType("application/javascript+module")
                         .cached(true)
                         .build();
             } catch (NoSuchFileException exception) {
                 return context.asValue(NO_SUCH_FILE);
             }
-            sourceCache.put(scriptPath, source);
+            sourceCache.put(filePath, source);
         }
         try {
             value = context.eval(source);
             contextPool.returnObject(context);
-            if (!value.canInvokeMember("run")) {
+            if (!value.canInvokeMember(methodName)) {
                 return context.asValue(NOT_RUNNABLE);
             } else {
-                return value.invokeMember("run");
+                return value.invokeMember(methodName);
             }
         } catch (PolyglotException exception) {
             exception.printStackTrace();
-            sourceCache.invalidate(scriptPath);
+            sourceCache.invalidate(filePath);
             return null;
         }
     }
