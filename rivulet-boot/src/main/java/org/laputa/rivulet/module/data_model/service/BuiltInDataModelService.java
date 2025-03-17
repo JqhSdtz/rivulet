@@ -32,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.boot.internal.MetadataImpl;
 import org.hibernate.mapping.PersistentClass;
 import org.hibernate.mapping.Property;
+import org.laputa.rivulet.common.constant.Strings;
 import org.laputa.rivulet.common.model.Result;
 import org.laputa.rivulet.common.state.AppState;
 import org.laputa.rivulet.common.util.RedissonLockUtil;
@@ -143,13 +144,13 @@ public class BuiltInDataModelService implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         refreshStructureUpdateSql();
         if (!appState.isBuiltInDataModelSynced()) {
-            log.info("检测到系统内部数据模型有更新，请访问系统以确认更新SQL");
+            System.out.println(Strings.STAR64 + "\n检测到系统内部数据模型有更新，请访问系统以确认更新SQL");
             String timeStr = TimeUnitUtil.format(terminalKeyProperty.getTimeout(), terminalKeyProperty.getTimeUnit());
-            log.info("确认更新的密钥为: {}，请在{}内进行确认操作", terminalKeyUtil.generateTerminalKey(confirmKeyBucket), timeStr);
+            System.out.printf("确认更新的密钥为: %s，请在%s内进行确认操作\n" + Strings.STAR64 + "\n", terminalKeyUtil.generateTerminalKey(confirmKeyBucket), timeStr);
             appState.registerStateChangeCallback("builtInDataModelSynced", state -> {
                 if (state.getCurrentValue().equals(false)) return;
                 syncBuiltInDataModel();
-                log.info("内部数据模型更新完毕");
+                System.out.println(Strings.STAR64 + "\n内部数据模型更新完毕\n" + Strings.STAR64 + "\n");
             });
         }
     }
@@ -278,7 +279,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
 
     @SneakyThrows
     private void syncBuiltInDataModel() {
-        Result result = redissonLockUtil.doWithLock("checkBuiltInDataModel", () -> doSyncBuiltInDataModelWithTransaction());
+        Result<?> result = redissonLockUtil.doWithLock("checkBuiltInDataModel", this::doSyncBuiltInDataModelWithTransaction);
         if (!result.isSuccessful()) {
             throw result.toRawException();
         }
@@ -289,7 +290,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
      *
      * @return
      */
-    private Result doSyncBuiltInDataModelWithTransaction() {
+    private Result<?> doSyncBuiltInDataModelWithTransaction() {
         return transactionTemplate.execute(transactionStatus -> {
             try {
                 return doSyncBuiltInDataModel();

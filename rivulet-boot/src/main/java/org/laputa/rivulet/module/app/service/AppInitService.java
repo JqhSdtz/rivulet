@@ -7,6 +7,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.laputa.rivulet.common.constant.Strings;
 import org.laputa.rivulet.common.model.Result;
 import org.laputa.rivulet.common.state.AppState;
 import org.laputa.rivulet.common.util.DatabaseUtil;
@@ -84,7 +85,7 @@ public class AppInitService implements ApplicationRunner {
             // 若应用未初始化，则启动后获取一个初始化密钥
             if (!appState.isAppInitialized()) {
                 String timeStr = TimeUnitUtil.format(terminalKeyProperty.getTimeout(), terminalKeyProperty.getTimeUnit());
-                log.info("应用的初始化密钥为: {}，请在{}内进行初始化操作", terminalKeyUtil.generateTerminalKey(initKeyBucket), timeStr);
+                System.out.printf(Strings.STAR64 + "\n应用的初始化密钥为: %s，请在%s内进行初始化操作\n" + Strings.STAR64 + "\n", terminalKeyUtil.generateTerminalKey(initKeyBucket), timeStr);
             }
         });
     }
