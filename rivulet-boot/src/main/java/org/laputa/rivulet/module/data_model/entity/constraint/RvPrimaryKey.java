@@ -85,6 +85,7 @@ public class RvPrimaryKey extends RvEntity<String> implements DataModelEntityInt
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "primaryKey")
     private List<RvPrimaryKeyColumn> primaryKeyColumns;
 
+    @Title("对应索引")
     @OneToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "backing_index_id")

@@ -104,6 +104,7 @@ public class RvForeignKey extends RvEntity<String> implements DataModelEntityInt
     @Column(name = "order_num")
     private Integer orderNum;
 
+    @Title("对应索引")
     @OneToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "backing_index_id")
