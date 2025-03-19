@@ -3,6 +3,8 @@ import * as RvComponents from '@/components/formily';
 import * as AntdIcons from '@ant-design/icons';
 import {Field, FormPath, registerValidateRules} from '@formily/core';
 import {isEmpty, isArr, isValid, toArr, isEqual} from '@formily/shared';
+import rvUtil from "@/utils/rvUtil";
+import rvRequest from "@/utils/rvRequest";
 
 export const allComponents = {
     ...AntdComponents,
@@ -46,7 +48,7 @@ const isValidateEmpty = (value: any) => {
 };
 export const registerRvValidateRules = () => {
     registerValidateRules({
-        unique(value, rule,ctx) {
+        unique(value, rule, ctx) {
             if (isValidateEmpty(value) || !rule.unique) return '';
             const field: Field = ctx.field;
             const list = field.path.pop().pop().getIn(field.form.values);
@@ -64,3 +66,8 @@ export const registerRvValidateRules = () => {
         }
     });
 };
+export const getRvScope = (injected: any) => ({
+    ...injected,
+    rvUtil,
+    rvRequest
+});

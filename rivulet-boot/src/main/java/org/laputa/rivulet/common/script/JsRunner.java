@@ -47,7 +47,7 @@ public class JsRunner {
         if (scriptPath == null || scriptPath.isEmpty()) {
             throw new RvException(Result.fail("EmptyScriptPath", "脚本路径为空"));
         }
-        String[] parts = scriptPath.split("#");
+        String[] parts = scriptPath.split("@");
         String filePath = parts.length > 1 ? parts[0] : scriptPath;
         String methodName = parts.length > 1 ? parts[1] : "run";
         Source source = sourceCache.getIfPresent(scriptPath);
@@ -80,22 +80,34 @@ public class JsRunner {
     }
 
     @SneakyThrows
-    public Result<Object> runScript(String scriptPath) {
-        Value result = doRun(scriptPath);
-        if (result == null) {
-            return Result.fail(Object.class, "JavaScriptRunFailed", "脚本程序运行异常");
-        } else if (!result.isString()) {
-            return Result.fail(Object.class, "NonStringResult", "无法解析非字符串的返回结果");
-        } else if (NO_SUCH_FILE.equals(result.asString())) {
-            return Result.fail(Object.class, NO_SUCH_FILE, "未找到脚本文件");
-        } else if (NOT_RUNNABLE.equals(result.asString())) {
-            return Result.fail(Object.class, NOT_RUNNABLE, "脚本未设置运行接口");
+    public Result<?> runScript(String scriptPath) {
+        Value value = doRun(scriptPath);
+        if (value == null) {
+            return Result.fail("JavaScriptRunFailed", "脚本程序运行异常");
+        } else if (value.isString()) {
+            if (NO_SUCH_FILE.equals(value.asString())) {
+                return Result.fail(NO_SUCH_FILE, "未找到脚本文件");
+            } else if (NOT_RUNNABLE.equals(value.asString())) {
+                return Result.fail(NOT_RUNNABLE, "脚本未设置运行接口");
+            } else {
+                return Result.succeed(value.asString());
+            }
+        } else if (value.isBoolean()) {
+            return value.asBoolean() ? Result.SUCCESS : Result.FAIL;
+        } else if (value.isHostObject()) {
+            Object result = value.asHostObject();
+            if (result instanceof Result) {
+                return (Result<?>) result;
+            } else {
+                return Result.fail("NonResultJavaObject", "非Result类型的Java对象结果");
+            }
+        } else {
+            return Result.fail("InvalidResultType", "非法的返回值类型");
         }
-        return Result.succeed(result.asString());
     }
 
     @Transactional
-    public Result<Object> runScriptWithTransaction(String scriptPath) {
+    public Result<?> runScriptWithTransaction(String scriptPath) {
         return runScript(scriptPath);
     }
 

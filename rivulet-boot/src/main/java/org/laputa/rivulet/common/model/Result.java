@@ -30,7 +30,7 @@ public class Result<ResultType> {
      *
      * @param successful
      */
-    private Result(boolean successful) {
+    public Result(boolean successful) {
         this.successful = successful;
     }
 

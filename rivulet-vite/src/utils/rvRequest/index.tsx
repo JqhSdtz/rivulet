@@ -8,6 +8,7 @@ import './index.less';
 import {Result} from '@/types/result';
 import {useRvModal} from '@/components/common/RvModal';
 import rvUtil from "@/utils/rvUtil";
+import {getRvScope} from "@/utils/formilyUtil";
 
 function wrapRequestFunction(oriRequest: () => Promise<AxiosResponse>): () => Promise<Result> {
     return () =>
@@ -130,16 +131,19 @@ export default {
     async runJsSchema(filename: string, data: any = {}) {
         const rawResponse = await this.runJs('/src/schemas/' + filename, data, false);
         const result = rawResponse.data;
-        // 这里是为schema中通过wrapFunctionToStr包裹的函数传递上下文，因为其函数最终都是在当前上下文中执行，所以直接通过this就可以设置上下文
-        this.$rvScope = {
-            rvUtil
-        };
-        result.payload = JSON.parse(result.payload, (_key, value) => {
-            if (typeof value === 'string' && value.length > 7 && value.substring(0, 7) === '$RvFun$') {
-                return eval(value.substring(7, value.length));
+        const deepTranslate = _root => {
+            if (typeof _root === 'string' && _root.length > 7 && _root.substring(0, 7) === '$RvFun$') {
+                return eval(_root.substring(7, _root.length));
+            } else if (typeof _root === 'object') {
+                for (const key in _root) {
+                    _root[key] = deepTranslate(_root[key]);
+                }
             }
-            return value;
-        });
+            return _root;
+        }
+        result.payload = deepTranslate(result.payload);
+        // 这里是为schema中通过wrapFunctionToStr包裹的函数传递上下文，因为其函数最终都是在当前上下文中执行，所以直接通过this就可以设置上下文
+        this.$rvScope = getRvScope(result.payload.rvInjected);
         return rawResponse;
     },
     async runJsService(filename: string, data: any = {}): Promise<Result> {

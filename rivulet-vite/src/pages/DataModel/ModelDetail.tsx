@@ -1,11 +1,12 @@
-import {FormTab} from '@formily/antd';
 import {createSchemaField, FormProvider} from '@formily/react';
 import {useMount, useRequest} from 'ahooks';
 import {PageLoading} from '@/layouts/BasicLayout';
-import {allComponents} from '@/utils/formilyUtil';
+import {allComponents, getRvScope} from '@/utils/formilyUtil';
 import {useFormInstance} from '@/components/formily/hooks';
 import useUrlState from '@ahooksjs/use-url-state';
 import RvRequest from '@/utils/rvRequest';
+import rvRequest from '@/utils/rvRequest';
+import rvUtil from '@/utils/rvUtil';
 
 const SchemaField = createSchemaField({
     components: allComponents as any
@@ -18,7 +19,7 @@ const FormComponent = props => {
     });
     return (
         <FormProvider form={form}>
-            <SchemaField schema={props.schema} />
+            <SchemaField scope={{$rvScope: getRvScope({rvInjected: props.rvInjected})}} schema={props.schema} />
         </FormProvider>
     );
 };

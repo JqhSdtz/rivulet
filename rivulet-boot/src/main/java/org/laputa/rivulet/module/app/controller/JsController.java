@@ -13,13 +13,13 @@ public class JsController {
     private JsRunner jsRunner;
 
     @PostMapping("/run")
-    public Result<Object> runScript(@RequestParam String filename, @RequestBody String jsonStr, HttpServletRequest request) {
+    public Result<?> runScript(@RequestParam String filename, @RequestBody String jsonStr, HttpServletRequest request) {
         request.setAttribute("jsonStr", jsonStr);
         return jsRunner.runScript(filename);
     }
 
     @PostMapping("/runWithTransaction")
-    public Result<Object> runScriptWithTransaction(@RequestParam String filename, @RequestBody String jsonStr, HttpServletRequest request) {
+    public Result<?> runScriptWithTransaction(@RequestParam String filename, @RequestBody String jsonStr, HttpServletRequest request) {
         request.setAttribute("jsonStr", jsonStr);
         return jsRunner.runScriptWithTransaction(filename);
     }
