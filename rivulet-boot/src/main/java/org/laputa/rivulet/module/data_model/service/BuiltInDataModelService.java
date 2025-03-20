@@ -1,5 +1,6 @@
 package org.laputa.rivulet.module.data_model.service;
 
+import cn.hutool.core.lang.TypeReference;
 import cn.hutool.core.util.RandomUtil;
 import com.google.common.collect.Streams;
 import jakarta.annotation.PostConstruct;
@@ -131,7 +132,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
     @Getter
     private String currentStructureUpdateSql;
     private DatabaseChangeLog currentDatabaseChangeLog;
-    @Autowired
+    @Resource
     private RvAdminRepository rvAdminRepository;
 
     @PostConstruct
@@ -302,11 +303,12 @@ public class BuiltInDataModelService implements ApplicationRunner {
         });
     }
 
-    private Result doSyncBuiltInDataModel() {
+    private Result<?> doSyncBuiltInDataModel() {
         DatabaseSnapshot hibernateSnapshot = this.diffResult.getReferenceSnapshot();
         DatabaseObjectCollection hibernateDatabaseObjects = (DatabaseObjectCollection) hibernateSnapshot.getSerializableFieldValue("objects");
         Map<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> objectMapByClass = hibernateDatabaseObjects.toMap();
-        Set<Table> tableSet = (Set<Table>) objectMapByClass.get(Table.class);
+        Set<Table> tableSet = TypeConvertUtil.convert(new TypeReference<>() {
+        }, objectMapByClass.get(Table.class));
         List<RvPrototype> originalPrototypeList = rvPrototypeRepository.findAll();
         List<RvPrototype> toDeletePrototypeList = new ArrayList<>();
         Map<String, RvPrototype> rvPrototypeMap = new HashMap<>(tableSet.size());
