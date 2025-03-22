@@ -118,9 +118,14 @@ public class RvPrototype extends RvEntity<String> implements DataModelEntityInte
 
     @JsonSetter("columns")
     public void setColumns(List<RvColumn> columns) {
-        this.columns = columns;
         if (columns == null) {
             return;
+        }
+        if (this.columns == null) {
+            this.columns = columns;
+        } else {
+            this.columns.clear();
+            this.columns.addAll(columns);
         }
         columns.forEach(column -> column.setPrototype(this));
     }
@@ -132,9 +137,14 @@ public class RvPrototype extends RvEntity<String> implements DataModelEntityInte
 
     @JsonSetter("indexes")
     public void setIndexes(List<RvIndex> indexes) {
-        this.indexes = indexes;
         if (indexes == null) {
             return;
+        }
+        if (this.indexes == null) {
+            this.indexes = indexes;
+        } else {
+            this.indexes.clear();
+            this.indexes.addAll(indexes);
         }
         indexes.forEach(index -> index.setPrototype(this));
     }
@@ -160,9 +170,14 @@ public class RvPrototype extends RvEntity<String> implements DataModelEntityInte
 
     @JsonSetter("foreignKeys")
     public void setForeignKeys(List<RvForeignKey> foreignKeys) {
-        this.foreignKeys = foreignKeys;
         if (foreignKeys == null) {
             return;
+        }
+        if (this.foreignKeys == null) {
+            this.foreignKeys = foreignKeys;
+        } else {
+            this.foreignKeys.clear();
+            this.foreignKeys.addAll(foreignKeys);
         }
         foreignKeys.forEach(foreignKey -> foreignKey.setPrototype(this));
     }
@@ -174,9 +189,14 @@ public class RvPrototype extends RvEntity<String> implements DataModelEntityInte
 
     @JsonSetter("uniques")
     public void setUniques(List<RvUnique> uniques) {
-        this.uniques = uniques;
         if (uniques == null) {
             return;
+        }
+        if (this.uniques == null) {
+            this.uniques = uniques;
+        } else {
+            this.uniques.clear();
+            this.uniques.addAll(uniques);
         }
         uniques.forEach(unique -> unique.setPrototype(this));
     }
@@ -188,9 +208,14 @@ public class RvPrototype extends RvEntity<String> implements DataModelEntityInte
 
     @JsonSetter("notNulls")
     public void setNotNulls(List<RvNotNull> notNulls) {
-        this.notNulls = notNulls;
         if (notNulls == null) {
             return;
+        }
+        if (this.notNulls == null) {
+            this.notNulls = notNulls;
+        } else {
+            this.notNulls.clear();
+            this.notNulls.addAll(notNulls);
         }
         notNulls.forEach(notNull -> notNull.setPrototype(this));
     }

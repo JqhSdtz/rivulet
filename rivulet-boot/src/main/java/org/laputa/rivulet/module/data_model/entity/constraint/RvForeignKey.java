@@ -116,9 +116,14 @@ public class RvForeignKey extends RvEntity<String> implements DataModelEntityInt
 
     @JsonSetter("foreignKeyTargetColumns")
     public void setForeignKeyTargetColumns(List<RvForeignKeyTargetColumn> foreignKeyTargetColumns) {
-        this.foreignKeyTargetColumns = foreignKeyTargetColumns;
         if (foreignKeyTargetColumns == null) {
             return;
+        }
+        if (this.foreignKeyTargetColumns == null) {
+            this.foreignKeyTargetColumns = foreignKeyTargetColumns;
+        } else {
+            this.foreignKeyTargetColumns.clear();
+            this.foreignKeyTargetColumns.addAll(foreignKeyTargetColumns);
         }
         foreignKeyTargetColumns.forEach(foreignKeyTargetColumn -> foreignKeyTargetColumn.setForeignKey(this));
     }
@@ -129,9 +134,14 @@ public class RvForeignKey extends RvEntity<String> implements DataModelEntityInt
 
     @JsonSetter("foreignKeyForeignColumns")
     public void setForeignKeyForeignColumns(List<RvForeignKeyForeignColumn> foreignKeyForeignColumns) {
-        this.foreignKeyForeignColumns = foreignKeyForeignColumns;
         if (foreignKeyForeignColumns == null) {
             return;
+        }
+        if (this.foreignKeyForeignColumns == null) {
+            this.foreignKeyForeignColumns = foreignKeyForeignColumns;
+        } else {
+            this.foreignKeyForeignColumns.clear();
+            this.foreignKeyForeignColumns.addAll(foreignKeyForeignColumns);
         }
         foreignKeyForeignColumns.forEach(foreignKeyForeignColumn -> foreignKeyForeignColumn.setForeignKey(this));
     }

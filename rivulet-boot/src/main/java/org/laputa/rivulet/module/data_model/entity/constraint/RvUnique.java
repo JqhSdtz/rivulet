@@ -98,9 +98,14 @@ public class RvUnique extends RvEntity<String> implements DataModelEntityInterfa
 
     @JsonSetter("uniqueColumns")
     public void setUniqueColumns(List<RvUniqueColumn> rvUniqueColumns) {
-        this.uniqueColumns = rvUniqueColumns;
         if (rvUniqueColumns == null) {
             return;
+        }
+        if (uniqueColumns == null) {
+            uniqueColumns = rvUniqueColumns;
+        } else {
+            uniqueColumns.clear();
+            uniqueColumns.addAll(rvUniqueColumns);
         }
         rvUniqueColumns.forEach(rvUniqueColumn -> rvUniqueColumn.setUnique(this));
     }

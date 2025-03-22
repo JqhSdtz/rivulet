@@ -22,6 +22,7 @@ import org.laputa.rivulet.module.data_model.entity.RvPrototype;
 import org.laputa.rivulet.module.data_model.entity.column_relation.RvPrimaryKeyColumn;
 import org.laputa.rivulet.module.data_model.entity.inter.DataModelEntityInterface;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -93,9 +94,14 @@ public class RvPrimaryKey extends RvEntity<String> implements DataModelEntityInt
 
     @JsonSetter("primaryKeyColumns")
     public void setPrimaryKeyColumns(List<RvPrimaryKeyColumn> primaryKeyColumns) {
-        this.primaryKeyColumns = primaryKeyColumns;
         if (primaryKeyColumns == null) {
             return;
+        }
+        if (this.primaryKeyColumns == null) {
+            this.primaryKeyColumns = new ArrayList<>();
+        } else {
+            this.primaryKeyColumns.clear();
+            this.primaryKeyColumns.addAll(primaryKeyColumns);
         }
         primaryKeyColumns.forEach(primaryKeyColumn -> primaryKeyColumn.setPrimaryKey(this));
     }

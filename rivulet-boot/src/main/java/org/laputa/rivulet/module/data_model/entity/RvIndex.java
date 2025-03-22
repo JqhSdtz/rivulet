@@ -95,9 +95,14 @@ public class RvIndex extends RvEntity<String> implements DataModelEntityInterfac
 
     @JsonSetter("indexColumns")
     public void setIndexColumns(List<RvIndexColumn> indexColumns) {
-        this.indexColumns = indexColumns;
         if (indexColumns == null) {
             return;
+        }
+        if (this.indexColumns == null) {
+            this.indexColumns = indexColumns;
+        } else {
+            this.indexColumns.clear();
+            this.indexColumns.addAll(indexColumns);
         }
         indexColumns.forEach(indexColumn -> indexColumn.setIndex(this));
     }
