@@ -105,7 +105,7 @@ public class RvForeignKey extends RvEntity<String> implements DataModelEntityInt
     private Integer orderNum;
 
     @Title("对应索引")
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "backing_index_id")
     private RvIndex backingIndex;
