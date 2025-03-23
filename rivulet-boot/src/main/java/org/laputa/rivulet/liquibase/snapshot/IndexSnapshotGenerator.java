@@ -5,9 +5,9 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import org.laputa.rivulet.module.data_model.entity.RvIndex;
-import org.laputa.rivulet.module.data_model.entity.RvPrototype;
-import org.laputa.rivulet.module.data_model.entity.column_relation.RvIndexColumn;
+import org.laputa.rivulet.module.dbms_model.entity.RvIndex;
+import org.laputa.rivulet.module.dbms_model.entity.RvTable;
+import org.laputa.rivulet.module.dbms_model.entity.column_relation.RvIndexColumn;
 
 public class IndexSnapshotGenerator extends RivuletSnapshotGenerator {
 
@@ -22,7 +22,7 @@ public class IndexSnapshotGenerator extends RivuletSnapshotGenerator {
             return example;
         }
         Relation table = ((Index) example).getRelation();
-        RvPrototype prototype = findRvPrototype(table, snapshot);
+        RvTable prototype = findRvPrototype(table, snapshot);
         if (prototype == null) {
             return example;
         }
@@ -43,7 +43,7 @@ public class IndexSnapshotGenerator extends RivuletSnapshotGenerator {
             return;
         }
         if (foundObject instanceof Table table) {
-            RvPrototype prototype = findRvPrototype(table, snapshot);
+            RvTable prototype = findRvPrototype(table, snapshot);
             if (prototype == null) {
                 return;
             }

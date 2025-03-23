@@ -10,11 +10,10 @@ import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.RmCommand;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.laputa.rivulet.module.app.property.GitProperty;
-import org.laputa.rivulet.module.data_model.entity.RvPrototype;
+import org.laputa.rivulet.module.dbms_model.entity.RvTable;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
@@ -75,10 +74,10 @@ public class GitService implements ApplicationRunner {
     }
 
     @SneakyThrows
-    public void removeBuiltInRvPrototypes(List<RvPrototype> rvPrototypes) {
-        if (rvPrototypes.isEmpty()) return;
+    public void removeBuiltInRvPrototypes(List<RvTable> rvTables) {
+        if (rvTables.isEmpty()) return;
         RmCommand rmCommand = gitRepo.rm();
-        rvPrototypes.forEach(rvPrototype -> {
+        rvTables.forEach(rvPrototype -> {
             String filePath = "/prototypes/builtIn/" + rvPrototype.getCode();
             rmCommand.addFilepattern(filePath);
         });

@@ -8,9 +8,9 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
-import org.laputa.rivulet.module.data_model.entity.RvPrototype;
-import org.laputa.rivulet.module.data_model.entity.column_relation.RvUniqueColumn;
-import org.laputa.rivulet.module.data_model.entity.constraint.RvUnique;
+import org.laputa.rivulet.module.dbms_model.entity.RvTable;
+import org.laputa.rivulet.module.dbms_model.entity.column_relation.RvUniqueColumn;
+import org.laputa.rivulet.module.dbms_model.entity.constraint.RvUnique;
 
 public class UniqueConstraintSnapshotGenerator extends RivuletSnapshotGenerator {
 
@@ -30,7 +30,7 @@ public class UniqueConstraintSnapshotGenerator extends RivuletSnapshotGenerator 
             return;
         }
         Table table = (Table) foundObject;
-        RvPrototype prototype = findRvPrototype(table, snapshot);
+        RvTable prototype = findRvPrototype(table, snapshot);
         if (prototype == null) {
             return;
         }

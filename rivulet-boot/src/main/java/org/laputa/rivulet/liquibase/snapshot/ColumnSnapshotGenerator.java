@@ -10,8 +10,8 @@ import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 import org.laputa.rivulet.liquibase.database.RivuletDatabase;
-import org.laputa.rivulet.module.data_model.entity.RvColumn;
-import org.laputa.rivulet.module.data_model.entity.RvPrototype;
+import org.laputa.rivulet.module.dbms_model.entity.RvColumn;
+import org.laputa.rivulet.module.dbms_model.entity.RvTable;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,7 +51,7 @@ public class ColumnSnapshotGenerator extends RivuletSnapshotGenerator {
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         if (foundObject instanceof Table) {
-            RvPrototype prototype = findRvPrototype(foundObject, snapshot);
+            RvTable prototype = findRvPrototype(foundObject, snapshot);
             if (prototype == null) {
                 return;
             }
@@ -67,7 +67,7 @@ public class ColumnSnapshotGenerator extends RivuletSnapshotGenerator {
 
     protected void snapshotColumn(Column column, DatabaseSnapshot snapshot) throws DatabaseException {
         RivuletDatabase database = (RivuletDatabase) snapshot.getDatabase();
-        RvPrototype prototype = findRvPrototype(column.getRelation(), snapshot);
+        RvTable prototype = findRvPrototype(column.getRelation(), snapshot);
         if (prototype == null) {
             return;
         }

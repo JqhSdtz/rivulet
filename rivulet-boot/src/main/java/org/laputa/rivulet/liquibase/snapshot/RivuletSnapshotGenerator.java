@@ -8,7 +8,7 @@ import liquibase.snapshot.SnapshotGenerator;
 import liquibase.snapshot.SnapshotGeneratorChain;
 import liquibase.structure.DatabaseObject;
 import org.laputa.rivulet.liquibase.database.RivuletDatabase;
-import org.laputa.rivulet.module.data_model.entity.RvPrototype;
+import org.laputa.rivulet.module.dbms_model.entity.RvTable;
 
 import java.util.List;
 
@@ -83,10 +83,10 @@ public abstract class RivuletSnapshotGenerator implements SnapshotGenerator {
 
     protected abstract void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException;
 
-    protected RvPrototype findRvPrototype(DatabaseObject example, DatabaseSnapshot snapshot) {
+    protected RvTable findRvPrototype(DatabaseObject example, DatabaseSnapshot snapshot) {
         RivuletDatabase database = (RivuletDatabase) snapshot.getDatabase();
-        List<RvPrototype> prototypes = database.getPrototypes();
-        for (RvPrototype prototype : prototypes) {
+        List<RvTable> prototypes = database.getPrototypes();
+        for (RvTable prototype : prototypes) {
             if (prototype.getCode().equalsIgnoreCase(example.getName())) {
                 return prototype;
             }

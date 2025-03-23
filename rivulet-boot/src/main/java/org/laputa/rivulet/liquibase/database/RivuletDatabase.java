@@ -17,8 +17,8 @@ import org.hibernate.type.spi.TypeConfiguration;
 import org.laputa.rivulet.common.util.SpringBeanUtil;
 import org.laputa.rivulet.common.util.TypeConvertUtil;
 import org.laputa.rivulet.liquibase.database.connection.RvDriver;
-import org.laputa.rivulet.module.data_model.entity.RvPrototype;
-import org.laputa.rivulet.module.data_model.repository.RvPrototypeRepository;
+import org.laputa.rivulet.module.dbms_model.entity.RvTable;
+import org.laputa.rivulet.module.dbms_model.repository.RvPrototypeRepository;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.lang.NonNull;
 
@@ -30,7 +30,7 @@ import java.util.List;
 public abstract class RivuletDatabase extends AbstractJdbcDatabase {
 
     @Getter
-    private List<RvPrototype> prototypes;
+    private List<RvTable> prototypes;
     private TypeConfiguration typeConfiguration;
     private Dialect dbmsDialect;
     private Method resolveSqlTypeCodeMethod;

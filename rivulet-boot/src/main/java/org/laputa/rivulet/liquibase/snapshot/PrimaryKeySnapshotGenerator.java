@@ -9,10 +9,10 @@ import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import org.hibernate.sql.Alias;
-import org.laputa.rivulet.module.data_model.entity.RvIndex;
-import org.laputa.rivulet.module.data_model.entity.RvPrototype;
-import org.laputa.rivulet.module.data_model.entity.column_relation.RvPrimaryKeyColumn;
-import org.laputa.rivulet.module.data_model.entity.constraint.RvPrimaryKey;
+import org.laputa.rivulet.module.dbms_model.entity.RvIndex;
+import org.laputa.rivulet.module.dbms_model.entity.RvTable;
+import org.laputa.rivulet.module.dbms_model.entity.column_relation.RvPrimaryKeyColumn;
+import org.laputa.rivulet.module.dbms_model.entity.constraint.RvPrimaryKey;
 
 public class PrimaryKeySnapshotGenerator extends RivuletSnapshotGenerator {
 
@@ -36,7 +36,7 @@ public class PrimaryKeySnapshotGenerator extends RivuletSnapshotGenerator {
             return;
         }
         Table table = (Table) foundObject;
-        RvPrototype prototype = findRvPrototype(table, snapshot);
+        RvTable prototype = findRvPrototype(table, snapshot);
         if (prototype == null) {
             return;
         }

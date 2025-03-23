@@ -5,7 +5,7 @@ import jakarta.annotation.Resource;
 import jakarta.validation.constraints.NotNull;
 import org.laputa.rivulet.common.mvc.interceptor.RvInterceptor;
 import org.laputa.rivulet.common.mvc.resolver.RequestBodyParamResolver;
-import org.laputa.rivulet.module.data_model.interceptor.DataModelModifyConfirmInterceptor;
+import org.laputa.rivulet.module.dbms_model.interceptor.DataModelModifyConfirmInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;

@@ -9,11 +9,11 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
 import org.laputa.rivulet.liquibase.database.RivuletDatabase;
-import org.laputa.rivulet.module.data_model.entity.RvPrototype;
-import org.laputa.rivulet.module.data_model.entity.column_relation.RvForeignKeyForeignColumn;
-import org.laputa.rivulet.module.data_model.entity.column_relation.RvForeignKeyTargetColumn;
-import org.laputa.rivulet.module.data_model.entity.column_relation.RvPrimaryKeyColumn;
-import org.laputa.rivulet.module.data_model.entity.constraint.RvForeignKey;
+import org.laputa.rivulet.module.dbms_model.entity.RvTable;
+import org.laputa.rivulet.module.dbms_model.entity.column_relation.RvForeignKeyForeignColumn;
+import org.laputa.rivulet.module.dbms_model.entity.column_relation.RvForeignKeyTargetColumn;
+import org.laputa.rivulet.module.dbms_model.entity.column_relation.RvPrimaryKeyColumn;
+import org.laputa.rivulet.module.dbms_model.entity.constraint.RvForeignKey;
 
 public class ForeignKeySnapshotGenerator extends RivuletSnapshotGenerator {
 
@@ -34,11 +34,11 @@ public class ForeignKeySnapshotGenerator extends RivuletSnapshotGenerator {
         }
         Table table = (Table) foundObject;
         RivuletDatabase database = (RivuletDatabase) snapshot.getDatabase();
-        for (RvPrototype prototype : database.getPrototypes()) {
+        for (RvTable prototype : database.getPrototypes()) {
             for (RvForeignKey rvForeignKey : prototype.getForeignKeys()) {
                 Table currentTable = new Table().setName(prototype.getCode());
                 currentTable.setSchema(database.getDefaultCatalogName(), database.getDefaultSchemaName());
-                RvPrototype targetPrototype = rvForeignKey.getTargetPrototype();
+                RvTable targetPrototype = rvForeignKey.getTargetPrototype();
                 Table targetTable = new Table().setName(targetPrototype.getCode());
                 targetTable.setSchema(database.getDefaultCatalogName(), database.getDefaultSchemaName());
                 ForeignKey fk = new ForeignKey();

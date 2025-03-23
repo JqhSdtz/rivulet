@@ -7,7 +7,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import org.laputa.rivulet.liquibase.database.RivuletDatabase;
-import org.laputa.rivulet.module.data_model.entity.RvPrototype;
+import org.laputa.rivulet.module.dbms_model.entity.RvTable;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class TableSnapshotGenerator extends RivuletSnapshotGenerator {
         if (example.getSnapshotId() != null) {
             return example;
         }
-        RvPrototype prototype = findRvPrototype(example, snapshot);
+        RvTable prototype = findRvPrototype(example, snapshot);
         if (prototype == null) {
             return example;
         }
@@ -41,14 +41,14 @@ public class TableSnapshotGenerator extends RivuletSnapshotGenerator {
         }
         if (foundObject instanceof Schema schema) {
             RivuletDatabase database = (RivuletDatabase) snapshot.getDatabase();
-            List<RvPrototype> prototypes = database.getPrototypes();
-            for (RvPrototype prototype : prototypes) {
+            List<RvTable> prototypes = database.getPrototypes();
+            for (RvTable prototype : prototypes) {
                 addDatabaseObjectToSchema(prototype, schema, snapshot);
             }
         }
     }
 
-    private void addDatabaseObjectToSchema(RvPrototype join, Schema schema, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    private void addDatabaseObjectToSchema(RvTable join, Schema schema, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Table joinTable = new Table().setName(join.getCode());
         joinTable.setSchema(schema);
         schema.addDatabaseObject(snapshotObject(joinTable, snapshot));
