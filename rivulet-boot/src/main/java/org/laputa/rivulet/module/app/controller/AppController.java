@@ -1,15 +1,22 @@
 package org.laputa.rivulet.module.app.controller;
 
+import cn.hutool.core.lang.TypeReference;
 import jakarta.annotation.Resource;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.metamodel.EntityType;
+import org.laputa.rivulet.common.hibernate.RvEntityManagerFactory;
 import org.laputa.rivulet.common.entity.RvEntity;
 import org.laputa.rivulet.common.model.Result;
+import org.laputa.rivulet.common.util.TypeConvertUtil;
 import org.laputa.rivulet.module.app.model.AppInitialData;
 import org.laputa.rivulet.module.app.service.AppInitService;
 import org.laputa.rivulet.module.auth.entity.RvAdmin;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author JQH
@@ -20,6 +27,8 @@ import java.util.Map;
 public class AppController {
     @Resource
     private AppInitService appService;
+    @Resource
+    private RvEntityManagerFactory rvEntityManagerFactory;
 
     @GetMapping("/initialData")
     public Result<AppInitialData> getAppInitialData() {
@@ -36,5 +45,14 @@ public class AppController {
     @PostMapping("/initialAdmin")
     public Result<Void> createInitialAdmin(@RequestBody @Validated(RvEntity.Persist.class) RvAdmin rvAdmin) {
         return appService.createInitialAdmin(rvAdmin);
+    }
+
+    @GetMapping("/test")
+    public Result<?> test() {
+        rvEntityManagerFactory.rebuildEntityManagerFactory();
+        EntityManager entityManager = rvEntityManagerFactory.getEntityManager();
+        List<Map<String, Object>> resultList = TypeConvertUtil.convert(new TypeReference<>() {
+        }, entityManager.createQuery("select p from Book p").getResultList());
+        return Result.succeed(resultList);
     }
 }

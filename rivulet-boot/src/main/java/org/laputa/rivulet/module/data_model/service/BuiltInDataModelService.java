@@ -328,12 +328,17 @@ public class BuiltInDataModelService implements ApplicationRunner {
                 rvPrototypeMap.put(table.getName(), new RvPrototype());
             }
         });
-        RvAdmin initialAdmin = new RvAdmin();
-        // 临时设置的初始管理员的用户名和密码，否则rv_prototype无法保存。在正式创建初始管理员时会被替换掉。
-        initialAdmin.setAdminName("admin");
-        initialAdmin.setPassword(PasswordUtil.encode(RandomUtil.randomString(32)));
-        initialAdmin.setAdminType(AdminType.INITIAL_ADMIN);
-        rvAdminRepository.save(initialAdmin);
+        RvAdmin initialAdmin;
+        if (!appState.isAppInitialized()) {
+            initialAdmin = new RvAdmin();
+            // 临时设置的初始管理员的用户名和密码，否则rv_prototype无法保存。在正式创建初始管理员时会被替换掉。
+            initialAdmin.setAdminName("admin");
+            initialAdmin.setPassword(PasswordUtil.encode(RandomUtil.randomString(32)));
+            initialAdmin.setAdminType(AdminType.INITIAL_ADMIN);
+            rvAdminRepository.save(initialAdmin);
+        } else {
+            initialAdmin = rvAdminRepository.findById(appInitService.getInitialAdminId()).orElse(null);
+        }
         AtomicInteger rvPrototypeOrderNum = new AtomicInteger(0);
         tableSet.forEach(table -> toSaveRvPrototypeList.add(buildRvPrototype(table, rvPrototypeOrderNum.getAndIncrement(), rvPrototypeMap, initialAdmin)));
         // 每次启动都全量覆盖保存内部数据模型
@@ -661,6 +666,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
         if (this.columnFieldMap.isEmpty()) {
             entityBindingMap.forEach((className, entity) -> {
                 Class<?> entityClass = entity.getMappedClass();
+                if (entityClass == null) return;
                 for (Field field : entityClass.getFields()) {
                     Property property = entity.getProperty(field.getName());
                     String tableName = entity.getTable().getName();

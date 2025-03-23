@@ -90,6 +90,7 @@ public class GitService implements ApplicationRunner {
         if (tableClasses.isEmpty()) return;
         AddCommand addCommand = gitRepo.add();
         for (Class<?> tableClass : tableClasses) {
+            if (tableClass == null) continue;
             String filePath = "/src/prototypes/builtIn/" + tableClass.getSimpleName() + ".js";
             File rvPrototypeFile = FileUtil.touch(FileUtil.normalize(gitProperty.getLocalDir() + File.separator + filePath));
             String content = getContent(tableClass);
