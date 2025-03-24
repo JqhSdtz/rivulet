@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.spi.PersistenceUnitInfo;
 import liquibase.Scope;
+import lombok.Getter;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager;
@@ -23,6 +24,7 @@ public class RvEntityManagerFactory {
     private final PersistenceUnitInfo persistenceUnitInfo;
     private final RvHibernatePersistenceProvider persistenceProvider;
 
+    @Getter
     private EntityManagerFactory entityManagerFactory;
 
     public RvEntityManagerFactory(DataSource dataSource, JpaProperties jpaProperties) {
@@ -46,7 +48,7 @@ public class RvEntityManagerFactory {
      *
      * @return 创建的EntityManager对象
      */
-    public EntityManager getEntityManager() {
+    public EntityManager createEntityManager() {
         return this.entityManagerFactory.createEntityManager();
     }
 

@@ -62,8 +62,8 @@ public class RvForeignKey extends RvEntity<String> implements DataModelEntityInt
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "prototype_id")
-    private RvTable prototype;
+    @JoinColumn(name = "table_id")
+    private RvTable table;
 
     @Title("系统内置")
     @Comment("系统内置标记用于标记该外键是否是系统内置")
@@ -91,8 +91,8 @@ public class RvForeignKey extends RvEntity<String> implements DataModelEntityInt
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "target_prototype_id")
-    private RvTable targetPrototype;
+    @JoinColumn(name = "target_table_id")
+    private RvTable targetTable;
 
     @Title("备注")
     @Comment("外键备注对应数据库中外键的注释，即外键的Comment")

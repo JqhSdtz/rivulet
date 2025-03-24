@@ -34,12 +34,12 @@ public class ForeignKeySnapshotGenerator extends RivuletSnapshotGenerator {
         }
         Table table = (Table) foundObject;
         RivuletDatabase database = (RivuletDatabase) snapshot.getDatabase();
-        for (RvTable prototype : database.getPrototypes()) {
-            for (RvForeignKey rvForeignKey : prototype.getForeignKeys()) {
-                Table currentTable = new Table().setName(prototype.getCode());
+        for (RvTable rvTable : database.getRvTables()) {
+            for (RvForeignKey rvForeignKey : rvTable.getForeignKeys()) {
+                Table currentTable = new Table().setName(rvTable.getCode());
                 currentTable.setSchema(database.getDefaultCatalogName(), database.getDefaultSchemaName());
-                RvTable targetPrototype = rvForeignKey.getTargetPrototype();
-                Table targetTable = new Table().setName(targetPrototype.getCode());
+                RvTable targetRvTable = rvForeignKey.getTargetTable();
+                Table targetTable = new Table().setName(targetRvTable.getCode());
                 targetTable.setSchema(database.getDefaultCatalogName(), database.getDefaultSchemaName());
                 ForeignKey fk = new ForeignKey();
                 fk.setName(rvForeignKey.getCode());
@@ -52,7 +52,7 @@ public class ForeignKeySnapshotGenerator extends RivuletSnapshotGenerator {
                     fk.addPrimaryKeyColumn(new Column((keyTargetColumn).getColumn().getCode()));
                 }
                 if (fk.getPrimaryKeyColumns() == null || fk.getPrimaryKeyColumns().isEmpty()) {
-                    for (RvPrimaryKeyColumn primaryKeyColumn : targetPrototype.getPrimaryKey().getPrimaryKeyColumns()) {
+                    for (RvPrimaryKeyColumn primaryKeyColumn : targetRvTable.getPrimaryKey().getPrimaryKeyColumns()) {
                         fk.addPrimaryKeyColumn(new Column(primaryKeyColumn.getColumn().getCode()));
                     }
                 }

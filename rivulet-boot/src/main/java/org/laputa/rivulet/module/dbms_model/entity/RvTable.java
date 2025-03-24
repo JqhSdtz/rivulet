@@ -44,7 +44,7 @@ import java.util.List;
 @DynamicUpdate
 @Title("数据模型")
 @TableComment("数据模型和数据库表对应，包含属性、索引、外键等，用于描述一个结构化的数据")
-@Table(name = "rv_prototype")
+@Table(name = "rv_table")
 public class RvTable extends RvEntity<String> implements DataModelEntityInterface {
     @Id
     @UuidGenerator
@@ -113,7 +113,7 @@ public class RvTable extends RvEntity<String> implements DataModelEntityInterfac
 
     @Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     @JsonManagedReference("columns")
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "prototype")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "table")
     private List<RvColumn> columns;
 
     @JsonSetter("columns")
@@ -127,12 +127,12 @@ public class RvTable extends RvEntity<String> implements DataModelEntityInterfac
             this.columns.clear();
             this.columns.addAll(columns);
         }
-        columns.forEach(column -> column.setPrototype(this));
+        columns.forEach(column -> column.setTable(this));
     }
 
     @Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     @JsonManagedReference("indexes")
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "prototype")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "table")
     private List<RvIndex> indexes;
 
     @JsonSetter("indexes")
@@ -146,12 +146,12 @@ public class RvTable extends RvEntity<String> implements DataModelEntityInterfac
             this.indexes.clear();
             this.indexes.addAll(indexes);
         }
-        indexes.forEach(index -> index.setPrototype(this));
+        indexes.forEach(index -> index.setTable(this));
     }
 
     @Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     @JsonManagedReference("primaryKey")
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "prototype")
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "table")
     private RvPrimaryKey primaryKey;
 
     @JsonSetter("primaryKey")
@@ -160,12 +160,12 @@ public class RvTable extends RvEntity<String> implements DataModelEntityInterfac
         if (primaryKey == null) {
             return;
         }
-        primaryKey.setPrototype(this);
+        primaryKey.setTable(this);
     }
 
     @Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     @JsonManagedReference("foreignKeys")
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "prototype")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "table")
     private List<RvForeignKey> foreignKeys;
 
     @JsonSetter("foreignKeys")
@@ -179,12 +179,12 @@ public class RvTable extends RvEntity<String> implements DataModelEntityInterfac
             this.foreignKeys.clear();
             this.foreignKeys.addAll(foreignKeys);
         }
-        foreignKeys.forEach(foreignKey -> foreignKey.setPrototype(this));
+        foreignKeys.forEach(foreignKey -> foreignKey.setTable(this));
     }
 
     @Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     @JsonManagedReference("uniques")
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "prototype")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "table")
     private List<RvUnique> uniques;
 
     @JsonSetter("uniques")
@@ -198,12 +198,12 @@ public class RvTable extends RvEntity<String> implements DataModelEntityInterfac
             this.uniques.clear();
             this.uniques.addAll(uniques);
         }
-        uniques.forEach(unique -> unique.setPrototype(this));
+        uniques.forEach(unique -> unique.setTable(this));
     }
 
     @Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     @JsonManagedReference("notNulls")
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "prototype")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "table")
     private List<RvNotNull> notNulls;
 
     @JsonSetter("notNulls")
@@ -217,6 +217,6 @@ public class RvTable extends RvEntity<String> implements DataModelEntityInterfac
             this.notNulls.clear();
             this.notNulls.addAll(notNulls);
         }
-        notNulls.forEach(notNull -> notNull.setPrototype(this));
+        notNulls.forEach(notNull -> notNull.setTable(this));
     }
 }

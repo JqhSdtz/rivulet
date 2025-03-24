@@ -58,8 +58,8 @@ public class RvPrimaryKey extends RvEntity<String> implements DataModelEntityInt
     @OneToOne
     @Title("对应模型ID")
     @Comment("主键所对应的数据模型的ID，使用外键关联")
-    @JoinColumn(name = "prototype_id")
-    private RvTable prototype;
+    @JoinColumn(name = "table_id")
+    private RvTable table;
 
     @Title("系统内置")
     @Comment("系统内置标记用于标记该主键是否是系统内置")

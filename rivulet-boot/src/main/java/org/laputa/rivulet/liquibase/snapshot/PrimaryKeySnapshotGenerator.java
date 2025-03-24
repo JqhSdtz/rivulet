@@ -36,11 +36,11 @@ public class PrimaryKeySnapshotGenerator extends RivuletSnapshotGenerator {
             return;
         }
         Table table = (Table) foundObject;
-        RvTable prototype = findRvPrototype(table, snapshot);
-        if (prototype == null) {
+        RvTable rvTable = findRvTable(table, snapshot);
+        if (rvTable == null) {
             return;
         }
-        RvPrimaryKey rvPrimaryKey = prototype.getPrimaryKey();
+        RvPrimaryKey rvPrimaryKey = rvTable.getPrimaryKey();
         if (rvPrimaryKey == null) {
             return;
         }

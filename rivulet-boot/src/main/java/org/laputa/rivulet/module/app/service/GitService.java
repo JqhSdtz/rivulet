@@ -74,26 +74,26 @@ public class GitService implements ApplicationRunner {
     }
 
     @SneakyThrows
-    public void removeBuiltInRvPrototypes(List<RvTable> rvTables) {
+    public void removeBuiltInRvTables(List<RvTable> rvTables) {
         if (rvTables.isEmpty()) return;
         RmCommand rmCommand = gitRepo.rm();
-        rvTables.forEach(rvPrototype -> {
-            String filePath = "/prototypes/builtIn/" + rvPrototype.getCode();
+        rvTables.forEach(rvTable -> {
+            String filePath = "/prototypes/builtIn/" + rvTable.getCode();
             rmCommand.addFilepattern(filePath);
         });
         rmCommand.call();
     }
 
     @SneakyThrows
-    public void addBuiltInRvPrototypes(List<Class<?>> tableClasses) {
+    public void addBuiltInRvTables(List<Class<?>> tableClasses) {
         if (tableClasses.isEmpty()) return;
         AddCommand addCommand = gitRepo.add();
         for (Class<?> tableClass : tableClasses) {
             if (tableClass == null) continue;
             String filePath = "/src/prototypes/builtIn/" + tableClass.getSimpleName() + ".js";
-            File rvPrototypeFile = FileUtil.touch(FileUtil.normalize(gitProperty.getLocalDir() + File.separator + filePath));
+            File rvTableFile = FileUtil.touch(FileUtil.normalize(gitProperty.getLocalDir() + File.separator + filePath));
             String content = getContent(tableClass);
-            FileUtil.writeString(content, rvPrototypeFile, StandardCharsets.UTF_8);
+            FileUtil.writeString(content, rvTableFile, StandardCharsets.UTF_8);
             addCommand.addFilepattern(filePath);
         }
         addCommand.call();

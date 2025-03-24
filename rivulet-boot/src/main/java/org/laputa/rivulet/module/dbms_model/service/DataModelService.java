@@ -35,8 +35,8 @@ public class DataModelService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    public Result<Page<RvTable>> queryDataModel(RvTable prototype, Pageable pageable) {
-        Example<RvTable> example = Example.of(prototype);
+    public Result<Page<RvTable>> queryDataModel(RvTable table, Pageable pageable) {
+        Example<RvTable> example = Example.of(table);
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<RvTable> query = builder.createQuery(RvTable.class);
         Root<RvTable> root = query.from(RvTable.class);

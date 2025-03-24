@@ -22,11 +22,11 @@ public class IndexSnapshotGenerator extends RivuletSnapshotGenerator {
             return example;
         }
         Relation table = ((Index) example).getRelation();
-        RvTable prototype = findRvPrototype(table, snapshot);
-        if (prototype == null) {
+        RvTable rvTable = findRvTable(table, snapshot);
+        if (rvTable == null) {
             return example;
         }
-        for (RvIndex rvIndex : prototype.getIndexes()) {
+        for (RvIndex rvIndex : rvTable.getIndexes()) {
             Index index = handleRvIndex(table, rvIndex);
             if (index.getColumnNames().equalsIgnoreCase(((Index) example).getColumnNames())) {
                 table.getIndexes().add(index);
@@ -43,11 +43,11 @@ public class IndexSnapshotGenerator extends RivuletSnapshotGenerator {
             return;
         }
         if (foundObject instanceof Table table) {
-            RvTable prototype = findRvPrototype(table, snapshot);
-            if (prototype == null) {
+            RvTable rvTable = findRvTable(table, snapshot);
+            if (rvTable == null) {
                 return;
             }
-            for (RvIndex rvIndex : prototype.getIndexes()) {
+            for (RvIndex rvIndex : rvTable.getIndexes()) {
                 Index index = handleRvIndex(table, rvIndex);
                 table.getIndexes().add(index);
             }

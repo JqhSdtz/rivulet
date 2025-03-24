@@ -55,8 +55,8 @@ public class RvIndex extends RvEntity<String> implements DataModelEntityInterfac
     @ManyToOne(cascade = CascadeType.PERSIST)
     @Title("对应模型ID")
     @Comment("索引所对应的数据模型的ID，使用外键关联")
-    @JoinColumn(name = "prototype_id")
-    private RvTable prototype;
+    @JoinColumn(name = "table_id")
+    private RvTable table;
 
     @Title("系统内置")
     @Comment("系统内置标记用于标记该索引是否是系统内置")

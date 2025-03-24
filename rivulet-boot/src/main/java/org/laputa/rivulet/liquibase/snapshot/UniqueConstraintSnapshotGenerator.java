@@ -30,11 +30,11 @@ public class UniqueConstraintSnapshotGenerator extends RivuletSnapshotGenerator 
             return;
         }
         Table table = (Table) foundObject;
-        RvTable prototype = findRvPrototype(table, snapshot);
-        if (prototype == null) {
+        RvTable rvTable = findRvTable(table, snapshot);
+        if (rvTable == null) {
             return;
         }
-        for (RvUnique rvUnique : prototype.getUniques()) {
+        for (RvUnique rvUnique : rvTable.getUniques()) {
             UniqueConstraint uniqueConstraint = new UniqueConstraint();
             uniqueConstraint.setName(rvUnique.getCode());
             uniqueConstraint.setRelation(table);

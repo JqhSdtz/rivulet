@@ -110,7 +110,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
     @Resource
     private AppInitService appInitService;
     @Resource
-    private RvPrototypeRepository rvPrototypeRepository;
+    private RvTableRepository rvTableRepository;
     @Resource
     private RvColumnRepository rvColumnRepository;
     @Resource
@@ -129,7 +129,6 @@ public class BuiltInDataModelService implements ApplicationRunner {
     private TransactionTemplate transactionTemplate;
 
     private RBucket<String> confirmKeyBucket;
-    private final Map<String, Field> columnFieldMap = new HashMap<>();
     private DiffResult diffResult;
     @Getter
     private String currentStructureUpdateSql;
@@ -311,29 +310,29 @@ public class BuiltInDataModelService implements ApplicationRunner {
         Map<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> objectMapByClass = hibernateDatabaseObjects.toMap();
         Set<Table> tableSet = TypeConvertUtil.convert(new TypeReference<>() {
         }, objectMapByClass.get(Table.class));
-        List<RvTable> originalPrototypeList = rvPrototypeRepository.findAll();
-        List<RvTable> toDeletePrototypeList = new ArrayList<>();
-        Map<String, RvTable> rvPrototypeMap = new HashMap<>(tableSet.size());
-        originalPrototypeList.forEach(prototype -> {
-            if (tableSet.stream().anyMatch(table -> table.getName().equals(prototype.getCode()))) {
-                rvPrototypeMap.put(prototype.getCode(), prototype);
+        List<RvTable> originalTableList = rvTableRepository.findAll();
+        List<RvTable> toDeleteTableList = new ArrayList<>();
+        Map<String, RvTable> rvTableMap = new HashMap<>(tableSet.size());
+        originalTableList.forEach(rvTable -> {
+            if (tableSet.stream().anyMatch(table -> table.getName().equals(rvTable.getCode()))) {
+                rvTableMap.put(rvTable.getCode(), rvTable);
             } else {
-                toDeletePrototypeList.add(prototype);
+                toDeleteTableList.add(rvTable);
             }
         });
-        rvPrototypeRepository.deleteAllById(toDeletePrototypeList.stream().map(RvTable::getId).collect(Collectors.toList()));
-        gitService.removeBuiltInRvPrototypes(toDeletePrototypeList);
+        rvTableRepository.deleteAllById(toDeleteTableList.stream().map(RvTable::getId).collect(Collectors.toList()));
+        gitService.removeBuiltInRvTables(toDeleteTableList);
         List<RvTable> toSaveRvTableList = new ArrayList<>(tableSet.size());
-        // 先把所有的prototype建好，便于构造过程中的外键引用
+        // 先把所有的table建好，便于构造过程中的外键引用
         tableSet.forEach(table -> {
-            if (!rvPrototypeMap.containsKey(table.getName())) {
-                rvPrototypeMap.put(table.getName(), new RvTable());
+            if (!rvTableMap.containsKey(table.getName())) {
+                rvTableMap.put(table.getName(), new RvTable());
             }
         });
         RvAdmin initialAdmin;
         if (!appState.isAppInitialized()) {
             initialAdmin = new RvAdmin();
-            // 临时设置的初始管理员的用户名和密码，否则rv_prototype无法保存。在正式创建初始管理员时会被替换掉。
+            // 临时设置的初始管理员的用户名和密码，否则rv_table无法保存。在正式创建初始管理员时会被替换掉。
             initialAdmin.setAdminName("admin");
             initialAdmin.setPassword(PasswordUtil.encode(RandomUtil.randomString(32)));
             initialAdmin.setAdminType(AdminType.INITIAL_ADMIN);
@@ -341,12 +340,12 @@ public class BuiltInDataModelService implements ApplicationRunner {
         } else {
             initialAdmin = rvAdminRepository.findById(appInitService.getInitialAdminId()).orElse(null);
         }
-        AtomicInteger rvPrototypeOrderNum = new AtomicInteger(0);
-        tableSet.forEach(table -> toSaveRvTableList.add(buildRvPrototype(table, rvPrototypeOrderNum.getAndIncrement(), rvPrototypeMap, initialAdmin)));
+        AtomicInteger rvTableOrderNum = new AtomicInteger(0);
+        tableSet.forEach(table -> toSaveRvTableList.add(buildRvTable(table, rvTableOrderNum.getAndIncrement(), rvTableMap, initialAdmin)));
         // 每次启动都全量覆盖保存内部数据模型
         List<Class<?>> tableClasses = TypeConvertUtil.streamToList(tableSet.stream().map(table -> table.getAttribute(DatabaseObjectAttrName.TableClass, Class.class)));
-        rvPrototypeRepository.saveAll(toSaveRvTableList);
-        gitService.addBuiltInRvPrototypes(tableClasses);
+        rvTableRepository.saveAll(toSaveRvTableList);
+        gitService.addBuiltInRvTables(tableClasses);
         return Result.succeed();
     }
 
@@ -361,8 +360,8 @@ public class BuiltInDataModelService implements ApplicationRunner {
         dataModelEntity.setBuiltIn(true);
     }
 
-    private RvTable buildRvPrototype(Table table, int tableIndex, Map<String, RvTable> rvPrototypeMap, RvAdmin initialAdmin) {
-        RvTable rvTable = rvPrototypeMap.get(table.getName());
+    private RvTable buildRvTable(Table table, int tableIndex, Map<String, RvTable> rvTableMap, RvAdmin initialAdmin) {
+        RvTable rvTable = rvTableMap.get(table.getName());
         setCodeAndTitleAndBuiltIn(rvTable, table);
         rvTable.setOrderNum(tableIndex);
         if (rvTable.getRemark() == null) {
@@ -388,7 +387,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
         rvTable.setColumns(Streams.mapWithIndex(table.getColumns().stream(), (column, idx) -> {
             RvColumn rvColumn = buildRvColumn(column, rvColumnMap);
             rvColumn.setOrderNum((int) idx);
-            rvColumn.setPrototype(rvTable);
+            rvColumn.setTable(rvTable);
             return rvColumn;
         }).collect(Collectors.toList()));
 
@@ -407,7 +406,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
         rvTable.setIndexes(Streams.mapWithIndex(table.getIndexes().stream(), (index, idx) -> {
             RvIndex rvIndex = buildRvIndex(index, rvColumnMap, rvIndexMap);
             rvIndex.setOrderNum((int) idx);
-            rvIndex.setPrototype(rvTable);
+            rvIndex.setTable(rvTable);
             return rvIndex;
         }).collect(Collectors.toList()));
 
@@ -426,9 +425,9 @@ public class BuiltInDataModelService implements ApplicationRunner {
         }
         rvForeignKeyRepository.deleteAllById(deletedForeignKeyIdList);
         rvTable.setForeignKeys(Streams.mapWithIndex(table.getOutgoingForeignKeys().stream(), (foreignKey, idx) -> {
-            RvForeignKey rvForeignKey = buildRvForeignKey(foreignKey, rvPrototypeMap, rvColumnMap, rvIndexMap, rvForeignKeyMap);
+            RvForeignKey rvForeignKey = buildRvForeignKey(foreignKey, rvTableMap, rvColumnMap, rvIndexMap, rvForeignKeyMap);
             rvForeignKey.setOrderNum((int) idx);
-            rvForeignKey.setPrototype(rvTable);
+            rvForeignKey.setTable(rvTable);
             return rvForeignKey;
         }).collect(Collectors.toList()));
 
@@ -447,7 +446,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
         rvTable.setUniques(Streams.mapWithIndex(table.getUniqueConstraints().stream(), (uniqueConstraint, idx) -> {
             RvUnique rvUnique = buildRvUnique(uniqueConstraint, rvColumnMap, rvIndexMap, rvUniqueMap);
             rvUnique.setOrderNum((int) idx);
-            rvUnique.setPrototype(rvTable);
+            rvUnique.setTable(rvTable);
             return rvUnique;
         }).collect(Collectors.toList()));
 
@@ -466,7 +465,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
         rvTable.setNotNulls(Streams.mapWithIndex(table.getNotNullConstraints().stream(), (notNullConstraint, idx) -> {
             RvNotNull rvNotNull = buildRvNotNull(notNullConstraint, rvColumnMap, rvNotNullMap);
             rvNotNull.setOrderNum((int) idx);
-            rvNotNull.setPrototype(rvTable);
+            rvNotNull.setTable(rvTable);
             return rvNotNull;
         }).collect(Collectors.toList()));
 
@@ -562,7 +561,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
         return rvPrimaryKey;
     }
 
-    private RvForeignKey buildRvForeignKey(ForeignKey foreignKey, Map<String, RvTable> rvPrototypeMap, Map<String, RvColumn> rvColumnMap, Map<String, RvIndex> rvIndexMap, Map<String, RvForeignKey> rvForeignKeyMap) {
+    private RvForeignKey buildRvForeignKey(ForeignKey foreignKey, Map<String, RvTable> rvTableMap, Map<String, RvColumn> rvColumnMap, Map<String, RvIndex> rvIndexMap, Map<String, RvForeignKey> rvForeignKeyMap) {
         RvForeignKey rvForeignKey = rvForeignKeyMap.get(foreignKey.getName());
         boolean isNew = rvForeignKey == null;
         if (rvForeignKey == null) {
@@ -592,7 +591,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
             }
             return rvForeignKeyTargetColumn;
         }).collect(Collectors.toList()));
-        rvForeignKey.setTargetPrototype(rvPrototypeMap.get(foreignKey.getPrimaryKeyTable().getName()));
+        rvForeignKey.setTargetTable(rvTableMap.get(foreignKey.getPrimaryKeyTable().getName()));
         rvForeignKey.setForeignKeyForeignColumns(Streams.mapWithIndex(foreignKey.getForeignKeyColumns().stream(), (column, idx) -> {
             List<RvForeignKeyForeignColumn> matchedRvForeignKeyForeignColumns = isNew ? null : targetRvForeignKey.getForeignKeyForeignColumns().stream()
                     .filter(foreignKeyForeignColumn -> column.getName().equals(foreignKeyForeignColumn.getColumn().getCode()))
@@ -664,20 +663,19 @@ public class BuiltInDataModelService implements ApplicationRunner {
 
     private void processMetadata(MetadataImpl metadata) {
         Map<String, PersistentClass> entityBindingMap = metadata.getEntityBindingMap();
-        // columnFieldMap只需要初始化一次即可
-        if (this.columnFieldMap.isEmpty()) {
-            entityBindingMap.forEach((className, entity) -> {
-                Class<?> entityClass = entity.getMappedClass();
-                if (entityClass == null) return;
-                for (Field field : entityClass.getFields()) {
-                    Property property = entity.getProperty(field.getName());
-                    String tableName = entity.getTable().getName();
-                    List<org.hibernate.mapping.Column> columnList = property.getValue().getColumns();
-                    String columnName = columnList.get(0).getText();
-                    this.columnFieldMap.put(tableName + "." + columnName, field);
-                }
-            });
-        }
+
+        entityBindingMap.forEach((className, entity) -> {
+            Class<?> entityClass = entity.getMappedClass();
+            if (entityClass == null) return;
+            for (Field field : entityClass.getFields()) {
+                Property property = entity.getProperty(field.getName());
+                String tableName = entity.getTable().getName();
+                List<org.hibernate.mapping.Column> columnList = property.getValue().getColumns();
+                String columnName = columnList.get(0).getText();
+
+            }
+        });
+
     }
 
     private String buildUrl(String baseUrl, Map<String, String> parameterMap) {

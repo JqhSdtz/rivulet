@@ -49,8 +49,8 @@ public class RvNotNull extends RvEntity<String> implements DataModelEntityInterf
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "prototype_id")
-    private RvTable prototype;
+    @JoinColumn(name = "table_id")
+    private RvTable table;
 
     @Title("系统内置")
     @Comment("系统内置标记用于标记该非空约束是否是系统内置")

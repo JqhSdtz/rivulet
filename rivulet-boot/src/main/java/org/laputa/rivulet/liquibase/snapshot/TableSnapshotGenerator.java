@@ -22,14 +22,14 @@ public class TableSnapshotGenerator extends RivuletSnapshotGenerator {
         if (example.getSnapshotId() != null) {
             return example;
         }
-        RvTable prototype = findRvPrototype(example, snapshot);
-        if (prototype == null) {
+        RvTable rvTable = findRvTable(example, snapshot);
+        if (rvTable == null) {
             return example;
         }
-        Table table = new Table().setName(prototype.getCode());
+        Table table = new Table().setName(rvTable.getCode());
         table.setSchema(example.getSchema());
-        if (prototype.getRemark() != null && !prototype.getRemark().isEmpty()) {
-            table.setRemarks(prototype.getRemark());
+        if (rvTable.getRemark() != null && !rvTable.getRemark().isEmpty()) {
+            table.setRemarks(rvTable.getRemark());
         }
         return table;
     }
@@ -41,9 +41,9 @@ public class TableSnapshotGenerator extends RivuletSnapshotGenerator {
         }
         if (foundObject instanceof Schema schema) {
             RivuletDatabase database = (RivuletDatabase) snapshot.getDatabase();
-            List<RvTable> prototypes = database.getPrototypes();
-            for (RvTable prototype : prototypes) {
-                addDatabaseObjectToSchema(prototype, schema, snapshot);
+            List<RvTable> rvTables = database.getRvTables();
+            for (RvTable rvTable : rvTables) {
+                addDatabaseObjectToSchema(rvTable, schema, snapshot);
             }
         }
     }

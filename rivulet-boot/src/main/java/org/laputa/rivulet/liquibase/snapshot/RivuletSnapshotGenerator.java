@@ -83,12 +83,12 @@ public abstract class RivuletSnapshotGenerator implements SnapshotGenerator {
 
     protected abstract void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException;
 
-    protected RvTable findRvPrototype(DatabaseObject example, DatabaseSnapshot snapshot) {
+    protected RvTable findRvTable(DatabaseObject example, DatabaseSnapshot snapshot) {
         RivuletDatabase database = (RivuletDatabase) snapshot.getDatabase();
-        List<RvTable> prototypes = database.getPrototypes();
-        for (RvTable prototype : prototypes) {
-            if (prototype.getCode().equalsIgnoreCase(example.getName())) {
-                return prototype;
+        List<RvTable> rvTables = database.getRvTables();
+        for (RvTable rvTable : rvTables) {
+            if (rvTable.getCode().equalsIgnoreCase(example.getName())) {
+                return rvTable;
             }
         }
         return null;

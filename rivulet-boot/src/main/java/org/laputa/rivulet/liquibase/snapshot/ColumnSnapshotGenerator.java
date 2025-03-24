@@ -51,11 +51,11 @@ public class ColumnSnapshotGenerator extends RivuletSnapshotGenerator {
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         if (foundObject instanceof Table) {
-            RvTable prototype = findRvPrototype(foundObject, snapshot);
-            if (prototype == null) {
+            RvTable rvTable = findRvTable(foundObject, snapshot);
+            if (rvTable == null) {
                 return;
             }
-            for (RvColumn rvColumn : prototype.getColumns()) {
+            for (RvColumn rvColumn : rvTable.getColumns()) {
                 Column column = new Column();
                 column.setName(rvColumn.getCode());
                 column.setRelation((Table) foundObject);
@@ -67,11 +67,11 @@ public class ColumnSnapshotGenerator extends RivuletSnapshotGenerator {
 
     protected void snapshotColumn(Column column, DatabaseSnapshot snapshot) throws DatabaseException {
         RivuletDatabase database = (RivuletDatabase) snapshot.getDatabase();
-        RvTable prototype = findRvPrototype(column.getRelation(), snapshot);
-        if (prototype == null) {
+        RvTable rvTable = findRvTable(column.getRelation(), snapshot);
+        if (rvTable == null) {
             return;
         }
-        for (RvColumn rvColumn : prototype.getColumns()) {
+        for (RvColumn rvColumn : rvTable.getColumns()) {
             if (rvColumn.getCode().equalsIgnoreCase(column.getName())) {
                 String rvColumnDataType = rvColumn.getDataType();
                 String rvColumnDefaultValue = rvColumn.getDefaultValue();

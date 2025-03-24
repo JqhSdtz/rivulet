@@ -18,7 +18,7 @@ import org.laputa.rivulet.common.util.SpringBeanUtil;
 import org.laputa.rivulet.common.util.TypeConvertUtil;
 import org.laputa.rivulet.liquibase.database.connection.RvDriver;
 import org.laputa.rivulet.module.dbms_model.entity.RvTable;
-import org.laputa.rivulet.module.dbms_model.repository.RvPrototypeRepository;
+import org.laputa.rivulet.module.dbms_model.repository.RvTableRepository;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.lang.NonNull;
 
@@ -30,7 +30,7 @@ import java.util.List;
 public abstract class RivuletDatabase extends AbstractJdbcDatabase {
 
     @Getter
-    private List<RvTable> prototypes;
+    private List<RvTable> rvTables;
     private TypeConfiguration typeConfiguration;
     private Dialect dbmsDialect;
     private Method resolveSqlTypeCodeMethod;
@@ -68,7 +68,7 @@ public abstract class RivuletDatabase extends AbstractJdbcDatabase {
     public void setConnection(DatabaseConnection conn) {
         super.setConnection(conn);
         Scope.getCurrentScope().getLog(getClass()).info("Reading rivulet configuration " + getConnection().getURL());
-        RvPrototypeRepository rvPrototypeRepository = SpringBeanUtil.getBean(RvPrototypeRepository.class);
+        RvTableRepository rvTableRepository = SpringBeanUtil.getBean(RvTableRepository.class);
         JpaProperties jpaProperties = SpringBeanUtil.getBean(JpaProperties.class);
         this.typeConfiguration = new TypeConfiguration();
         String dialectClassName = jpaProperties.getProperties().get("hibernate.dialect");
@@ -78,7 +78,7 @@ public abstract class RivuletDatabase extends AbstractJdbcDatabase {
             dbmsDialect = dialectClass.getDeclaredConstructor().newInstance();
             this.resolveSqlTypeCodeMethod = ReflectUtil.getMethodByName(dialectClass, "resolveSqlTypeCode");
         }
-        prototypes = rvPrototypeRepository.findAll();
+        rvTables = rvTableRepository.findAll();
         afterSetup();
     }
 
