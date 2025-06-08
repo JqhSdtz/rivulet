@@ -41,7 +41,6 @@ spring:
         properties:
             javax.persistence.sharedCache.mode: ENABLE_SELECTIVE
             hibernate:
-                dialect: org.hibernate.dialect.PostgreSQLDialect
                 new_generator_mappings: false
                 format_sql: false
                 generate_statistics: true
