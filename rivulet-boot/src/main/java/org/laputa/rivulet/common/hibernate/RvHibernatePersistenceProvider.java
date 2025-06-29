@@ -4,7 +4,6 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.spi.PersistenceUnitInfo;
 import org.hibernate.bytecode.enhance.spi.EnhancementContext;
 import org.hibernate.jpa.HibernatePersistenceProvider;
-import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
 import org.hibernate.jpa.boot.internal.PersistenceUnitInfoDescriptor;
 import org.springframework.core.NativeDetector;
 import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
@@ -25,7 +24,7 @@ public class RvHibernatePersistenceProvider extends HibernatePersistenceProvider
         if (info instanceof SmartPersistenceUnitInfo smartInfo) {
             mergedClassesAndPackages.addAll(smartInfo.getManagedPackages());
         }
-        return new EntityManagerFactoryBuilderImpl(
+        return new RvEntityManagerFactoryBuilderImpl(
                 new PersistenceUnitInfoDescriptor(info) {
                     @Override
                     public List<String> getManagedClassNames() {

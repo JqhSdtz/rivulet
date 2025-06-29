@@ -4,6 +4,8 @@ import cn.hutool.core.lang.TypeReference;
 import jakarta.annotation.Resource;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.EntityType;
+import jakarta.persistence.metamodel.ManagedType;
+import org.hibernate.metamodel.model.domain.internal.EntityTypeImpl;
 import org.laputa.rivulet.common.hibernate.RvEntityManagerFactory;
 import org.laputa.rivulet.common.entity.RvEntity;
 import org.laputa.rivulet.common.model.Result;
@@ -49,10 +51,8 @@ public class AppController {
 
     @GetMapping("/test")
     public Result<?> test() {
-        rvEntityManagerFactory.rebuildEntityManagerFactory();
-        EntityManager entityManager = rvEntityManagerFactory.getEntityManager();
-        List<Map<String, Object>> resultList = TypeConvertUtil.convert(new TypeReference<>() {
-        }, entityManager.createQuery("select p from Book p").getResultList());
-        return Result.succeed(resultList);
+        Set<EntityType<?>> entityTypes = rvEntityManagerFactory.getEntityManagerFactory().getMetamodel().getEntities();
+        EntityTypeImpl<?> entity = (EntityTypeImpl<?>) entityTypes.iterator().next();
+        return Result.succeed();
     }
 }
