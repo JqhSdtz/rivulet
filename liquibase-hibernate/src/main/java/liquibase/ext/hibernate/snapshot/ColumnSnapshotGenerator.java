@@ -135,7 +135,9 @@ public class ColumnSnapshotGenerator extends HibernateSnapshotGenerator {
                     Scope.getCurrentScope().getLog(getClass()).info("Found column " + column.getName() + " " + column.getType().toString());
                 }
 
-                column.setRemarks(hibernateColumn.getComment());
+                // !!!这里增加trim，因为PostreSQL在设置注释时会trim，需保证对应
+                String comment = hibernateColumn.getComment();
+                column.setRemarks(comment == null ? null : comment.trim());
                 if (hibernateColumn.getValue() instanceof SimpleValue) {
                     DataType parseType;
                     if (DataTypeFactory.getInstance().from(dataType, database) instanceof UnknownType) {

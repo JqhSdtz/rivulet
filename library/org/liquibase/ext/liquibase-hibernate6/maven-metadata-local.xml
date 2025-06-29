@@ -25,6 +25,12 @@
         <updated>20250207133841</updated>
       </snapshotVersion>
     </snapshotVersions>
+    <snapshotVersion>
+        <extension>pom</extension>
+        <value>4.31.0-alpha</value>
+        <updated>20250207133841</updated>
+      </snapshotVersion>
+    </snapshotVersions>
   </versioning>
-  <version>4.31.0-SNAPSHOT</version>
+  <version>4.31.0-alpha</version>
 </metadata>
