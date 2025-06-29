@@ -569,7 +569,7 @@ public class RvMetadataBuildingProcess {
         }
     }
 
-//	todo (7.0) : buildJandexInitializer
+//	to do (7.0) : buildJandexInitializer
 //	private static JandexInitManager buildJandexInitializer(
 //			MetadataBuildingOptions options,
 //			ClassLoaderAccess classLoaderAccess) {

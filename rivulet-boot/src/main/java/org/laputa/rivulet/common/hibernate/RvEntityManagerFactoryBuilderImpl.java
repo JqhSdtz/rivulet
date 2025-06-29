@@ -195,7 +195,7 @@ public class RvEntityManagerFactoryBuilderImpl implements EntityManagerFactoryBu
 
             applyMetadataBuilderContributor();
 
-            // todo : would be nice to have MetadataBuilder still do the handling of CfgXmlAccessService here
+            // to do : would be nice to have MetadataBuilder still do the handling of CfgXmlAccessService here
             //		another option is to immediately handle them here (probably in mergeSettings?) as we encounter them...
             final CfgXmlAccessService cfgXmlAccessService = standardServiceRegistry.requireService(CfgXmlAccessService.class);
             if (cfgXmlAccessService.getAggregatedConfig() != null) {
@@ -1168,11 +1168,11 @@ public class RvEntityManagerFactoryBuilderImpl implements EntityManagerFactoryBu
 
     @SuppressWarnings("unchecked")
     private List<ConverterDescriptor> applyMappingResources(MetadataSources metadataSources) {
-        // todo : where in the heck are `org.hibernate.jpa.boot.spi.PersistenceUnitDescriptor.getManagedClassNames` handled?!?
+        // to do : where in the heck are `org.hibernate.jpa.boot.spi.PersistenceUnitDescriptor.getManagedClassNames` handled?!?
 
 //		final ClassLoaderService classLoaderService = ssr.getService( ClassLoaderService.class );
 //
-//		// todo : make sure MetadataSources/Metadata are capable of handling duplicate sources
+//		// to do : make sure MetadataSources/Metadata are capable of handling duplicate sources
 //
 //		// explicit persistence unit mapping files listings
 //		if ( persistenceUnit.getMappingFileNames() != null ) {
@@ -1343,7 +1343,7 @@ public class RvEntityManagerFactoryBuilderImpl implements EntityManagerFactoryBu
     @Override
     public void cancel() {
         cleanup();
-        // todo : close the bootstrap registry (not critical, but nice to do)
+        // to do : close the bootstrap registry (not critical, but nice to do)
     }
 
     private void cleanup() {
