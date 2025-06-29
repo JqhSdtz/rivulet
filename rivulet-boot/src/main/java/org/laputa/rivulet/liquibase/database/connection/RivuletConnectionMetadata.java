@@ -1,6 +1,7 @@
 package org.laputa.rivulet.liquibase.database.connection;
 
 import org.hibernate.Version;
+import org.laputa.rivulet.common.constant.Strings;
 
 import java.sql.*;
 
@@ -53,7 +54,7 @@ public class RivuletConnectionMetadata implements DatabaseMetaData {
     }
 
     public String getDatabaseProductName() throws SQLException {
-        return "Rivulet";
+        return Strings.RIVULET;
     }
 
     public String getDatabaseProductVersion() throws SQLException {

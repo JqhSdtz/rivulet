@@ -14,6 +14,7 @@ import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.engine.jdbc.connections.spi.DatabaseConnectionInfo;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.hibernate.type.spi.TypeConfiguration;
+import org.laputa.rivulet.common.constant.Strings;
 import org.laputa.rivulet.common.util.SpringBeanUtil;
 import org.laputa.rivulet.common.util.TypeConvertUtil;
 import org.laputa.rivulet.liquibase.database.connection.RvDriver;
@@ -36,7 +37,7 @@ public abstract class RivuletDatabase extends AbstractJdbcDatabase {
     private Method resolveSqlTypeCodeMethod;
 
     private boolean indexesForForeignKeys = false;
-    public static final String DEFAULT_SCHEMA = "RIVULET";
+    public static final String DEFAULT_SCHEMA = Strings.RIVULET;
 
     public RivuletDatabase() {
         setDefaultCatalogName(DEFAULT_SCHEMA);
@@ -52,7 +53,7 @@ public abstract class RivuletDatabase extends AbstractJdbcDatabase {
     }
 
     public String getDefaultDriver(String url) {
-        if (url.startsWith("rivulet")) {
+        if (url.startsWith(Strings.RIVULET)) {
             return RvDriver.class.getName();
         }
         return null;
@@ -76,7 +77,8 @@ public abstract class RivuletDatabase extends AbstractJdbcDatabase {
             Class<? extends Dialect> dialectClass = TypeConvertUtil.convert(new TypeReference<>() {
             }, Class.forName(dialectClassName));
             dbmsDialect = dialectClass.getDeclaredConstructor().newInstance();
-            this.resolveSqlTypeCodeMethod = ReflectUtil.getMethodByName(dialectClass, "resolveSqlTypeCode");
+            this.resolveSqlTypeCodeMethod = ReflectUtil.getMethod(dialectClass, "resolveSqlTypeCode", String.class, TypeConfiguration.class);
+            this.resolveSqlTypeCodeMethod.setAccessible(true);
         }
         rvTables = rvTableRepository.findAll();
         afterSetup();
@@ -85,7 +87,7 @@ public abstract class RivuletDatabase extends AbstractJdbcDatabase {
     @SneakyThrows
     public Integer resolveSqlTypeCode(String columnTypeName) {
         if (resolveSqlTypeCodeMethod == null) return null;
-        return (Integer) resolveSqlTypeCodeMethod.invoke(columnTypeName, typeConfiguration);
+        return (Integer) resolveSqlTypeCodeMethod.invoke(this.dbmsDialect, columnTypeName, typeConfiguration);
     }
 
     /**

@@ -21,7 +21,6 @@ public class SpringBeanUtil implements ApplicationContextAware {
         context = applicationContext;
     }
 
-
     public static Object getBean(String beanName) {
         return context.getBean(beanName);
     }
@@ -32,5 +31,9 @@ public class SpringBeanUtil implements ApplicationContextAware {
 
     public static <T> T getBean(Class<T> clazz) {
         return context.getBean(clazz);
+    }
+
+    public static boolean contextInitialized() {
+        return context != null;
     }
 }

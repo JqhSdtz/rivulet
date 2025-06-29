@@ -94,10 +94,13 @@ dependencies {
 //    implementation 'com.alibaba:druid-spring-boot-3-starter:1.2.24'
     implementation 'org.redisson:redisson-spring-boot-starter:3.44.0'
     implementation 'org.liquibase:liquibase-core:4.31.1'
-    implementation 'org.liquibase.ext:liquibase-hibernate6:4.31.0-SNAPSHOT'
-//    springboot jpa中的hibernate还是6.6.5，所以这里版本也设置为6.6.5
+    implementation 'org.liquibase.ext:liquibase-hibernate6:4.31.0-alpha'
+//    implementation 'org.hibernate.common:hibernate-commons-annotations:7.0.3.Final'
+    //    springboot jpa中的hibernate还是6.6.5，所以这里版本也设置为6.6.5
     implementation 'org.hibernate:hibernate-envers:6.6.5.Final'
     implementation 'org.hibernate.orm:hibernate-jcache:6.6.5.Final'
+    // https://mvnrepository.com/artifact/io.smallrye/jandex
+    implementation 'io.smallrye:jandex:3.2.7'
     implementation "org.ehcache:ehcache:3.10.8"
     implementation 'org.eclipse.jgit:org.eclipse.jgit:6.6.1.202309021850-r'
     implementation 'cn.hutool:hutool-core:5.8.35'

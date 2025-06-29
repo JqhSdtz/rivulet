@@ -2,6 +2,7 @@ package org.laputa.rivulet.liquibase.database.connection;
 
 import liquibase.resource.ResourceAccessor;
 import lombok.Getter;
+import org.laputa.rivulet.common.constant.Strings;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -149,7 +150,7 @@ public class RivuletConnection implements Connection {
     }
 
     public String getCatalog() throws SQLException {
-        return "RIVULET";
+        return Strings.RIVULET;
     }
 
     public void setTransactionIsolation(int level) throws SQLException {
@@ -299,7 +300,7 @@ public class RivuletConnection implements Connection {
 
     //@Override only in java 1.7
     public String getSchema() throws SQLException {
-        return "RIVULET";
+        return Strings.RIVULET;
     }
 
     //@Override only in java 1.7
