@@ -16,7 +16,7 @@ import lombok.ToString;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
 import org.laputa.rivulet.common.constant.Strings;
-import org.laputa.rivulet.common.entity.RvEntity;
+import org.laputa.rivulet.common.entity.RvBaseEntity;
 import org.laputa.rivulet.module.dbms_model.entity.RvIndex;
 import org.laputa.rivulet.module.dbms_model.entity.RvTable;
 import org.laputa.rivulet.module.dbms_model.entity.column_relation.RvForeignKeyForeignColumn;
@@ -45,7 +45,7 @@ import java.util.List;
         非包含关系的两个数据之间若要关联，则需要添加一个中间表，比如班级和学生之间需要有一个学生分班表，因为即使班级没有了，学生依然存在。
         但是班级或学生任意一个不存在了，则分班表中相关的数据也都会随之删除。""")
 @Table(name = "rv_foreign_key")
-public class RvForeignKey extends RvEntity<String> implements DataModelEntityInterface {
+public class RvForeignKey extends RvBaseEntity<String> implements DataModelEntityInterface {
     @Id
     @UuidGenerator
     @Title("外键ID")

@@ -6,7 +6,7 @@ import liquibase.ext.hibernate.annotation.Title;
 import lombok.Getter;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.UuidGenerator;
-import org.laputa.rivulet.common.entity.RvEntity;
+import org.laputa.rivulet.common.entity.RvBaseEntity;
 import org.laputa.rivulet.module.auth.entity.RvAdmin;
 
 import java.util.Date;
@@ -18,7 +18,7 @@ import java.util.Date;
 @Table(name = "databasechangelog", indexes = {
         @Index(name = "idx_databasechangelog_author", columnList = "author")
 })
-public class DatabaseChangeLog extends RvEntity<String> {
+public class DatabaseChangeLog extends RvBaseEntity<String> {
     @Id
     @UuidGenerator
     @Title("变更记录ID")

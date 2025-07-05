@@ -16,7 +16,7 @@ import lombok.ToString;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
 import org.laputa.rivulet.common.constant.Strings;
-import org.laputa.rivulet.common.entity.RvEntity;
+import org.laputa.rivulet.common.entity.RvBaseEntity;
 import org.laputa.rivulet.module.dbms_model.entity.column_relation.RvIndexColumn;
 import org.laputa.rivulet.module.dbms_model.entity.inter.DataModelEntityInterface;
 
@@ -38,7 +38,7 @@ import java.util.List;
 @Title("数据模型索引")
 @TableComment("数据模型索引和数据库的表索引对应，一般创建主键、外键以及唯一性约束时会自动生成，也可以自己添加。被索引的列有更快的查询速度。")
 @Table(name = "rv_index")
-public class RvIndex extends RvEntity<String> implements DataModelEntityInterface {
+public class RvIndex extends RvBaseEntity<String> implements DataModelEntityInterface {
     @Id
     @UuidGenerator
     @Title("索引ID")

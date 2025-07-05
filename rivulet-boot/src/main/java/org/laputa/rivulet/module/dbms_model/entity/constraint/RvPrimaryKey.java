@@ -16,7 +16,7 @@ import lombok.ToString;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
 import org.laputa.rivulet.common.constant.Strings;
-import org.laputa.rivulet.common.entity.RvEntity;
+import org.laputa.rivulet.common.entity.RvBaseEntity;
 import org.laputa.rivulet.module.dbms_model.entity.RvIndex;
 import org.laputa.rivulet.module.dbms_model.entity.RvTable;
 import org.laputa.rivulet.module.dbms_model.entity.column_relation.RvPrimaryKeyColumn;
@@ -41,7 +41,7 @@ import java.util.List;
 @Title("主键")
 @TableComment("数据模型的主键对应数据库表的主键，用于唯一标识一条数据记录，主键不可更改且一定唯一")
 @Table(name = "rv_primary_key")
-public class RvPrimaryKey extends RvEntity<String> implements DataModelEntityInterface {
+public class RvPrimaryKey extends RvBaseEntity<String> implements DataModelEntityInterface {
     @Id
     @UuidGenerator
     @Title("主键ID")

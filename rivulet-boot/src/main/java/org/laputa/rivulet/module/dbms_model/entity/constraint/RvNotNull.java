@@ -14,7 +14,7 @@ import lombok.ToString;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
 import org.laputa.rivulet.common.constant.Strings;
-import org.laputa.rivulet.common.entity.RvEntity;
+import org.laputa.rivulet.common.entity.RvBaseEntity;
 import org.laputa.rivulet.module.dbms_model.entity.RvColumn;
 import org.laputa.rivulet.module.dbms_model.entity.RvTable;
 import org.laputa.rivulet.module.dbms_model.entity.inter.DataModelEntityInterface;
@@ -35,7 +35,7 @@ import org.laputa.rivulet.module.dbms_model.entity.inter.DataModelEntityInterfac
 @Title("非空约束")
 @TableComment("数据模型的非空约束对应数据库表的非空约束，用于约束数据模型中的一个属性不为空，通常会有一个索引与之对应")
 @Table(name = "rv_not_null")
-public class RvNotNull extends RvEntity<String> implements DataModelEntityInterface {
+public class RvNotNull extends RvBaseEntity<String> implements DataModelEntityInterface {
     @Id
     @UuidGenerator
     @Title("非空约束ID")

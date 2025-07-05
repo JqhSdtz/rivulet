@@ -10,7 +10,7 @@ import java.io.Serializable;
  * @author JQH
  * @since 下午 8:42 22/04/04
  */
-public abstract class RvEntity<PkType> implements Serializable {
+public abstract class RvBaseEntity<PkType> implements Serializable {
     /**
      * 获取实体对象ID
      *

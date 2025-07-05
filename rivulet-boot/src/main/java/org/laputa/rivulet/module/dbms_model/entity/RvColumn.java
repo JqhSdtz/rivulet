@@ -14,7 +14,7 @@ import lombok.ToString;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
 import org.laputa.rivulet.common.constant.Strings;
-import org.laputa.rivulet.common.entity.RvEntity;
+import org.laputa.rivulet.common.entity.RvBaseEntity;
 import org.laputa.rivulet.module.dbms_model.entity.inter.DataModelEntityInterface;
 
 import java.math.BigInteger;
@@ -35,7 +35,7 @@ import java.math.BigInteger;
 @Title("数据模型属性")
 @TableComment("数据模型属性与数据库中表的字段对应，用于描述一个数据模型的具体构成，是数据存储的基本单位")
 @Table(name = "rv_column")
-public class RvColumn extends RvEntity<String> implements DataModelEntityInterface {
+public class RvColumn extends RvBaseEntity<String> implements DataModelEntityInterface {
     @Id
     @UuidGenerator
     @Title("属性ID")

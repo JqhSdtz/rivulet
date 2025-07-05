@@ -14,7 +14,7 @@ import lombok.ToString;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
 import org.laputa.rivulet.common.constant.Strings;
-import org.laputa.rivulet.common.entity.RvEntity;
+import org.laputa.rivulet.common.entity.RvBaseEntity;
 import org.laputa.rivulet.module.dbms_model.entity.RvColumn;
 import org.laputa.rivulet.module.dbms_model.entity.constraint.RvUnique;
 
@@ -34,7 +34,7 @@ import org.laputa.rivulet.module.dbms_model.entity.constraint.RvUnique;
 @Title("唯一性约束与属性的关联模型")
 @TableComment("唯一性约束与属性的关联模型用于记录某个数据模型中的唯一性约束与所涉及的属性之间的关联关系")
 @Table(name = "rv_unique_column")
-public class RvUniqueColumn extends RvEntity<String> {
+public class RvUniqueColumn extends RvBaseEntity<String> {
     @Id
     @UuidGenerator
     @Title("关联ID")

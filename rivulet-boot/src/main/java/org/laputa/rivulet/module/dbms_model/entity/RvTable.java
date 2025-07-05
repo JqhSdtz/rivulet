@@ -17,7 +17,7 @@ import lombok.ToString;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
 import org.laputa.rivulet.common.constant.Strings;
-import org.laputa.rivulet.common.entity.RvEntity;
+import org.laputa.rivulet.common.entity.RvBaseEntity;
 import org.laputa.rivulet.module.auth.entity.RvAdmin;
 import org.laputa.rivulet.module.dbms_model.entity.constraint.RvForeignKey;
 import org.laputa.rivulet.module.dbms_model.entity.constraint.RvNotNull;
@@ -45,7 +45,7 @@ import java.util.List;
 @Title("数据模型")
 @TableComment("数据模型和数据库表对应，包含属性、索引、外键等，用于描述一个结构化的数据")
 @Table(name = "rv_table")
-public class RvTable extends RvEntity<String> implements DataModelEntityInterface {
+public class RvTable extends RvBaseEntity<String> implements DataModelEntityInterface {
     @Id
     @UuidGenerator
     @Title("模型ID")

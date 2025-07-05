@@ -14,7 +14,7 @@ import lombok.ToString;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
 import org.laputa.rivulet.common.constant.Strings;
-import org.laputa.rivulet.common.entity.RvEntity;
+import org.laputa.rivulet.common.entity.RvBaseEntity;
 import org.laputa.rivulet.module.dbms_model.entity.RvColumn;
 import org.laputa.rivulet.module.dbms_model.entity.constraint.RvForeignKey;
 
@@ -34,7 +34,7 @@ import org.laputa.rivulet.module.dbms_model.entity.constraint.RvForeignKey;
 @Title("外键自身与属性的关联模型")
 @TableComment("外键自身与属性的关联模型用于记录某个数据模型中的外键在本模型中与所涉及的属性之间的关联关系")
 @Table(name = "rv_foreign_key_foreign_column")
-public class RvForeignKeyForeignColumn extends RvEntity<String> {
+public class RvForeignKeyForeignColumn extends RvBaseEntity<String> {
     @Id
     @UuidGenerator
     @Title("关联ID")

@@ -4,7 +4,7 @@ package org.laputa.rivulet.common.entity;
  * @author JQH
  * @since 下午 8:17 22/07/21
  */
-public abstract class RvTree<PkType> extends RvEntity<PkType> {
+public abstract class RvTree<PkType> extends RvBaseEntity<PkType> {
     /**
      * 获取树形对象的父节点ID
      *

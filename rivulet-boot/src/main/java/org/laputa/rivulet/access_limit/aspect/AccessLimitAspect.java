@@ -15,7 +15,7 @@ import org.laputa.rivulet.access_limit.annotation.AccessLimitLevel;
 import org.laputa.rivulet.access_limit.annotation.AccessLimitTarget;
 import org.laputa.rivulet.access_limit.annotation.AccessLimits;
 import org.laputa.rivulet.common.constant.RedisPrefix;
-import org.laputa.rivulet.common.entity.RvEntity;
+import org.laputa.rivulet.common.entity.RvBaseEntity;
 import org.laputa.rivulet.common.model.Result;
 import org.laputa.rivulet.module.auth.entity.RvAdmin;
 import org.laputa.rivulet.module.auth.session.AppAuth;
@@ -148,18 +148,18 @@ public class AccessLimitAspect implements ApplicationRunner {
             }
         }
         Parameter[] parameters = method.getParameters();
-        RvEntity<?> target = null;
+        RvBaseEntity<?> target = null;
         Object[] args = joinPoint.getArgs();
         for (int i = 0; i < parameters.length; ++i) {
             Parameter parameter = parameters[i];
             Object argValue = args[i];
             if (parameter.isAnnotationPresent(AccessLimitTarget.class)) {
                 AccessLimitTarget limitTarget = parameter.getAnnotation(AccessLimitTarget.class);
-                if (argValue instanceof RvEntity) {
-                    target = (RvEntity<?>) argValue;
+                if (argValue instanceof RvBaseEntity) {
+                    target = (RvBaseEntity<?>) argValue;
                     if (!"".equals(limitTarget.byMethod())) {
                         String methodName = limitTarget.byMethod();
-                        target = (RvEntity<?>) target.getClass().getDeclaredMethod(methodName).invoke(target);
+                        target = (RvBaseEntity<?>) target.getClass().getDeclaredMethod(methodName).invoke(target);
                     }
                 }
             }
@@ -196,7 +196,7 @@ public class AccessLimitAspect implements ApplicationRunner {
      * @param limits
      * @return
      */
-    private boolean doAccessLimit(Method method, RvEntity<?> target, AccessLimit[] limits) {
+    private boolean doAccessLimit(Method method, RvBaseEntity<?> target, AccessLimit[] limits) {
         boolean isRedisLevel = false;
         if (method.isAnnotationPresent(AccessLimitLevel.class)) {
             AccessLimitLevel level = method.getAnnotation(AccessLimitLevel.class);

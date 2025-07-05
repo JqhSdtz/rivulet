@@ -16,7 +16,7 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.validator.constraints.Length;
 import org.laputa.rivulet.common.constant.Strings;
-import org.laputa.rivulet.common.entity.RvEntity;
+import org.laputa.rivulet.common.entity.RvBaseEntity;
 import org.laputa.rivulet.common.validation.RvValidationGroup;
 import org.laputa.rivulet.module.auth.entity.dict.AdminType;
 
@@ -38,7 +38,7 @@ import org.laputa.rivulet.module.auth.entity.dict.AdminType;
 }, indexes = {
         @Index(name = "idx_rvadmin_admintype", columnList = "admin_type")
 })
-public class RvAdmin extends RvEntity<String> {
+public class RvAdmin extends RvBaseEntity<String> {
     @NotNull(groups = Update.class)
     @Id
     @RvAdminIdentityGenerator

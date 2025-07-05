@@ -16,7 +16,7 @@ import lombok.ToString;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
 import org.laputa.rivulet.common.constant.Strings;
-import org.laputa.rivulet.common.entity.RvEntity;
+import org.laputa.rivulet.common.entity.RvBaseEntity;
 import org.laputa.rivulet.module.dbms_model.entity.RvIndex;
 import org.laputa.rivulet.module.dbms_model.entity.RvTable;
 import org.laputa.rivulet.module.dbms_model.entity.column_relation.RvUniqueColumn;
@@ -40,7 +40,7 @@ import java.util.List;
 @Title("唯一性约束")
 @TableComment("数据模型的唯一性约束对应数据库表的唯一性约束，用于约束数据模型中的一个属性或一组属性在全部数据中唯一，通常会有一个索引与之对应")
 @Table(name = "rv_unique")
-public class RvUnique extends RvEntity<String> implements DataModelEntityInterface {
+public class RvUnique extends RvBaseEntity<String> implements DataModelEntityInterface {
     @Id
     @UuidGenerator
     @Title("唯一性约束ID")
