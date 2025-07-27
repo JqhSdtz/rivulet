@@ -1,6 +1,8 @@
 package org.laputa.rivulet.module.app.controller;
 
 import jakarta.annotation.Resource;
+import jakarta.persistence.EntityGraph;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.EntityType;
 import org.hibernate.metamodel.model.domain.internal.EntityTypeImpl;
 import org.laputa.rivulet.common.hibernate.RvEntityManagerFactory;
@@ -9,6 +11,7 @@ import org.laputa.rivulet.common.model.Result;
 import org.laputa.rivulet.module.app.model.AppInitialData;
 import org.laputa.rivulet.module.app.service.AppInitService;
 import org.laputa.rivulet.module.auth.entity.RvAdmin;
+import org.laputa.rivulet.module.dbms_model.entity.RvTable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,6 +49,9 @@ public class AppController {
 
     @GetMapping("/test")
     public Result<?> test() {
+        EntityManager entityManager = rvEntityManagerFactory.createEntityManager();
+        EntityGraph<RvTable> loadGraph = entityManager.createEntityGraph(RvTable.class);
+        loadGraph.addSubgraph("table");
         Set<EntityType<?>> entityTypes = rvEntityManagerFactory.getEntityManagerFactory().getMetamodel().getEntities();
         EntityTypeImpl<?> entity = (EntityTypeImpl<?>) entityTypes.iterator().next();
         return Result.succeed();
