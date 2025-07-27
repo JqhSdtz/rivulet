@@ -37,7 +37,7 @@ export interface RvTableContextType {
 
 export const RvTableContext = React.createContext({} as RvTableContextType);
 
-export const RvTable: React.FC<RvTableProps> = (props) => {
+export const RvTableComp: React.FC<RvTableProps> = (props) => {
     const rvModal = useRvModal();
     const initPagination = getInitPagination();
     const initParams = {
