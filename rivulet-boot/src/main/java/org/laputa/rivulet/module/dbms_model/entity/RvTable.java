@@ -42,8 +42,8 @@ import java.util.List;
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @DynamicInsert
 @DynamicUpdate
-@Title("数据模型")
-@TableComment("数据模型和数据库表对应，包含属性、索引、外键等，用于描述一个结构化的数据")
+@Title("数据表")
+@TableComment("数据表和数据库表对应，包含属性、索引、外键等，用于描述一个结构化的数据")
 @Table(name = "rv_table")
 public class RvTable extends RvBaseEntity<String> implements DataModelEntityInterface {
     @Id

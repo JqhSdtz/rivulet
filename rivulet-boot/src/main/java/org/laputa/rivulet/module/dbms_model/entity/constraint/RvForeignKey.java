@@ -3,9 +3,9 @@ package org.laputa.rivulet.module.dbms_model.entity.constraint;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
-import jakarta.persistence.*;
 import liquibase.ext.hibernate.annotation.DefaultValue;
 import liquibase.ext.hibernate.annotation.TableComment;
 import liquibase.ext.hibernate.annotation.Title;
@@ -23,7 +23,7 @@ import org.laputa.rivulet.module.dbms_model.entity.column_relation.RvForeignKeyF
 import org.laputa.rivulet.module.dbms_model.entity.column_relation.RvForeignKeyTargetColumn;
 import org.laputa.rivulet.module.dbms_model.entity.inter.DataModelEntityInterface;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * @author JQH
@@ -111,11 +111,11 @@ public class RvForeignKey extends RvBaseEntity<String> implements DataModelEntit
     private RvIndex backingIndex;
 
     @JsonManagedReference("foreignKeyTargetColumns")
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "foreignKey")
-    private List<RvForeignKeyTargetColumn> foreignKeyTargetColumns;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "foreignKey")
+    private Set<RvForeignKeyTargetColumn> foreignKeyTargetColumns;
 
     @JsonSetter("foreignKeyTargetColumns")
-    public void setForeignKeyTargetColumns(List<RvForeignKeyTargetColumn> foreignKeyTargetColumns) {
+    public void setForeignKeyTargetColumns(Set<RvForeignKeyTargetColumn> foreignKeyTargetColumns) {
         if (foreignKeyTargetColumns == null) {
             return;
         }
@@ -129,11 +129,11 @@ public class RvForeignKey extends RvBaseEntity<String> implements DataModelEntit
     }
 
     @JsonManagedReference("foreignKeyForeignColumns")
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "foreignKey")
-    private List<RvForeignKeyForeignColumn> foreignKeyForeignColumns;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "foreignKey")
+    private Set<RvForeignKeyForeignColumn> foreignKeyForeignColumns;
 
     @JsonSetter("foreignKeyForeignColumns")
-    public void setForeignKeyForeignColumns(List<RvForeignKeyForeignColumn> foreignKeyForeignColumns) {
+    public void setForeignKeyForeignColumns(Set<RvForeignKeyForeignColumn> foreignKeyForeignColumns) {
         if (foreignKeyForeignColumns == null) {
             return;
         }

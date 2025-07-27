@@ -93,7 +93,7 @@ public class RvUnique extends RvBaseEntity<String> implements DataModelEntityInt
     private RvIndex backingIndex;
 
     @JsonManagedReference("uniqueColumns")
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "unique")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "unique")
     private List<RvUniqueColumn> uniqueColumns;
 
     @JsonSetter("uniqueColumns")

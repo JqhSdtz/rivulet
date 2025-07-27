@@ -90,7 +90,7 @@ public class RvIndex extends RvBaseEntity<String> implements DataModelEntityInte
     private Integer orderNum;
 
     @JsonManagedReference("indexColumns")
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "index")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "index")
     private List<RvIndexColumn> indexColumns;
 
     @JsonSetter("indexColumns")

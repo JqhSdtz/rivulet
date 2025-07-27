@@ -590,7 +590,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
                 rvForeignKeyTargetColumn.setOrderNum((int) idx);
             }
             return rvForeignKeyTargetColumn;
-        }).collect(Collectors.toList()));
+        }).collect(Collectors.toSet()));
         rvForeignKey.setTargetTable(rvTableMap.get(foreignKey.getPrimaryKeyTable().getName()));
         rvForeignKey.setForeignKeyForeignColumns(Streams.mapWithIndex(foreignKey.getForeignKeyColumns().stream(), (column, idx) -> {
             List<RvForeignKeyForeignColumn> matchedRvForeignKeyForeignColumns = isNew ? null : targetRvForeignKey.getForeignKeyForeignColumns().stream()
@@ -607,7 +607,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
                 rvForeignKeyForeignColumn.setOrderNum((int) idx);
             }
             return rvForeignKeyForeignColumn;
-        }).collect(Collectors.toList()));
+        }).collect(Collectors.toSet()));
         return rvForeignKey;
     }
 

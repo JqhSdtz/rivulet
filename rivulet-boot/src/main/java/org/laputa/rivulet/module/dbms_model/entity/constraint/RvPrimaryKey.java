@@ -55,7 +55,7 @@ public class RvPrimaryKey extends RvBaseEntity<String> implements DataModelEntit
     @JsonBackReference("primaryKey")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Title("对应模型ID")
     @Comment("主键所对应的数据模型的ID，使用外键关联")
     @JoinColumn(name = "table_id")
@@ -83,11 +83,11 @@ public class RvPrimaryKey extends RvBaseEntity<String> implements DataModelEntit
     private String remark;
 
     @JsonManagedReference("primaryKeyColumns")
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "primaryKey")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "primaryKey")
     private List<RvPrimaryKeyColumn> primaryKeyColumns;
 
     @Title("对应索引")
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "backing_index_id")
     private RvIndex backingIndex;
