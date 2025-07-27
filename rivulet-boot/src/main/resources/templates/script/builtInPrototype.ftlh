@@ -5,7 +5,7 @@ export class ${tableClass.getSimpleName()} {
         if (typeof javaObject !== 'undefined') {
             this.javaObject = javaObject;
         } else {
-            this.javaObject = new JavaType();
+            this.javaObject = new ${tableClass.getSimpleName()}.JavaType();
         }
     }
 

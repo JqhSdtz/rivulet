@@ -26,6 +26,6 @@ const FormComponent = props => {
 
 export default () => {
     const [urlState] = useUrlState();
-    const {data, loading} = useRequest(() => RvRequest.runJsSchema('ModelDetail/index.mjs', urlState));
+    const {data, loading} = useRequest(() => RvRequest.runJsSchema('dbms_model/ModelDetail/index.mjs', urlState));
     return loading ? <PageLoading /> : <FormComponent {...data.data.payload} />;
 };

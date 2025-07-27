@@ -15,7 +15,7 @@ const SchemaField = createSchemaField({
 
 export default () => {
     const form = useFormInstance();
-    const {data, loading} = useRequest(() => RvRequest.runJsSchema('DataModelIndex.mjs'));
+    const {data, loading} = useRequest(() => RvRequest.runJsSchema('dbms_model/DataModelIndex.mjs'));
     return loading ? <PageLoading/> : (
         <FormProvider form={form}>
             <SchemaField schema={data.data.payload.schema}/>
