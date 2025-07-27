@@ -120,6 +120,9 @@ export default {
     async doPost(url: string, data: any): Promise<Result> {
         return this.do(() => axios.post(url, data));
     },
+    async doPostRaw(url: string, data: any): Promise<Result> {
+        return this.doRaw(() => axios.post(url, data));
+    },
     async doRaw(requestFunc: () => Promise<AxiosResponse>): Promise<AxiosResponse> {
         const result = await this.do(requestFunc);
         return result.rawResponse;
@@ -146,8 +149,11 @@ export default {
         this.$rvScope = getRvScope(result.payload.rvInjected);
         return rawResponse;
     },
+    async runJsServiceRaw(filename: string, data: any = {}): Promise<Result> {
+        return this.runJs('/src/services/' + filename, data, true);
+    },
     async runJsService(filename: string, data: any = {}): Promise<Result> {
-        const rawResponse = await this.runJs('/src/services/' + filename, data, true);
+        const rawResponse = await this.runJsServiceRaw(filename, data);
         return rawResponse.data;
     },
     async clearJsCache() {

@@ -7,9 +7,11 @@ import {Result} from '@/types/result';
 import RvRequest from '@/utils/rvRequest';
 import {useRvModal} from '@/components/common/RvModal';
 import {useFormInstance} from "@/components/formily/hooks";
+import {act} from 'react-dom/test-utils';
 
 interface RvTableProps {
     baseUrl: string;
+    requestType?: string;
 }
 
 export interface PaginationType {
@@ -42,7 +44,12 @@ export const RvTable: React.FC<RvTableProps> = (props) => {
         pagination: initPagination
     };
     const queryRequest = (params) => {
-        return RvRequest.doRaw(() => axios.post(props.baseUrl, params ?? initParams));
+        const data = params ?? initParams;
+        if (props.requestType === 'js') {
+            return RvRequest.runJsServiceRaw(props.baseUrl, data);
+        } else {
+            return RvRequest.doPostRaw(props.baseUrl, data);
+        }
     };
     const [pagination, setPagination] = useState<PaginationType>(initPagination);
     const {data, loading, runAsync} = useRequest<any, any[]>(queryRequest);
