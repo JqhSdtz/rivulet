@@ -24,7 +24,6 @@ import org.hibernate.boot.model.TypeContributor;
 import org.hibernate.boot.model.convert.internal.ClassBasedConverterDescriptor;
 import org.hibernate.boot.model.convert.spi.ConverterDescriptor;
 import org.hibernate.boot.model.process.spi.ManagedResources;
-import org.hibernate.boot.model.process.spi.MetadataBuildingProcess;
 import org.hibernate.boot.registry.BootstrapServiceRegistry;
 import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
 import org.hibernate.boot.registry.StandardServiceRegistry;
@@ -78,6 +77,7 @@ import static org.hibernate.internal.log.DeprecationLogger.DEPRECATION_LOGGER;
 /**
  * @author Steve Ebersole
  */
+@SuppressWarnings({"all"})
 public class RvEntityManagerFactoryBuilderImpl implements EntityManagerFactoryBuilder {
     private static final EntityManagerMessageLogger LOG = messageLogger(RvEntityManagerFactoryBuilderImpl.class);
 
@@ -207,7 +207,7 @@ public class RvEntityManagerFactoryBuilderImpl implements EntityManagerFactoryBu
                 }
             }
 
-            this.managedResources = MetadataBuildingProcess.prepare(
+            this.managedResources = RvMetadataBuildingProcess.prepare(
                     metadataSources,
                     metamodelBuilder.getBootstrapContext()
             );
@@ -1215,7 +1215,7 @@ public class RvEntityManagerFactoryBuilderImpl implements EntityManagerFactoryBu
 
         // add any explicit Class references passed in
         final List<Class<? extends AttributeConverter<?, ?>>> loadedAnnotatedClasses = (List<Class<? extends AttributeConverter<?, ?>>>)
-                configurationValues.remove(AvailableSettings.LOADED_CLASSES);
+                configurationValues.remove(LOADED_CLASSES);
         if (loadedAnnotatedClasses != null) {
             for (Class<? extends AttributeConverter<?, ?>> cls : loadedAnnotatedClasses) {
                 if (AttributeConverter.class.isAssignableFrom(cls)) {
@@ -1232,7 +1232,7 @@ public class RvEntityManagerFactoryBuilderImpl implements EntityManagerFactoryBu
         }
 
         // add any explicit hbm.xml references passed in
-        final String explicitHbmXmls = (String) configurationValues.remove(org.hibernate.cfg.AvailableSettings.HBM_XML_FILES);
+        final String explicitHbmXmls = (String) configurationValues.remove(HBM_XML_FILES);
         if (explicitHbmXmls != null) {
             for (String hbmXml : StringHelper.split(", ", explicitHbmXmls)) {
                 metadataSources.addResource(hbmXml);
@@ -1240,7 +1240,7 @@ public class RvEntityManagerFactoryBuilderImpl implements EntityManagerFactoryBu
         }
 
         // add any explicit orm.xml references passed in
-        final List<String> explicitOrmXmlList = (List<String>) configurationValues.remove(org.hibernate.cfg.AvailableSettings.ORM_XML_FILES);
+        final List<String> explicitOrmXmlList = (List<String>) configurationValues.remove(ORM_XML_FILES);
         if (explicitOrmXmlList != null) {
             explicitOrmXmlList.forEach(metadataSources::addResource);
         }
@@ -1418,7 +1418,7 @@ public class RvEntityManagerFactoryBuilderImpl implements EntityManagerFactoryBu
             ((SessionFactoryBuilderImplementor) sfBuilder).disableJtaTransactionAccess();
         }
 
-        final boolean allowRefreshDetachedEntity = readBooleanConfigurationValue(AvailableSettings.ALLOW_REFRESH_DETACHED_ENTITY);
+        final boolean allowRefreshDetachedEntity = readBooleanConfigurationValue(ALLOW_REFRESH_DETACHED_ENTITY);
         if (!allowRefreshDetachedEntity) {
             ((SessionFactoryBuilderImplementor) sfBuilder).disableRefreshDetachedEntity();
         }

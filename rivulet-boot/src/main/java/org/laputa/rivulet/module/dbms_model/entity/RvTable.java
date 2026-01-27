@@ -151,7 +151,10 @@ public class RvTable extends RvBaseEntity<String> implements DataModelEntityInte
 
     @Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     @JsonManagedReference("primaryKey")
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "table")
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, optional = false)
+    @Title("主键ID")
+    @Comment("主键ID为表的主键在主键表中的ID，使用外键关联")
+    @JoinColumn(name = "primary_key_id")
     private RvPrimaryKey primaryKey;
 
     @JsonSetter("primaryKey")

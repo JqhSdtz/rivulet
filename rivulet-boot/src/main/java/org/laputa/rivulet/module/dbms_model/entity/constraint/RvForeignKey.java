@@ -110,6 +110,7 @@ public class RvForeignKey extends RvBaseEntity<String> implements DataModelEntit
     @JoinColumn(name = "backing_index_id")
     private RvIndex backingIndex;
 
+    @Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     @JsonManagedReference("foreignKeyTargetColumns")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "foreignKey")
     private Set<RvForeignKeyTargetColumn> foreignKeyTargetColumns;
@@ -128,6 +129,7 @@ public class RvForeignKey extends RvBaseEntity<String> implements DataModelEntit
         foreignKeyTargetColumns.forEach(foreignKeyTargetColumn -> foreignKeyTargetColumn.setForeignKey(this));
     }
 
+    @Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     @JsonManagedReference("foreignKeyForeignColumns")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "foreignKey")
     private Set<RvForeignKeyForeignColumn> foreignKeyForeignColumns;

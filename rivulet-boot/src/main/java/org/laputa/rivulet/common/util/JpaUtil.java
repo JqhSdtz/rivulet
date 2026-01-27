@@ -2,15 +2,15 @@ package org.laputa.rivulet.common.util;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import org.hibernate.CacheMode;
 import org.hibernate.jpa.AvailableHints;
 import org.laputa.rivulet.common.model.Pagination;
-import org.laputa.rivulet.common.model.Result;
-import org.laputa.rivulet.module.dbms_model.entity.RvTable;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -79,4 +79,23 @@ public class JpaUtil {
         Page<T> pagedList = PageableExecutionUtils.getPage(list, pageable, countSupplier);
         return pagedList;
     }
+
+//    public void setCacheModeHint(Query query, String cacheModeStr) {
+//        CacheMode cacheMode = CacheMode.IGNORE;
+//        switch (cacheModeStr) {
+//            case "NORMAL":
+//                cacheMode = CacheMode.NORMAL;
+//                break;
+//            case "GET":
+//                cacheMode = CacheMode.GET;
+//                break;
+//            case "PUT":
+//                cacheMode = CacheMode.PUT;
+//                break;
+//            case "REFRESH":
+//                cacheMode = CacheMode.REFRESH;
+//                break;
+//        }
+//        query.setHint(AvailableHints.HINT_CACHE_MODE, cacheMode);
+//    }
 }

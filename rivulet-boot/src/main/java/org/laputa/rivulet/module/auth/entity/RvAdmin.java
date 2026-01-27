@@ -2,6 +2,8 @@ package org.laputa.rivulet.module.auth.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import liquibase.ext.hibernate.annotation.DefaultValue;
@@ -11,9 +13,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Comment;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.*;
+import org.hibernate.annotations.Cache;
 import org.hibernate.validator.constraints.Length;
 import org.laputa.rivulet.common.constant.Strings;
 import org.laputa.rivulet.common.entity.RvBaseEntity;
@@ -29,6 +30,8 @@ import org.laputa.rivulet.module.auth.entity.dict.AdminType;
 @Setter
 @ToString
 @RequiredArgsConstructor
+@Cacheable
+@Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
 @DynamicInsert
 @DynamicUpdate
 @Title("系统管理员")

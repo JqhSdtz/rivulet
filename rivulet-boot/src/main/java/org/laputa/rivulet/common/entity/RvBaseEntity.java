@@ -35,6 +35,10 @@ public abstract class RvBaseEntity<PkType> implements Serializable {
 
     @Override
     public int hashCode() {
+        PkType id = getId();
+        if (id == null) {
+            return -1;
+        }
         return getId().hashCode();
     }
 

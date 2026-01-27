@@ -55,10 +55,7 @@ public class RvPrimaryKey extends RvBaseEntity<String> implements DataModelEntit
     @JsonBackReference("primaryKey")
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @Title("对应模型ID")
-    @Comment("主键所对应的数据模型的ID，使用外键关联")
-    @JoinColumn(name = "table_id")
+    @OneToOne(mappedBy = "primaryKey")
     private RvTable table;
 
     @Title("系统内置")
@@ -82,6 +79,7 @@ public class RvPrimaryKey extends RvBaseEntity<String> implements DataModelEntit
     @Column(name = "remark")
     private String remark;
 
+    @Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     @JsonManagedReference("primaryKeyColumns")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "primaryKey")
     private List<RvPrimaryKeyColumn> primaryKeyColumns;
@@ -98,7 +96,7 @@ public class RvPrimaryKey extends RvBaseEntity<String> implements DataModelEntit
             return;
         }
         if (this.primaryKeyColumns == null) {
-            this.primaryKeyColumns = new ArrayList<>();
+            this.primaryKeyColumns = primaryKeyColumns;
         } else {
             this.primaryKeyColumns.clear();
             this.primaryKeyColumns.addAll(primaryKeyColumns);

@@ -25,6 +25,6 @@ public class AuthSessionAccessor {
     }
 
     public void test(Object test) {
-        System.out.println(test.getClass().getName());
+        System.out.println(test);
     }
 }

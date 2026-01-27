@@ -5,6 +5,8 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.spi.PersistenceUnitInfo;
 import liquibase.Scope;
 import lombok.Getter;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager;
@@ -19,7 +21,7 @@ import javax.sql.DataSource;
  * @since 下午 10:38 22/09/05
  */
 @Component
-public class RvEntityManagerFactory {
+public class RvEntityManagerFactory implements ApplicationRunner {
     private final JpaProperties jpaProperties;
     private final PersistenceUnitInfo persistenceUnitInfo;
     private final RvHibernatePersistenceProvider persistenceProvider;
@@ -36,6 +38,10 @@ public class RvEntityManagerFactory {
         internalPersistenceUnitManager.preparePersistenceUnitInfos();
         this.persistenceUnitInfo = internalPersistenceUnitManager.obtainDefaultPersistenceUnitInfo();
         this.persistenceProvider = new RvHibernatePersistenceProvider();
+    }
+
+    @Override
+    public void run(ApplicationArguments args) {
         this.entityManagerFactory = persistenceProvider.createContainerEntityManagerFactory(persistenceUnitInfo, jpaProperties.getProperties());
     }
 
@@ -51,5 +57,4 @@ public class RvEntityManagerFactory {
     public EntityManager createEntityManager() {
         return this.entityManagerFactory.createEntityManager();
     }
-
 }

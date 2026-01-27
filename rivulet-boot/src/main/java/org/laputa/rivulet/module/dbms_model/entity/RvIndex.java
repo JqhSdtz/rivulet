@@ -89,6 +89,7 @@ public class RvIndex extends RvBaseEntity<String> implements DataModelEntityInte
     @Column(name = "order_num")
     private Integer orderNum;
 
+    @Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     @JsonManagedReference("indexColumns")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "index")
     private List<RvIndexColumn> indexColumns;

@@ -4,6 +4,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
 import org.apache.commons.pool2.impl.GenericObjectPool;
@@ -30,6 +32,8 @@ public class JsRunner {
     private static final String NO_SUCH_FILE = "NoSuchFile";
     @Resource
     private JsContextFactory jsContextFactory;
+    @Resource
+    private JavaNative javaNative;
     @Resource
     private GitProperty gitProperty;
 
@@ -108,7 +112,13 @@ public class JsRunner {
 
     @Transactional
     public Result<?> runScriptWithTransaction(String scriptPath) {
-        return runScript(scriptPath);
+        EntityManager entityManager = javaNative.getRvEntityManagerFactory().createEntityManager();
+        javaNative.setEntityManager(entityManager);
+        EntityTransaction transaction = entityManager.getTransaction();
+        transaction.begin();
+        Result<?> result = runScript(scriptPath);
+        transaction.commit();
+        return result;
     }
 
     public Result<Void> clearCache() {

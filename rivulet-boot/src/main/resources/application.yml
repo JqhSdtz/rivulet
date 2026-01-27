@@ -39,12 +39,12 @@ spring:
         hibernate:
             ddl-auto: none
         properties:
-            javax.persistence.sharedCache.mode: ENABLE_SELECTIVE
+            jakarta.persistence.sharedCache.mode: ENABLE_SELECTIVE
             hibernate:
                 new_generator_mappings: false
                 format_sql: false
                 generate_statistics: true
-                default_entity_mode: dynamic-map
+#                default_entity_mode: dynamic-map
                 jpa.metamodel.population: enabled
                 javax.cache:
                     missing_cache_strategy: create

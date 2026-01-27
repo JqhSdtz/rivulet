@@ -8,6 +8,9 @@ public class Strings {
     public static final String RIVULET = "rivulet";
     public static final String FALSE = "false";
     public static final String TRUE = "true";
+    public static final String LAZY = "lazy";
+    public static final String EAGER = "eager";
+
     public static final String STAR64 = "****************************************************************";
     public static final String STAR128 = STAR64+ STAR64;
 
