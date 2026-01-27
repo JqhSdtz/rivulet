@@ -127,9 +127,43 @@ public class RvProperty extends RvBaseEntity<String> {
     @Column(name = "order_num")
     private Integer orderNum;
 
+    @Title("是否唯一")
+    @Comment("是否唯一标识用于标记该属性是否受唯一性约束")
+    @Column(name = "unique")
+    private Boolean unique;
+
     @Title("可以为空")
     @Comment("可以为空标识用于标记该属性是否可以是空值")
-    @DefaultValue(Strings.FALSE)
     @Column(name = "nullable")
     private Boolean nullable;
+
+    @Title("新增包含")
+    @Comment("新增包含标识用于标记该属性是否被包含在JPA自动生成的insert语句中")
+    @Column(name = "insertable")
+    private Boolean insertable;
+
+    @Title("更新包含")
+    @Comment("更新包含标识用于标记该属性是否被包含在JPA自动生成的update语句中")
+    @Column(name = "updatable")
+    private Boolean updatable;
+
+    @Title("字段定义")
+    @Comment("用于自定义该字段的DDL，即生成该字段的SQL片段")
+    @Column(name = "column_definition")
+    private String columnDefinition;
+
+    @Title("字段长度")
+    @Comment("用于定义该字段在数据库中的长度")
+    @Column(name = "length")
+    private Integer length;
+
+    @Title("字段精度")
+    @Comment("用于定义该字段在数据库中的精度，一般用在decimal类型的字段中")
+    @Column(name = "precision")
+    private Integer precision;
+
+    @Title("字段刻度")
+    @Comment("用于定义该字段在数据库中的刻度，一般用在decimal类型的字段中")
+    @Column(name = "scale")
+    private Integer scale;
 }
