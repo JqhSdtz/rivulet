@@ -5,7 +5,6 @@ import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.EntityType;
 import org.hibernate.metamodel.model.domain.internal.EntityTypeImpl;
-import org.laputa.rivulet.common.hibernate.RvEntityManagerFactory;
 import org.laputa.rivulet.common.entity.RvBaseEntity;
 import org.laputa.rivulet.common.model.Result;
 import org.laputa.rivulet.module.app.model.AppInitialData;
@@ -28,7 +27,7 @@ public class AppController {
     @Resource
     private AppInitService appService;
     @Resource
-    private RvEntityManagerFactory rvEntityManagerFactory;
+    private EntityManager entityManager;
 
     @GetMapping("/initialData")
     public Result<AppInitialData> getAppInitialData() {
@@ -49,10 +48,9 @@ public class AppController {
 
     @GetMapping("/test")
     public Result<?> test() {
-        EntityManager entityManager = rvEntityManagerFactory.createEntityManager();
         EntityGraph<RvTable> loadGraph = entityManager.createEntityGraph(RvTable.class);
         loadGraph.addSubgraph("table");
-        Set<EntityType<?>> entityTypes = rvEntityManagerFactory.getEntityManagerFactory().getMetamodel().getEntities();
+        Set<EntityType<?>> entityTypes = entityManager.getEntityManagerFactory().getMetamodel().getEntities();
         EntityTypeImpl<?> entity = (EntityTypeImpl<?>) entityTypes.iterator().next();
         return Result.succeed();
     }

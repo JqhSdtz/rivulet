@@ -2,6 +2,10 @@ package org.laputa.rivulet.module.jpa_model.enums;
 
 public enum PropertyType {
     /**
+     * Id类型，即添加@Id注解的字段，统一使用UUID
+     */
+    Id,
+    /**
      * 基础类型，即@column表示的字段
      */
     Attribute,

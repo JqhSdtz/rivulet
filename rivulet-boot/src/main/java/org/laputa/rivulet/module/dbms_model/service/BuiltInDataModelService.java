@@ -34,7 +34,6 @@ import org.hibernate.boot.internal.MetadataImpl;
 import org.hibernate.mapping.PersistentClass;
 import org.hibernate.mapping.Property;
 import org.laputa.rivulet.common.constant.Strings;
-import org.laputa.rivulet.common.hibernate.RvEntityManagerFactory;
 import org.laputa.rivulet.common.model.Result;
 import org.laputa.rivulet.common.state.AppState;
 import org.laputa.rivulet.common.util.RedissonLockUtil;
@@ -90,13 +89,11 @@ import static liquibase.structure.core.ForeignKeyConstraintType.importedKeyCasca
  * @since 下午 6:47 22/09/04
  */
 @Service
-@Order()
+@Order(1002)
 @Slf4j
 public class BuiltInDataModelService implements ApplicationRunner {
     @Resource
     private JpaProperties jpaProperties;
-    @Resource
-    private RvEntityManagerFactory rvEntityManagerFactory;
     @Resource
     private AppState appState;
     @Resource

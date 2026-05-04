@@ -26,10 +26,10 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
-@Order()
+@Order(1002)
 @Slf4j
 public class JpaModelService implements ApplicationRunner {
-    private static List<RvPrototype> rvPrototypes = new CopyOnWriteArrayList<>();
+    private static final List<RvPrototype> rvPrototypes = new CopyOnWriteArrayList<>();
 
     private static String cascadeTypesToString(CascadeType[] cascadeTypes) {
         StringBuilder sb = new StringBuilder();
@@ -88,9 +88,16 @@ public class JpaModelService implements ApplicationRunner {
                 if (cacheAnnotation != null) {
                     rvProperty.setUseCache(true);
                 }
+                Id idAnnotation = field.getAnnotation(Id.class);
+                if (idAnnotation != null) {
+                    rvProperty.setType(PropertyType.Id);
+                }
                 Column columnAnnotation = field.getAnnotation(Column.class);
                 if (columnAnnotation != null) {
-                    rvProperty.setType(PropertyType.Attribute);
+                    // 避免覆盖Id类型
+                    if (rvProperty.getType() == null) {
+                        rvProperty.setType(PropertyType.Attribute);
+                    }
                     rvProperty.setCode(columnAnnotation.name());
                     rvProperty.setUnique(columnAnnotation.unique());
                     rvProperty.setNullable(columnAnnotation.nullable());
@@ -110,23 +117,26 @@ public class JpaModelService implements ApplicationRunner {
                     rvProperty.setInsertable(joinColumnAnnotation.insertable());
                     rvProperty.setUpdatable(joinColumnAnnotation.updatable());
                     rvProperty.setColumnDefinition(joinColumnAnnotation.columnDefinition());
+                    rvProperty.setTable(joinColumnAnnotation.table());
+                    rvProperty.setReferencedColumnName(joinColumnAnnotation.referencedColumnName());
                 }
                 // 不使用@JoinTable注解，关联关系交给JPA自动维护，关联表也由JPA自动生成
                 OneToOne oneToOneAnnotation = field.getAnnotation(OneToOne.class);
                 if (oneToOneAnnotation != null) {
                     rvProperty.setType(PropertyType.OneToOne);
                     rvProperty.setTargetEntityClassName(oneToOneAnnotation.targetEntity().getName());
-                    rvProperty.setCascadeTypes(cascadeTypesToString(oneToOneAnnotation.cascade()));
-                    rvProperty.setFetchType(oneToOneAnnotation.fetch().name());
+                    rvProperty.setCascade(cascadeTypesToString(oneToOneAnnotation.cascade()));
+                    rvProperty.setFetch(oneToOneAnnotation.fetch().name());
                     rvProperty.setOptional(oneToOneAnnotation.optional());
                     rvProperty.setMappedBy(oneToOneAnnotation.mappedBy());
+                    rvProperty.setOrphanRemoval(oneToOneAnnotation.orphanRemoval());
                 }
                 OneToMany oneToManyAnnotation = field.getAnnotation(OneToMany.class);
                 if (oneToManyAnnotation != null) {
                     rvProperty.setType(PropertyType.OneToMany);
                     rvProperty.setTargetEntityClassName(oneToManyAnnotation.targetEntity().getName());
-                    rvProperty.setCascadeTypes(cascadeTypesToString(oneToManyAnnotation.cascade()));
-                    rvProperty.setFetchType(oneToManyAnnotation.fetch().name());
+                    rvProperty.setCascade(cascadeTypesToString(oneToManyAnnotation.cascade()));
+                    rvProperty.setFetch(oneToManyAnnotation.fetch().name());
                     rvProperty.setMappedBy(oneToManyAnnotation.mappedBy());
                     rvProperty.setOrphanRemoval(oneToManyAnnotation.orphanRemoval());
                 }
@@ -134,19 +144,20 @@ public class JpaModelService implements ApplicationRunner {
                 if (manyToOneAnnotation != null) {
                     rvProperty.setType(PropertyType.ManyToOne);
                     rvProperty.setTargetEntityClassName(manyToOneAnnotation.targetEntity().getName());
-                    rvProperty.setCascadeTypes(cascadeTypesToString(manyToOneAnnotation.cascade()));
-                    rvProperty.setFetchType(manyToOneAnnotation.fetch().name());
+                    rvProperty.setCascade(cascadeTypesToString(manyToOneAnnotation.cascade()));
+                    rvProperty.setFetch(manyToOneAnnotation.fetch().name());
                     rvProperty.setOptional(manyToOneAnnotation.optional());
                 }
                 ManyToMany manyToManyAnnotation = field.getAnnotation(ManyToMany.class);
                 if (manyToManyAnnotation != null) {
                     rvProperty.setType(PropertyType.ManyToMany);
                     rvProperty.setTargetEntityClassName(manyToManyAnnotation.targetEntity().getName());
-                    rvProperty.setCascadeTypes(cascadeTypesToString(manyToManyAnnotation.cascade()));
-                    rvProperty.setFetchType(manyToManyAnnotation.fetch().name());
+                    rvProperty.setCascade(cascadeTypesToString(manyToManyAnnotation.cascade()));
+                    rvProperty.setFetch(manyToManyAnnotation.fetch().name());
                     rvProperty.setMappedBy(manyToManyAnnotation.mappedBy());
                 }
             }
+            rvPrototypes.add(rvPrototype);
         }
     }
 }

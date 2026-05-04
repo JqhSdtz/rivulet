@@ -76,7 +76,7 @@ export const RvSubmitButton = (props: SubmitButtonProps) => {
                 }
                 form.submit(action)
                     .then(() => setLoading(false))
-                    .then(() => rvModal.success({content: '保存成功'}));
+                    .then(result0 => rvModal.success({content: '保存成功'}));
             })
             .catch(() => {
                 rvModal.error({content: '未知错误'});

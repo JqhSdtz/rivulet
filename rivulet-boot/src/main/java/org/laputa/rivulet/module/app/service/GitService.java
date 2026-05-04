@@ -33,7 +33,7 @@ import java.util.*;
  */
 
 @Service
-@Order(1)
+@Order(1001)
 @Slf4j
 public class GitService implements ApplicationRunner {
 

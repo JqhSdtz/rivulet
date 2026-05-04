@@ -38,7 +38,7 @@ import java.util.List;
  * @since 下午 8:48 22/03/31
  */
 @Service
-@Order(2)
+@Order(1002)
 @Slf4j
 public class AppInitService implements ApplicationRunner {
 

@@ -30,9 +30,11 @@ export const RvFormTab: React.FC<RvFormTabProps> = props => {
     const {onFormValuesChangeCallback, extraList, ...tabProps} = props;
     const form = useFormInstance();
     useEffect(() => {
-        form.addEffects(form.id, () => {
-            onFormValuesChange(onFormValuesChangeCallback);
-        });
+        if (onFormValuesChangeCallback) {
+            form.addEffects(form.id, () => {
+                onFormValuesChange(onFormValuesChangeCallback);
+            });
+        }
     }, [form]);
     // 手动设置formTab，防止所有formTab共用一个实例，导致无法在不同的标签页下打开不同的tab
     tabProps.formTab = useCreation(() => createFormTab(), []);

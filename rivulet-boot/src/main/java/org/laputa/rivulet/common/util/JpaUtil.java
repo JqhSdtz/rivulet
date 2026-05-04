@@ -1,14 +1,12 @@
 package org.laputa.rivulet.common.util;
 
+import jakarta.annotation.Resource;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import org.hibernate.CacheMode;
 import org.hibernate.jpa.AvailableHints;
 import org.laputa.rivulet.common.model.Pagination;
 import org.springframework.data.domain.Example;
@@ -28,7 +26,7 @@ import static org.springframework.data.jpa.repository.query.QueryUtils.toOrders;
 
 @Component
 public class JpaUtil {
-    @PersistenceContext
+    @Resource
     private EntityManager entityManager;
 
     /**

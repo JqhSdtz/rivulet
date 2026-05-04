@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @since 下午 8:54 22/02/08
  */
 @Component
-@Order(2)
+@Order(1002)
 public class ForTest implements ApplicationRunner {
 
     @Override

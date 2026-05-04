@@ -41,7 +41,7 @@ import java.util.*;
 @Slf4j
 @Component
 @Aspect
-@Order(1)
+@Order(1001)
 public class AccessLimitAspect implements ApplicationRunner {
     @Resource
     private RedissonClient redissonClient;

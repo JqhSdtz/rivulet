@@ -112,14 +112,9 @@ public class JsRunner {
 
     @Transactional
     public Result<?> runScriptWithTransaction(String scriptPath) {
-        EntityManager entityManager = javaNative.getRvEntityManagerFactory().createEntityManager();
-        javaNative.setEntityManager(entityManager);
-        EntityTransaction transaction = entityManager.getTransaction();
-        transaction.begin();
-        Result<?> result = runScript(scriptPath);
-        transaction.commit();
-        return result;
+        return runScript(scriptPath);
     }
+
 
     public Result<Void> clearCache() {
         sourceCache.invalidateAll();

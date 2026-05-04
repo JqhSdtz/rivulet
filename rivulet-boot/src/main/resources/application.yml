@@ -49,7 +49,7 @@ spring:
                 javax.cache:
                     missing_cache_strategy: create
                     provider: org.ehcache.jsr107.EhcacheCachingProvider
-                    uri: classpath:ehcache.xml
+                    uri: ehcache.xml
                 cache:
                     use_second_level_cache: true
                     use_query_cache: true

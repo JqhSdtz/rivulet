@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
-import liquibase.ext.hibernate.annotation.DefaultValue;
 import liquibase.ext.hibernate.annotation.TableComment;
 import liquibase.ext.hibernate.annotation.Title;
 import lombok.Getter;
@@ -15,7 +14,6 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
-import org.laputa.rivulet.common.constant.Strings;
 import org.laputa.rivulet.common.entity.RvBaseEntity;
 import org.laputa.rivulet.module.jpa_model.enums.PropertyType;
 import org.laputa.rivulet.module.jpa_model.enums.PropertyValueClassType;
@@ -70,36 +68,6 @@ public class RvProperty extends RvBaseEntity<String> {
     @Comment("该属性是否使用JPA的二级缓存机制")
     @Column(name = "use_cache")
     private Boolean useCache;
-
-    @Title("关联实体类名")
-    @Comment("用于在@ManyToOne，@OneToMany等关联关系中显示指定关联实体的类名，避免因泛型擦除导致jpa无法识别目标类")
-    @Column(name = "target_entity_class_name")
-    private String targetEntityClassName;
-
-    @Title("关联关系级联类型")
-    @Comment("用于在关联关系中指定级联类型，即CascadeType枚举类，包括ALL,PERSIST,MERGE,REMOVE,REFRESH,REFRESH。可指定多个，用英文逗号分隔开")
-    @Column(name = "cascade_types")
-    private String cascadeTypes;
-
-    @Title("关联关系加载类型")
-    @Comment("用于在关联关系中指定加载类型，即FetchType枚举类中的LAZY或EAGER")
-    @Column(name = "fetch_type")
-    private String fetchType;
-
-    @Title("关联关系是否可选")
-    @Comment("用于在关联关系中指定optional属性，即是否可选，true为可选，即不必选；false为必选")
-    @Column(name = "optional")
-    private Boolean optional;
-
-    @Title("关联关系匹配字段")
-    @Comment("用于在双向的关联关系中指定mappedBy属性")
-    @Column(name = "mapped_by")
-    private String mappedBy;
-
-    @Title("关联关系是否孤立删除")
-    @Comment("用于在关联关系中指定orphanRemoval属性，即当该实体从所有被关联的实体中移除，即变为孤立实体时，是否删除该实体")
-    @Column(name = "orphan_removal")
-    private Boolean orphanRemoval;
 
     @Enumerated(EnumType.STRING)
     @Title("数据类类型")
@@ -166,4 +134,44 @@ public class RvProperty extends RvBaseEntity<String> {
     @Comment("用于定义该字段在数据库中的刻度，一般用在decimal类型的字段中")
     @Column(name = "scale")
     private Integer scale;
+
+    @Title("关联实体类名")
+    @Comment("用于在@ManyToOne，@OneToMany等关联关系中显示指定关联实体的类名，避免因泛型擦除导致jpa无法识别目标类")
+    @Column(name = "target_entity_class_name")
+    private String targetEntityClassName;
+
+    @Title("关联关系级联类型")
+    @Comment("用于在关联关系中指定级联类型，即CascadeType枚举类，包括ALL,PERSIST,MERGE,REMOVE,REFRESH,REFRESH。可指定多个，用英文逗号分隔开")
+    @Column(name = "cascade")
+    private String cascade;
+
+    @Title("关联关系加载类型")
+    @Comment("用于在关联关系中指定加载类型，即FetchType枚举类中的LAZY或EAGER")
+    @Column(name = "fetch")
+    private String fetch;
+
+    @Title("关联关系是否可选")
+    @Comment("用于在关联关系中指定optional属性，即是否可选，true为可选，即不必选；false为必选")
+    @Column(name = "optional")
+    private Boolean optional;
+
+    @Title("关联关系匹配字段")
+    @Comment("用于在双向的关联关系中指定mappedBy属性")
+    @Column(name = "mapped_by")
+    private String mappedBy;
+
+    @Title("关联关系是否孤立删除")
+    @Comment("用于在关联关系中指定orphanRemoval属性，即当该实体从所有被关联的实体中移除，即变为孤立实体时，是否删除该实体")
+    @Column(name = "orphan_removal")
+    private Boolean orphanRemoval;
+
+    @Title("关联表名称")
+    @Comment("关联关系中被关联表的名称，默认为关联实体类所对应的表")
+    @Column(name = "table")
+    private String table;
+
+    @Title("关联表中对应字段")
+    @Comment("关联关系中被关联表中对应的字段，默认为关联实体类所对应表的主键")
+    @Column(name = "referenced_column_name")
+    private String referencedColumnName;
 }
