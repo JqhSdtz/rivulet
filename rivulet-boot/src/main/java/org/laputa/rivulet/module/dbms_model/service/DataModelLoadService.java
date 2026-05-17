@@ -36,10 +36,8 @@ import org.hibernate.mapping.Property;
 import org.laputa.rivulet.common.constant.Strings;
 import org.laputa.rivulet.common.model.Result;
 import org.laputa.rivulet.common.state.AppState;
-import org.laputa.rivulet.common.util.RedissonLockUtil;
-import org.laputa.rivulet.common.util.TerminalKeyUtil;
-import org.laputa.rivulet.common.util.TimeUnitUtil;
-import org.laputa.rivulet.common.util.TypeConvertUtil;
+import org.laputa.rivulet.common.state.EventBus;
+import org.laputa.rivulet.common.util.*;
 import org.laputa.rivulet.module.app.property.TerminalKeyProperty;
 import org.laputa.rivulet.module.app.service.AppInitService;
 import org.laputa.rivulet.module.app.service.GitService;
@@ -79,9 +77,9 @@ import java.util.stream.Collectors;
 import static liquibase.structure.core.ForeignKeyConstraintType.importedKeyCascade;
 
 /**
- * 系统内部的数据模型自动同步到数据模型对应表中
- * 需要注意的是，系统内部的表、字段等数据模型改名字后无法和之前的关联，即之前对应的数据都将丢失
- * 所以系统内部表和字段一般情况下禁止改名字
+ * 数据模型自动同步到数据型模对应表中，并同步到对应的表结构模型中
+ * 需要注意的是，字段等数据模型改名字后无法和之前的关联，即之前对应的数据都将丢失
+ * 所以表和字段一般情况下禁止改名字
  * <p>
  * order不设置默认是整型最大值，默认最后运行
  *
@@ -91,7 +89,7 @@ import static liquibase.structure.core.ForeignKeyConstraintType.importedKeyCasca
 @Service
 @Order(1002)
 @Slf4j
-public class BuiltInDataModelService implements ApplicationRunner {
+public class DataModelLoadService implements ApplicationRunner {
     @Resource
     private JpaProperties jpaProperties;
     @Resource
@@ -142,13 +140,13 @@ public class BuiltInDataModelService implements ApplicationRunner {
     @Transactional(rollbackFor = Exception.class)
     public void run(ApplicationArguments args) throws Exception {
         refreshStructureUpdateSql();
-        if (!appState.isBuiltInDataModelSynced()) {
+        if (!appState.getAllLoadedDataModelSynced().getCurrentValue()) {
             System.out.println(Strings.STAR64 + "\n检测到系统内部数据模型有更新，请访问系统以确认更新SQL");
             String timeStr = TimeUnitUtil.format(terminalKeyProperty.getTimeout(), terminalKeyProperty.getTimeUnit());
             System.out.printf("确认更新的密钥为: %s，请在%s内进行确认操作\n" + Strings.STAR64 + "\n", terminalKeyUtil.generateTerminalKey(confirmKeyBucket), timeStr);
-            appState.registerStateChangeCallback("builtInDataModelSynced", state -> {
+            EventBus.registerStateChangeCallback(appState.getAllLoadedDataModelSynced(), state -> {
                 if (state.getCurrentValue().equals(false)) return;
-                syncBuiltInDataModel();
+                syncLoadedDataModel(true);
                 System.out.println(Strings.STAR64 + "\n内部数据模型更新完毕\n" + Strings.STAR64 + "\n");
             });
         }
@@ -164,7 +162,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
         }
         doStructureUpdate();
         refreshStructureUpdateSql();
-        if (!appState.isBuiltInDataModelSynced()) {
+        if (!appState.getAllLoadedDataModelSynced().getCurrentValue()) {
             String currentStructureUpdateSql = getCurrentStructureUpdateSql();
             Result<String> updateStructureResult = Result.fail(String.class, "requireConfirmUpdateSql", "需要确认内部数据模型更新的SQL");
             updateStructureResult.setPayload(currentStructureUpdateSql);
@@ -217,7 +215,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
         });
         this.currentDatabaseChangeLog = databaseChangeLog;
         if (changeSets.isEmpty()) {
-            this.appState.setBuiltInDataModelSynced(true);
+            this.appState.getAllLoadedDataModelSynced().setValue(true);
         }
         StringWriter stringWriter = new StringWriter();
         // 指定writer后就不会真正执行update，而是将sql语句输入writer中
@@ -268,7 +266,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
                 isBuiltIn = false;
             } else {
                 TableRemarkMetaInfo metaInfo = TableRemarkMetaInfoUtil.getMetaInfo(remark);
-                isBuiltIn = metaInfo.isBuiltIn();
+                isBuiltIn = !CustomDataModelUtil.isCustomDataModelClass(metaInfo.getClassName());
             }
             if (!isBuiltIn) {
                 iterator.remove();
@@ -277,8 +275,8 @@ public class BuiltInDataModelService implements ApplicationRunner {
     }
 
     @SneakyThrows
-    private void syncBuiltInDataModel() {
-        Result<?> result = redissonLockUtil.doWithLock("checkBuiltInDataModel", this::doSyncBuiltInDataModelWithTransaction);
+    private void syncLoadedDataModel(boolean isBuiltIn) {
+        Result<?> result = redissonLockUtil.doWithLock("checkLoadedDataModel", () -> doSyncLoadedDataModelWithTransaction(isBuiltIn));
         if (!result.isSuccessful()) {
             throw result.toRawException();
         }
@@ -289,10 +287,10 @@ public class BuiltInDataModelService implements ApplicationRunner {
      *
      * @return
      */
-    private Result<?> doSyncBuiltInDataModelWithTransaction() {
+    private Result<?> doSyncLoadedDataModelWithTransaction(boolean isBuiltIn) {
         return transactionTemplate.execute(transactionStatus -> {
             try {
-                return doSyncBuiltInDataModel();
+                return doSyncLoadedDataModel(isBuiltIn);
             } catch (Exception exception) {
                 exception.printStackTrace();
                 transactionStatus.setRollbackOnly();
@@ -301,7 +299,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
         });
     }
 
-    private Result<?> doSyncBuiltInDataModel() {
+    private Result<?> doSyncLoadedDataModel(boolean isBuiltIn) {
         DatabaseSnapshot hibernateSnapshot = this.diffResult.getReferenceSnapshot();
         DatabaseObjectCollection hibernateDatabaseObjects = (DatabaseObjectCollection) hibernateSnapshot.getSerializableFieldValue("objects");
         Map<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> objectMapByClass = hibernateDatabaseObjects.toMap();
@@ -327,7 +325,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
             }
         });
         RvAdmin initialAdmin;
-        if (!appState.isAppInitialized()) {
+        if (!appState.getInitAdminCreated().getCurrentValue()) {
             initialAdmin = new RvAdmin();
             // 临时设置的初始管理员的用户名和密码，否则rv_table无法保存。在正式创建初始管理员时会被替换掉。
             initialAdmin.setAdminName("admin");
@@ -338,7 +336,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
             initialAdmin = rvAdminRepository.findById(appInitService.getInitialAdminId()).orElse(null);
         }
         AtomicInteger rvTableOrderNum = new AtomicInteger(0);
-        tableSet.forEach(table -> toSaveRvTableList.add(buildRvTable(table, rvTableOrderNum.getAndIncrement(), rvTableMap, initialAdmin)));
+        tableSet.forEach(table -> toSaveRvTableList.add(buildRvTable(table, rvTableOrderNum.getAndIncrement(), rvTableMap, initialAdmin, isBuiltIn)));
         // 每次启动都全量覆盖保存内部数据模型
         List<Class<?>> tableClasses = TypeConvertUtil.streamToList(tableSet.stream().map(table -> table.getAttribute(DatabaseObjectAttrName.TableClass, Class.class)));
         rvTableRepository.saveAll(toSaveRvTableList);
@@ -346,7 +344,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
         return Result.succeed();
     }
 
-    private void setCodeAndTitleAndBuiltIn(DataModelEntityInterface dataModelEntity, DatabaseObject databaseObject) {
+    private void setCodeAndTitleAndBuiltIn(DataModelEntityInterface dataModelEntity, DatabaseObject databaseObject, boolean isBuiltIn) {
         dataModelEntity.setCode(databaseObject.getName());
         if (dataModelEntity.getTitle() == null) {
             dataModelEntity.setTitle(databaseObject.getAttribute(DatabaseObjectAttrName.Title, String.class));
@@ -354,12 +352,12 @@ public class BuiltInDataModelService implements ApplicationRunner {
         if (dataModelEntity.getTitle() == null) {
             dataModelEntity.setTitle(databaseObject.getName());
         }
-        dataModelEntity.setBuiltIn(true);
+        dataModelEntity.setBuiltIn(isBuiltIn);
     }
 
-    private RvTable buildRvTable(Table table, int tableIndex, Map<String, RvTable> rvTableMap, RvAdmin initialAdmin) {
+    private RvTable buildRvTable(Table table, int tableIndex, Map<String, RvTable> rvTableMap, RvAdmin initialAdmin, boolean isBuiltIn) {
         RvTable rvTable = rvTableMap.get(table.getName());
-        setCodeAndTitleAndBuiltIn(rvTable, table);
+        setCodeAndTitleAndBuiltIn(rvTable, table, isBuiltIn);
         rvTable.setOrderNum(tableIndex);
         if (rvTable.getRemark() == null) {
             rvTable.setRemark(table.getRemarks());
@@ -382,7 +380,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
         }
         rvColumnRepository.deleteAllById(deletedColumnIdList);
         rvTable.setColumns(Streams.mapWithIndex(table.getColumns().stream(), (column, idx) -> {
-            RvColumn rvColumn = buildRvColumn(column, rvColumnMap);
+            RvColumn rvColumn = buildRvColumn(column, rvColumnMap, isBuiltIn);
             rvColumn.setOrderNum((int) idx);
             rvColumn.setTable(rvTable);
             return rvColumn;
@@ -401,13 +399,13 @@ public class BuiltInDataModelService implements ApplicationRunner {
         }
         rvIndexRepository.deleteAllById(deletedIndexIdList);
         rvTable.setIndexes(Streams.mapWithIndex(table.getIndexes().stream(), (index, idx) -> {
-            RvIndex rvIndex = buildRvIndex(index, rvColumnMap, rvIndexMap);
+            RvIndex rvIndex = buildRvIndex(index, rvColumnMap, rvIndexMap, isBuiltIn);
             rvIndex.setOrderNum((int) idx);
             rvIndex.setTable(rvTable);
             return rvIndex;
         }).collect(Collectors.toList()));
 
-        rvTable.setPrimaryKey(buildRvPrimaryKey(table.getPrimaryKey(), rvTable, rvColumnMap, rvIndexMap));
+        rvTable.setPrimaryKey(buildRvPrimaryKey(table.getPrimaryKey(), rvTable, rvColumnMap, rvIndexMap, isBuiltIn));
 
         Map<String, RvForeignKey> rvForeignKeyMap = new HashMap<>(table.getOutgoingForeignKeys().size());
         List<String> deletedForeignKeyIdList = new ArrayList<>();
@@ -422,7 +420,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
         }
         rvForeignKeyRepository.deleteAllById(deletedForeignKeyIdList);
         rvTable.setForeignKeys(Streams.mapWithIndex(table.getOutgoingForeignKeys().stream(), (foreignKey, idx) -> {
-            RvForeignKey rvForeignKey = buildRvForeignKey(foreignKey, rvTableMap, rvColumnMap, rvIndexMap, rvForeignKeyMap);
+            RvForeignKey rvForeignKey = buildRvForeignKey(foreignKey, rvTableMap, rvColumnMap, rvIndexMap, rvForeignKeyMap, isBuiltIn);
             rvForeignKey.setOrderNum((int) idx);
             rvForeignKey.setTable(rvTable);
             return rvForeignKey;
@@ -441,7 +439,7 @@ public class BuiltInDataModelService implements ApplicationRunner {
         }
         rvUniqueRepository.deleteAllById(deletedUniqueIdList);
         rvTable.setUniques(Streams.mapWithIndex(table.getUniqueConstraints().stream(), (uniqueConstraint, idx) -> {
-            RvUnique rvUnique = buildRvUnique(uniqueConstraint, rvColumnMap, rvIndexMap, rvUniqueMap);
+            RvUnique rvUnique = buildRvUnique(uniqueConstraint, rvColumnMap, rvIndexMap, rvUniqueMap, isBuiltIn);
             rvUnique.setOrderNum((int) idx);
             rvUnique.setTable(rvTable);
             return rvUnique;
@@ -470,13 +468,13 @@ public class BuiltInDataModelService implements ApplicationRunner {
         return rvTable;
     }
 
-    private RvColumn buildRvColumn(Column column, Map<String, RvColumn> rvColumnMap) {
+    private RvColumn buildRvColumn(Column column, Map<String, RvColumn> rvColumnMap, boolean isBuiltIn) {
         RvColumn rvColumn = rvColumnMap.get(column.getName());
         if (rvColumn == null) {
             rvColumn = new RvColumn();
             rvColumnMap.put(column.getName(), rvColumn);
         }
-        setCodeAndTitleAndBuiltIn(rvColumn, column);
+        setCodeAndTitleAndBuiltIn(rvColumn, column, isBuiltIn);
         rvColumn.setDataType(column.getType().toString());
         rvColumn.setDefaultValue(String.valueOf(column.getDefaultValue()));
         rvColumn.setNullable(column.isNullable());
@@ -497,14 +495,14 @@ public class BuiltInDataModelService implements ApplicationRunner {
         return rvColumn;
     }
 
-    private RvIndex buildRvIndex(Index index, Map<String, RvColumn> rvColumnMap, Map<String, RvIndex> rvIndexMap) {
+    private RvIndex buildRvIndex(Index index, Map<String, RvColumn> rvColumnMap, Map<String, RvIndex> rvIndexMap, boolean isBuiltIn) {
         RvIndex rvIndex = rvIndexMap.get(index.getName());
         boolean isNew = rvIndex == null;
         if (rvIndex == null) {
             rvIndex = new RvIndex();
             rvIndexMap.put(index.getName(), rvIndex);
         }
-        setCodeAndTitleAndBuiltIn(rvIndex, index);
+        setCodeAndTitleAndBuiltIn(rvIndex, index, isBuiltIn);
         rvIndex.setUniqueIndex(index.isUnique());
         final RvIndex targetRvIndex = rvIndex;
         rvIndex.setIndexColumns(Streams.mapWithIndex(index.getColumns().stream(), (column, idx) -> {
@@ -528,13 +526,13 @@ public class BuiltInDataModelService implements ApplicationRunner {
         return rvIndex;
     }
 
-    private RvPrimaryKey buildRvPrimaryKey(PrimaryKey primaryKey, RvTable rvTable, Map<String, RvColumn> rvColumnMap, Map<String, RvIndex> rvIndexMap) {
+    private RvPrimaryKey buildRvPrimaryKey(PrimaryKey primaryKey, RvTable rvTable, Map<String, RvColumn> rvColumnMap, Map<String, RvIndex> rvIndexMap, boolean isBuiltIn) {
         RvPrimaryKey rvPrimaryKey = rvTable.getPrimaryKey();
         boolean isNew = rvPrimaryKey == null;
         if (rvPrimaryKey == null) {
             rvPrimaryKey = new RvPrimaryKey();
         }
-        setCodeAndTitleAndBuiltIn(rvPrimaryKey, primaryKey);
+        setCodeAndTitleAndBuiltIn(rvPrimaryKey, primaryKey, isBuiltIn);
         if (primaryKey.getBackingIndex() != null) {
             rvPrimaryKey.setBackingIndex(rvIndexMap.get(primaryKey.getBackingIndex().getName()));
         }
@@ -558,14 +556,14 @@ public class BuiltInDataModelService implements ApplicationRunner {
         return rvPrimaryKey;
     }
 
-    private RvForeignKey buildRvForeignKey(ForeignKey foreignKey, Map<String, RvTable> rvTableMap, Map<String, RvColumn> rvColumnMap, Map<String, RvIndex> rvIndexMap, Map<String, RvForeignKey> rvForeignKeyMap) {
+    private RvForeignKey buildRvForeignKey(ForeignKey foreignKey, Map<String, RvTable> rvTableMap, Map<String, RvColumn> rvColumnMap, Map<String, RvIndex> rvIndexMap, Map<String, RvForeignKey> rvForeignKeyMap, boolean isBuiltIn) {
         RvForeignKey rvForeignKey = rvForeignKeyMap.get(foreignKey.getName());
         boolean isNew = rvForeignKey == null;
         if (rvForeignKey == null) {
             rvForeignKey = new RvForeignKey();
             rvForeignKeyMap.put(foreignKey.getName(), rvForeignKey);
         }
-        setCodeAndTitleAndBuiltIn(rvForeignKey, foreignKey);
+        setCodeAndTitleAndBuiltIn(rvForeignKey, foreignKey, isBuiltIn);
         // 是否级联删除
         rvForeignKey.setCascadeDelete(importedKeyCascade.equals(foreignKey.getDeleteRule()));
         if (foreignKey.getBackingIndex() != null) {
@@ -608,14 +606,14 @@ public class BuiltInDataModelService implements ApplicationRunner {
         return rvForeignKey;
     }
 
-    private RvUnique buildRvUnique(UniqueConstraint uniqueConstraint, Map<String, RvColumn> rvColumnMap, Map<String, RvIndex> rvIndexMap, Map<String, RvUnique> rvUniqueMap) {
+    private RvUnique buildRvUnique(UniqueConstraint uniqueConstraint, Map<String, RvColumn> rvColumnMap, Map<String, RvIndex> rvIndexMap, Map<String, RvUnique> rvUniqueMap, boolean isBuiltIn) {
         RvUnique rvUnique = rvUniqueMap.get(uniqueConstraint.getName());
         boolean isNew = rvUnique == null;
         if (rvUnique == null) {
             rvUnique = new RvUnique();
             rvUniqueMap.put(uniqueConstraint.getName(), rvUnique);
         }
-        setCodeAndTitleAndBuiltIn(rvUnique, uniqueConstraint);
+        setCodeAndTitleAndBuiltIn(rvUnique, uniqueConstraint, isBuiltIn);
         if (uniqueConstraint.getBackingIndex() != null) {
             rvUnique.setBackingIndex(rvIndexMap.get(uniqueConstraint.getBackingIndex().getName()));
         }

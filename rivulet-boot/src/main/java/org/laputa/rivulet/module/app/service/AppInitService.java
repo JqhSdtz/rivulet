@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.laputa.rivulet.common.constant.Strings;
 import org.laputa.rivulet.common.model.Result;
 import org.laputa.rivulet.common.state.AppState;
+import org.laputa.rivulet.common.state.EventBus;
 import org.laputa.rivulet.common.util.DatabaseUtil;
 import org.laputa.rivulet.common.util.RedissonLockUtil;
 import org.laputa.rivulet.common.util.TerminalKeyUtil;
@@ -78,12 +79,12 @@ public class AppInitService implements ApplicationRunner {
     @SneakyThrows
     @Override
     public void run(ApplicationArguments args) {
-        appState.registerStateChangeCallback("builtInDataModelSynced", state -> {
+        EventBus.registerStateChangeCallback(appState.getAllLoadedDataModelSynced(), state -> {
             if (state.getCurrentValue().equals(false)) return;
-            // 启动后先判断应用是否已经初始化
-            appState.setAppInitialized(testAppInitialized());
+            // 启动后先判断应用是否已经初始化，即初始管理员是否已创建
+            appState.getInitAdminCreated().setValue((testAppInitialized()));
             // 若应用未初始化，则启动后获取一个初始化密钥
-            if (!appState.isAppInitialized()) {
+            if (!appState.getInitAdminCreated().getCurrentValue()) {
                 String timeStr = TimeUnitUtil.format(terminalKeyProperty.getTimeout(), terminalKeyProperty.getTimeUnit());
                 System.out.printf(Strings.STAR64 + "\n应用的初始化密钥为: %s，请在%s内进行初始化操作\n" + Strings.STAR64 + "\n", terminalKeyUtil.generateTerminalKey(initKeyBucket), timeStr);
             }
@@ -139,7 +140,7 @@ public class AppInitService implements ApplicationRunner {
                 rvAdmin.setActive(true);
                 rvAdminRepository.save(rvAdmin);
                 // 更改应用初始化状态
-                this.appState.setAppInitialized(true);
+                this.appState.getInitAdminCreated().setValue(true);
                 // 将创建的用户设为当前登录的用户，即实现直接登录
                 authSessionAccessor.setCurrentAdmin(rvAdmin);
                 return Result.succeed();

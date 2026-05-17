@@ -18,6 +18,8 @@ public abstract class RvBaseEntity<PkType> implements Serializable {
      */
     public abstract PkType getId();
 
+    public Boolean getBuiltIn() {return false;}
+
     @Override
     public boolean equals(Object obj) {
         if (null == obj) {

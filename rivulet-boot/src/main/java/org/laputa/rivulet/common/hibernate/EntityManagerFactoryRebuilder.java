@@ -1,6 +1,9 @@
 package org.laputa.rivulet.common.hibernate;
 
+import jakarta.annotation.Resource;
 import jakarta.persistence.EntityManagerFactory;
+import org.laputa.rivulet.common.state.AppState;
+import org.laputa.rivulet.common.state.EventBus;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -20,15 +23,17 @@ import java.util.function.Consumer;
  */
 @Service
 @Order(1)
-public class DynamicJpaManager implements InitializingBean, ApplicationRunner {
+public class EntityManagerFactoryRebuilder implements InitializingBean, ApplicationRunner {
     private final DataSource dataSource;
     private final JpaProperties jpaProperties;
     private final EntityManagerFactoryProxyPostProcessor proxyPostProcessor;
+    private final AppState appState;
 
-    public DynamicJpaManager(DataSource dataSource, JpaProperties jpaProperties, EntityManagerFactoryProxyPostProcessor proxyPostProcessor) {
+    public EntityManagerFactoryRebuilder(DataSource dataSource, JpaProperties jpaProperties, EntityManagerFactoryProxyPostProcessor proxyPostProcessor, AppState appState) {
         this.dataSource = dataSource;
         this.jpaProperties = jpaProperties;
         this.proxyPostProcessor = proxyPostProcessor;
+        this.appState = appState;
     }
 
     @Override
@@ -42,7 +47,10 @@ public class DynamicJpaManager implements InitializingBean, ApplicationRunner {
      */
     @Override
     public void afterPropertiesSet() {
-        rebuildAndSwap(null);
+        EventBus.registerStateChangeCallback(appState.getAllLoadedDataModelSynced(), state -> {
+            if (state.getCurrentValue().equals(false)) return;
+            rebuildAndSwap(null);
+        });
     }
 
     /**

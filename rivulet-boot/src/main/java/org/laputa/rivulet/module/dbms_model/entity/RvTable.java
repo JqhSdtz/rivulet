@@ -77,7 +77,8 @@ public class RvTable extends RvBaseEntity<String> implements DataModelEntityInte
 
     @Title("备注")
     @Comment("模型备注对应数据库中表的注释，即表的Comment。对于应用内置的模型，备注中会有一段用于区分是否内置的标识。")
-    @Column(name = "remark")
+    @Lob
+    @Column(name = "remark", columnDefinition = "TEXT")
     private String remark;
 
     @Title("排序号")

@@ -25,7 +25,7 @@ public class TableRemarkMetaInfoUtil {
         String[] metaInfoParts = metaInfoStr.split("#");
         TableRemarkMetaInfo metaInfo = new TableRemarkMetaInfo();
         if (metaInfoParts.length > 1) {
-            metaInfo.setBuiltIn("1".equals(metaInfoParts[1]));
+            metaInfo.setClassName(metaInfoParts[1]);
         }
         return metaInfo;
     }
@@ -35,7 +35,7 @@ public class TableRemarkMetaInfoUtil {
         // 经测试，PostreSQL在保存注释的时候，会去掉末尾换行符，所以这里需要trim一下，以保证对应
         remarkStr = remarkStr.trim();
         StringBuilder metaInfoStr = new StringBuilder('[' + META_FLAG);
-        metaInfoStr.append('#').append(metaInfo.isBuiltIn() ? '1' : '0');
+        metaInfoStr.append('#').append(metaInfo.getClassName());
         metaInfoStr.append("#方括号内请勿修改]");
         remarkStr = metaInfoStr + remarkStr;
         return remarkStr;

@@ -18,6 +18,8 @@ import org.hibernate.boot.spi.InFlightMetadataCollector;
 import org.hibernate.boot.spi.MetadataBuildingContext;
 import org.laputa.rivulet.common.constant.Strings;
 import org.laputa.rivulet.common.entity.RvBaseEntity;
+import org.laputa.rivulet.common.state.AppState;
+import org.laputa.rivulet.common.util.CustomDataModelUtil;
 import org.laputa.rivulet.common.util.SpringBeanUtil;
 import org.laputa.rivulet.module.dbms_model.entity.inter.DataModelEntityInterface;
 import org.laputa.rivulet.module.jpa_model.entity.RvProperty;
@@ -34,6 +36,7 @@ import java.util.Optional;
 
 public class RvAdditionalMappingContributor implements AdditionalMappingContributor {
     RvPrototypeRepository rvPrototypeRepository;
+    AppState appState;
 
     @Override
     public String getContributorName() {
@@ -89,11 +92,9 @@ public class RvAdditionalMappingContributor implements AdditionalMappingContribu
         }
     }
 
-    private static final String packageBase = "org.laputa.rivulet.common.entity.produced.";
-
     @SneakyThrows
     private Class<?> convertRvPrototypeToEntityClass(RvPrototype rvPrototype) {
-        String className = packageBase + rvPrototype.getCode();
+        String className = CustomDataModelUtil.getCustomDataModelClassName(rvPrototype.getCode());
         DynamicType.Builder<?> builder = new ByteBuddy().subclass(RvBaseEntity.class).name(className)
                 .implement(DataModelEntityInterface.class)
                 .annotateType(AnnotationDescription.Builder.ofType(Entity.class).build())
@@ -166,6 +167,13 @@ public class RvAdditionalMappingContributor implements AdditionalMappingContribu
     @Override
     public void contribute(AdditionalMappingContributions contributions, InFlightMetadataCollector metadata, ResourceStreamLocator resourceStreamLocator, MetadataBuildingContext buildingContext) {
         if (SpringBeanUtil.contextInitialized()) {
+            if (appState == null) {
+                appState = SpringBeanUtil.getBean(AppState.class);
+            }
+            if (!appState.getAllLoadedDataModelSynced().getCurrentValue()) {
+                // 有变动的模型还未同步到数据库，则不能读取自定义的模型
+                return;
+            }
             if (rvPrototypeRepository == null) {
                 rvPrototypeRepository = SpringBeanUtil.getBean(RvPrototypeRepository.class);
             }

@@ -68,7 +68,7 @@ public class TableSnapshotGenerator extends HibernateSnapshotGenerator {
             }
             // !!!增加附着在表注释的Meta数据
             TableRemarkMetaInfo metaInfo = new TableRemarkMetaInfo();
-            metaInfo.setBuiltIn(true);
+            metaInfo.setClassName(tableClass.getName());
             table.setRemarks(TableRemarkMetaInfoUtil.setMetaInfo(table.getRemarks(), metaInfo));
         }
         if (tableClass != null && tableClass.isAnnotationPresent(Title.class)) {

@@ -13,7 +13,7 @@ import org.laputa.rivulet.access_limit.annotation.LimitTimeUnit;
 import org.laputa.rivulet.common.model.Result;
 import org.laputa.rivulet.common.mvc.interceptor.RvInterceptor;
 import org.laputa.rivulet.common.state.AppState;
-import org.laputa.rivulet.module.dbms_model.service.BuiltInDataModelService;
+import org.laputa.rivulet.module.dbms_model.service.DataModelLoadService;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -30,7 +30,7 @@ public class DataModelModifyConfirmInterceptor extends RvInterceptor {
     @Resource
     private AppState appState;
     @Resource
-    private BuiltInDataModelService builtInDataModelService;
+    private DataModelLoadService dataModelLoadService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -47,11 +47,11 @@ public class DataModelModifyConfirmInterceptor extends RvInterceptor {
     @Override
     @AccessLimit(times = 40, duration = 10, unit = LimitTimeUnit.SECOND)
     public boolean preHandle(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull Object handler) {
-        if (appState.isBuiltInDataModelSynced()) return true;
-        builtInDataModelService.refreshStructureUpdateSql();
+        if (appState.getAllLoadedDataModelSynced().getCurrentValue()) return true;
+        dataModelLoadService.refreshStructureUpdateSql();
         // 执行getStructureUpdateSql会再进行一次对比，有可能已经同步完成
-        if (appState.isBuiltInDataModelSynced()) return true;
-        String currentStructureUpdateSql = builtInDataModelService.getCurrentStructureUpdateSql();
+        if (appState.getAllLoadedDataModelSynced().getCurrentValue() ) return true;
+        String currentStructureUpdateSql = dataModelLoadService.getCurrentStructureUpdateSql();
         Result<String> updateStructureResult = Result.fail(String.class, "requireConfirmUpdateSql", "需要确认内部数据模型更新的SQL");
         updateStructureResult.setPayload(currentStructureUpdateSql);
         writeResponse(response, updateStructureResult);

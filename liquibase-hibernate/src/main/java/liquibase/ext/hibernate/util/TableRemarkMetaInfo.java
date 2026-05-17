@@ -9,5 +9,5 @@ import lombok.Data;
  */
 @Data
 public class TableRemarkMetaInfo {
-    private boolean builtIn = false;
+    private String className;
 }

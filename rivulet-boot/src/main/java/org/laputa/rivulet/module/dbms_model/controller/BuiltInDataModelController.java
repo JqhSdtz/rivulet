@@ -2,7 +2,7 @@ package org.laputa.rivulet.module.dbms_model.controller;
 
 import jakarta.annotation.Resource;
 import org.laputa.rivulet.common.model.Result;
-import org.laputa.rivulet.module.dbms_model.service.BuiltInDataModelService;
+import org.laputa.rivulet.module.dbms_model.service.DataModelLoadService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,10 +18,10 @@ import java.util.Map;
 @RequestMapping("/api/builtInDataModel")
 public class BuiltInDataModelController {
     @Resource
-    private BuiltInDataModelService builtInDataModelService;
+    private DataModelLoadService dataModelLoadService;
 
     @PostMapping("/confirmUpdateSql")
     public Result<String> confirmStructureUpdateSql(@RequestBody Map<String, String> params) {
-        return builtInDataModelService.confirmUpdateStructureSql(params.get("confirmKey"));
+        return dataModelLoadService.confirmUpdateStructureSql(params.get("confirmKey"));
     }
 }
