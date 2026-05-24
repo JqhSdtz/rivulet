@@ -57,14 +57,16 @@ public class TableSnapshotGenerator extends HibernateSnapshotGenerator {
         // 的方式，太麻烦了，所以增加了一个注解，直接在这里添加注释
         Class tableClass = getTableClass(snapshot, hibernateTable.getName());
         table.setAttribute(DatabaseObjectAttrName.TableClass, tableClass);
-        if (tableClass != null && tableClass.isAnnotationPresent(TableComment.class)) {
-            TableComment tableComment = (TableComment) tableClass.getAnnotation(TableComment.class);
-            String oriComment = table.getRemarks();
-            // 如果原来在metadata中有注释，就在原来的后面追加@TableComment中定义的注释
-            if (oriComment == null) {
-                table.setRemarks(tableComment.value());
-            } else {
-                table.setRemarks(oriComment + " " + tableComment.value());
+        if (tableClass != null) {
+            if (tableClass.isAnnotationPresent(TableComment.class)) {
+                TableComment tableComment = (TableComment) tableClass.getAnnotation(TableComment.class);
+                String oriComment = table.getRemarks();
+                // 如果原来在metadata中有注释，就在原来的后面追加@TableComment中定义的注释
+                if (oriComment == null) {
+                    table.setRemarks(tableComment.value());
+                } else {
+                    table.setRemarks(oriComment + " " + tableComment.value());
+                }
             }
             // !!!增加附着在表注释的Meta数据
             TableRemarkMetaInfo metaInfo = new TableRemarkMetaInfo();
