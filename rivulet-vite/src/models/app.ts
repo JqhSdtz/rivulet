@@ -1,5 +1,7 @@
 const state = {
-    appInitialized: false
+    initAdminCreated: {
+        currentValue: false
+    }
 };
 type IAppState = typeof state;
 
@@ -7,7 +9,7 @@ export default {
     state: state,
     reducers: {
         finishAppInit(prevState: IAppState) {
-            prevState.appInitialized = true;
+            prevState.initAdminCreated.currentValue = true;
         }
     }
 };

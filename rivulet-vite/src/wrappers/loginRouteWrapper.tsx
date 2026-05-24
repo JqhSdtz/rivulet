@@ -4,7 +4,7 @@ import {Navigate, RouteObject} from 'react-router-dom';
 
 const WrappedComponent = (config: RouteConfig) => {
     const appState = store.useModelState('app');
-    if (!appState.appInitialized) {
+    if (!appState.initAdminCreated.currentValue) {
         return <Navigate to="/initApp"/>;
     }
     const authState = store.useModelState('auth');

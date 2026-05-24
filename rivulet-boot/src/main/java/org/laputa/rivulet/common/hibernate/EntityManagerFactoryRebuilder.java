@@ -47,10 +47,7 @@ public class EntityManagerFactoryRebuilder implements InitializingBean, Applicat
      */
     @Override
     public void afterPropertiesSet() {
-        EventBus.registerStateChangeCallback(appState.getAllLoadedDataModelSynced(), state -> {
-            if (state.getCurrentValue().equals(false)) return;
-            rebuildAndSwap(null);
-        });
+        rebuildAndSwap(null);
     }
 
     /**

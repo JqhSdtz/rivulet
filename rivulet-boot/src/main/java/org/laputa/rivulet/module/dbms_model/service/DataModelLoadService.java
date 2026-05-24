@@ -146,7 +146,7 @@ public class DataModelLoadService implements ApplicationRunner {
             System.out.printf("确认更新的密钥为: %s，请在%s内进行确认操作\n" + Strings.STAR64 + "\n", terminalKeyUtil.generateTerminalKey(confirmKeyBucket), timeStr);
             EventBus.registerStateChangeCallback(appState.getAllLoadedDataModelSynced(), state -> {
                 if (state.getCurrentValue().equals(false)) return;
-                syncLoadedDataModel(true);
+                syncLoadedDataModel();
                 System.out.println(Strings.STAR64 + "\n内部数据模型更新完毕\n" + Strings.STAR64 + "\n");
             });
         }
@@ -275,8 +275,8 @@ public class DataModelLoadService implements ApplicationRunner {
     }
 
     @SneakyThrows
-    private void syncLoadedDataModel(boolean isBuiltIn) {
-        Result<?> result = redissonLockUtil.doWithLock("checkLoadedDataModel", () -> doSyncLoadedDataModelWithTransaction(isBuiltIn));
+    private void syncLoadedDataModel() {
+        Result<?> result = redissonLockUtil.doWithLock("checkLoadedDataModel", () -> doSyncLoadedDataModelWithTransaction());
         if (!result.isSuccessful()) {
             throw result.toRawException();
         }
@@ -287,10 +287,10 @@ public class DataModelLoadService implements ApplicationRunner {
      *
      * @return
      */
-    private Result<?> doSyncLoadedDataModelWithTransaction(boolean isBuiltIn) {
+    private Result<?> doSyncLoadedDataModelWithTransaction() {
         return transactionTemplate.execute(transactionStatus -> {
             try {
-                return doSyncLoadedDataModel(isBuiltIn);
+                return doSyncLoadedDataModel();
             } catch (Exception exception) {
                 exception.printStackTrace();
                 transactionStatus.setRollbackOnly();
@@ -299,7 +299,7 @@ public class DataModelLoadService implements ApplicationRunner {
         });
     }
 
-    private Result<?> doSyncLoadedDataModel(boolean isBuiltIn) {
+    private Result<?> doSyncLoadedDataModel() {
         DatabaseSnapshot hibernateSnapshot = this.diffResult.getReferenceSnapshot();
         DatabaseObjectCollection hibernateDatabaseObjects = (DatabaseObjectCollection) hibernateSnapshot.getSerializableFieldValue("objects");
         Map<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> objectMapByClass = hibernateDatabaseObjects.toMap();
@@ -336,7 +336,7 @@ public class DataModelLoadService implements ApplicationRunner {
             initialAdmin = rvAdminRepository.findById(appInitService.getInitialAdminId()).orElse(null);
         }
         AtomicInteger rvTableOrderNum = new AtomicInteger(0);
-        tableSet.forEach(table -> toSaveRvTableList.add(buildRvTable(table, rvTableOrderNum.getAndIncrement(), rvTableMap, initialAdmin, isBuiltIn)));
+        tableSet.forEach(table -> toSaveRvTableList.add(buildRvTable(table, rvTableOrderNum.getAndIncrement(), rvTableMap, initialAdmin)));
         // 每次启动都全量覆盖保存内部数据模型
         List<Class<?>> tableClasses = TypeConvertUtil.streamToList(tableSet.stream().map(table -> table.getAttribute(DatabaseObjectAttrName.TableClass, Class.class)));
         rvTableRepository.saveAll(toSaveRvTableList);
@@ -355,13 +355,21 @@ public class DataModelLoadService implements ApplicationRunner {
         dataModelEntity.setBuiltIn(isBuiltIn);
     }
 
-    private RvTable buildRvTable(Table table, int tableIndex, Map<String, RvTable> rvTableMap, RvAdmin initialAdmin, boolean isBuiltIn) {
+    private RvTable buildRvTable(Table table, int tableIndex, Map<String, RvTable> rvTableMap, RvAdmin initialAdmin) {
+        boolean isBuiltIn;
         RvTable rvTable = rvTableMap.get(table.getName());
-        setCodeAndTitleAndBuiltIn(rvTable, table, isBuiltIn);
-        rvTable.setOrderNum(tableIndex);
         if (rvTable.getRemark() == null) {
             rvTable.setRemark(table.getRemarks());
         }
+        if (rvTable.getRemark() != null && TableRemarkMetaInfoUtil.existMetaInfo(rvTable.getRemark())) {
+            TableRemarkMetaInfo metaInfo = TableRemarkMetaInfoUtil.getMetaInfo(table.getRemarks());
+            rvTable.setClassName(metaInfo.getClassName());
+            isBuiltIn = !CustomDataModelUtil.isCustomDataModelClass(metaInfo.getClassName());
+        } else {
+            isBuiltIn = false;
+        }
+        setCodeAndTitleAndBuiltIn(rvTable, table, isBuiltIn);
+        rvTable.setOrderNum(tableIndex);
         rvTable.setCreateTime(new Date());
         rvTable.setUpdateTime(new Date());
         rvTable.setCreatedBy(initialAdmin);

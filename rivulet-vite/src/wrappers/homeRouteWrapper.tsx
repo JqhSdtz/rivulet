@@ -7,7 +7,8 @@ let beforeLogValidPath = '';
 const WrappedComponent = (config: RouteConfig) => {
     const location = useLocation();
     const appState = store.useModelState('app');
-    if (!appState.appInitialized) {
+    console.log(appState);
+    if (!appState.initAdminCreated.currentValue) {
         return <Navigate to="/initApp"/>;
     }
     const authState = store.useModelState('auth');

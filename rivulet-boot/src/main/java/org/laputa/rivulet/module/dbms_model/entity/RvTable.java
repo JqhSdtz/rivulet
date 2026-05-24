@@ -58,6 +58,11 @@ public class RvTable extends RvBaseEntity<String> implements DataModelEntityInte
     @Column(name = "title", nullable = false)
     private String title;
 
+    @Title("实体类名称")
+    @Comment("Java运行环境中对应的实体类名称")
+    @Column(name = "class_name", nullable = false)
+    private String className;
+
     @Title("模型编码")
     @Comment("模型编码对应数据库中表的名称，即表的Name，但对于应用来说叫编码更为合适，因为不会直接在应用中展示这个名字")
     @Column(name = "code", nullable = false)
