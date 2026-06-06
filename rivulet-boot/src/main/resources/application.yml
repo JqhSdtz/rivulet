@@ -2,9 +2,9 @@ logging:
     level:
         root: warn
         liquibase: warn
-        org.hibernate.sql: trace
+        org.hibernate.sql: warn
         org.hibernate.type.descriptor.sql.BasicBinder: warn
-        org.hibernate.orm.cache: trace
+        org.hibernate.orm.cache: warn
 
 server:
     port: 8081
@@ -34,7 +34,7 @@ spring:
         # 禁止springboot自动调用liquibase
         enabled: false
     jpa:
-        show-sql: true
+        show-sql: false
         open-in-view: true
         hibernate:
             ddl-auto: none

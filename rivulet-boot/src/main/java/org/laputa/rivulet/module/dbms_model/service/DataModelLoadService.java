@@ -22,11 +22,13 @@ import liquibase.ext.hibernate.DatabaseObjectAttrName;
 import liquibase.ext.hibernate.database.HibernateDatabase;
 import liquibase.ext.hibernate.util.TableRemarkMetaInfo;
 import liquibase.ext.hibernate.util.TableRemarkMetaInfoUtil;
+import liquibase.logging.LogFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.statement.NotNullConstraint;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.*;
+import liquibase.ui.LoggerUIService;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -144,7 +146,7 @@ public class DataModelLoadService implements ApplicationRunner {
             System.out.println(Strings.STAR64 + "\n检测到系统内部数据模型有更新，请访问系统以确认更新SQL");
             String timeStr = TimeUnitUtil.format(terminalKeyProperty.getTimeout(), terminalKeyProperty.getTimeUnit());
             System.out.printf("确认更新的密钥为: %s，请在%s内进行确认操作\n" + Strings.STAR64 + "\n", terminalKeyUtil.generateTerminalKey(confirmKeyBucket), timeStr);
-            EventBus.registerStateChangeCallback(appState.getAllLoadedDataModelSynced(), state -> {
+            EventBus.registerStateChangeCallback(appState.getAllLoadedDataModelSynced(), 1, state -> {
                 if (state.getCurrentValue().equals(false)) return;
                 syncLoadedDataModel();
                 System.out.println(Strings.STAR64 + "\n内部数据模型更新完毕\n" + Strings.STAR64 + "\n");
@@ -229,12 +231,20 @@ public class DataModelLoadService implements ApplicationRunner {
         this.currentStructureUpdateSql = stringWriter.toString();
     }
 
-    private void doStructureUpdate() throws SQLException, LiquibaseException {
-        Connection connection = this.dataSource.getConnection();
-        Database targetDataBase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-        Liquibase liquibase = new Liquibase(this.currentDatabaseChangeLog, null, targetDataBase);
-        liquibase.update(new Contexts());
-        targetDataBase.close();
+    private void doStructureUpdate() throws Exception {
+        Map<String, Object> scopeConfig = new HashMap<>();
+        // 不加下面三句，会在控制台上输出UPDATE SUMMARY
+        scopeConfig.put("liquibase.command.showSummary", "off");
+        scopeConfig.put("liquibase.command.update.showSummaryOutput", "LOG");
+        scopeConfig.put("liquibase.command.showSummaryOutput", "LOG");
+        scopeConfig.put(Scope.Attr.ui.name(), new LoggerUIService());// 不加这句会在控制台输出每一个变更记录
+        Scope.child(scopeConfig, () -> {
+            Connection connection = this.dataSource.getConnection();
+            Database targetDataBase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
+            Liquibase liquibase = new Liquibase(this.currentDatabaseChangeLog, null, targetDataBase);
+            liquibase.update(new Contexts());
+            targetDataBase.close();
+        });
     }
 
     /**
@@ -276,7 +286,7 @@ public class DataModelLoadService implements ApplicationRunner {
 
     @SneakyThrows
     private void syncLoadedDataModel() {
-        Result<?> result = redissonLockUtil.doWithLock("checkLoadedDataModel", () -> doSyncLoadedDataModelWithTransaction());
+        Result<?> result = redissonLockUtil.doWithLock("checkLoadedDataModel", this::doSyncLoadedDataModelWithTransaction);
         if (!result.isSuccessful()) {
             throw result.toRawException();
         }
@@ -340,7 +350,7 @@ public class DataModelLoadService implements ApplicationRunner {
         // 每次启动都全量覆盖保存内部数据模型
         List<Class<?>> tableClasses = TypeConvertUtil.streamToList(tableSet.stream().map(table -> table.getAttribute(DatabaseObjectAttrName.TableClass, Class.class)));
         rvTableRepository.saveAll(toSaveRvTableList);
-        gitService.addBuiltInRvTables(tableClasses);
+        gitService.createJsPrototypes(tableClasses);
         return Result.succeed();
     }
 

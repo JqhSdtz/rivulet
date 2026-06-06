@@ -85,16 +85,34 @@ public class GitService implements ApplicationRunner {
     }
 
     @SneakyThrows
-    public void addBuiltInRvTables(List<Class<?>> tableClasses) {
+    public void createJsPrototypes(List<Class<?>> tableClasses) {
         if (tableClasses.isEmpty()) return;
         AddCommand addCommand = gitRepo.add();
         for (Class<?> tableClass : tableClasses) {
             if (tableClass == null) continue;
-            String filePath = "/src/prototypes/builtIn/" + tableClass.getSimpleName() + ".js";
-            File rvTableFile = FileUtil.touch(FileUtil.normalize(gitProperty.getLocalDir() + File.separator + filePath));
+            Package pkg = tableClass.getPackage();
+            String classFilePath;
+            if (pkg == null) {
+                classFilePath = "/";
+            } else {
+                String pkgPath = pkg.getName().replace(".", "/");
+                String[] parts = pkgPath.split("/");
+                if (parts.length <= 3) {
+                    classFilePath = "/";
+                } else {
+                    StringBuilder result = new StringBuilder();
+                    for (int i = 3; i < parts.length; i++) {
+                        if (i > 3) result.append('/');
+                        result.append(parts[i]);
+                    }
+                    classFilePath = result.toString();
+                }
+            }
+            String jsFilePath = "/src/prototypes/" + classFilePath + "/" + tableClass.getSimpleName() + ".js";
+            File rvTableFile = FileUtil.touch(FileUtil.normalize(gitProperty.getLocalDir() + File.separator + jsFilePath));
             String content = getContent(tableClass);
             FileUtil.writeString(content, rvTableFile, StandardCharsets.UTF_8);
-            addCommand.addFilepattern(filePath);
+            addCommand.addFilepattern(jsFilePath);
         }
         addCommand.call();
     }
@@ -102,7 +120,7 @@ public class GitService implements ApplicationRunner {
     @SneakyThrows
     private String getContent(Class<?> tableClass) {
         Configuration configuration = freeMarkerConfigurer.getConfiguration();
-        Template template = configuration.getTemplate("script/builtInPrototype.ftlh");
+        Template template = configuration.getTemplate("script/jsPrototype.ftlh");
         Map<String, Object> dataModel = new HashMap<>();
         List<Method> sortedMethods = Arrays.stream(tableClass.getMethods()).sorted(Comparator.comparing(Method::getName)).toList();
         dataModel.put("sortedMethods", sortedMethods);

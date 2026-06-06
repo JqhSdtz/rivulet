@@ -1,12 +1,10 @@
 package org.laputa.rivulet.common.state;
 
+import cn.hutool.core.lang.Pair;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -17,7 +15,7 @@ public class EventBus {
     /**
      * 状态变更回调的映射关系
      */
-    private static final Map<State<?>, List<Consumer<State<?>>>> callbackMap = new HashMap<>();
+    private static final Map<State<?>, List<Pair<Integer, Consumer<State<?>>>>> callbackMap = new HashMap<>();
 
     @Getter
     public static class State<T> {
@@ -36,18 +34,23 @@ public class EventBus {
             }
             this.previousValue = currentValue;
             this.currentValue = value;
-            List<Consumer<State<?>>> callbackList = callbackMap.get(this);
+            List<Pair<Integer, Consumer<State<?>>>> callbackList = callbackMap.get(this);
             if (callbackList != null) {
+                callbackList.sort(Comparator.comparingInt(Pair::getKey));
                 callbackList.forEach(callback -> {
-                    callback.accept(this);
+                    callback.getValue().accept(this);
                 });
             }
         }
     }
 
     public static void registerStateChangeCallback(State<?> state, Consumer<State<?>> consumer) {
-        List<Consumer<State<?>>> callbackList = callbackMap.computeIfAbsent(state, k -> new ArrayList<>());
-        callbackList.add(consumer);
+        registerStateChangeCallback(state, 0, consumer);
+    }
+
+    public static void registerStateChangeCallback(State<?> state, int priority, Consumer<State<?>> consumer) {
+        List<Pair<Integer, Consumer<State<?>>>> callbackList = callbackMap.computeIfAbsent(state, k -> new ArrayList<>());
+        callbackList.add(new Pair<>(priority, consumer));
     }
 
 }

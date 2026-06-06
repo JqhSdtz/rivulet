@@ -79,7 +79,7 @@ public class AppInitService implements ApplicationRunner {
     @SneakyThrows
     @Override
     public void run(ApplicationArguments args) {
-        EventBus.registerStateChangeCallback(appState.getAllLoadedDataModelSynced(), state -> {
+        EventBus.registerStateChangeCallback(appState.getAllLoadedDataModelSynced(), 2, state -> {
             if (state.getCurrentValue().equals(false)) return;
             // 启动后先判断应用是否已经初始化，即初始管理员是否已创建
             appState.getInitAdminCreated().setValue((testAppInitialized()));

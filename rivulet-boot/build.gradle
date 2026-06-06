@@ -78,7 +78,8 @@ liquibase {
                 'driver'         : appKeys.spring.datasource['driver-class-name'],
                 'referenceUrl'   : referenceUrlStr,
                 'referenceDriver': 'liquibase.ext.hibernate.database.connection.HibernateDriver',
-                'logLevel'       : 'WARNING'
+                'logLevel'       : 'WARNING',
+                'sql.logLevel'   : 'OFF'
         ]
     }
 }
