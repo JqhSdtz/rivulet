@@ -63,3 +63,4 @@ hs_err_pid*
 
 /src/main/java/org/laputa/rivulet/TemporaryCode.java
 /src/main/resources/application-key.yml
+/src/main/resources/changelog/history/

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import liquibase.ext.hibernate.annotation.DefaultValue;
 import liquibase.ext.hibernate.annotation.TableComment;
 import liquibase.ext.hibernate.annotation.Title;
+import liquibase.ext.hibernate.util.TableRemarkMetaInfo;
+import liquibase.ext.hibernate.util.TableRemarkMetaInfoUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.Comment;
 import org.laputa.rivulet.module.jpa_model.entity.RvProperty;
@@ -20,6 +22,7 @@ import org.hibernate.annotations.Cache;
 import org.springframework.util.ClassUtils;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -29,7 +32,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Order(1002)
 @Slf4j
 public class JpaModelService implements ApplicationRunner {
-    private static final List<RvPrototype> rvPrototypes = new CopyOnWriteArrayList<>();
 
     private static String cascadeTypesToString(CascadeType[] cascadeTypes) {
         StringBuilder sb = new StringBuilder();
@@ -39,7 +41,8 @@ public class JpaModelService implements ApplicationRunner {
         return sb.toString();
     }
 
-    public void run(ApplicationArguments args) throws Exception {
+    public List<RvPrototype> getRvPrototypesByReflection() {
+        List<RvPrototype> rvPrototypes = new CopyOnWriteArrayList<>();
         Reflections reflections = new Reflections(Scanners.TypesAnnotated);
         Set<Class<?>> entityClasses = reflections.getTypesAnnotatedWith(Entity.class);
         for (Class<?> entityClass : entityClasses) {
@@ -55,12 +58,18 @@ public class JpaModelService implements ApplicationRunner {
             }
             TableComment tableCommentAnnotation = entityClass.getAnnotation(TableComment.class);
             if (tableCommentAnnotation != null) {
+                TableRemarkMetaInfo metaInfo = new TableRemarkMetaInfo();
+                metaInfo.setClassName(entityClass.getName());
                 rvPrototype.setRemark(tableCommentAnnotation.value());
+                rvPrototype.setRemark(TableRemarkMetaInfoUtil.setMetaInfo(tableCommentAnnotation.value(), metaInfo));
             }
             int fieldCount = entityClass.getDeclaredFields().length;
+            List<RvProperty> rvProperties = new ArrayList<>();
+            rvPrototype.setProperties(rvProperties);
             for (int i = 0; i < fieldCount; i++) {
                 Field field = entityClass.getDeclaredFields()[i];
                 RvProperty rvProperty = new RvProperty();
+                rvProperties.add(rvProperty);
                 rvProperty.setPrototype(rvPrototype);
                 rvProperty.setOrderNum(i);
                 Class<?> fieldClassType = field.getType();
@@ -159,5 +168,10 @@ public class JpaModelService implements ApplicationRunner {
             }
             rvPrototypes.add(rvPrototype);
         }
+        return rvPrototypes;
+    }
+
+    public void run(ApplicationArguments args) throws Exception {
+
     }
 }

@@ -1,6 +1,7 @@
 <#-- @ftlvariable name="tableClass" type="java.lang.Class" -->
 export class ${tableClass.getSimpleName()} {
     static JavaType = Java.type('${tableClass.getName()}');
+    static meta = ${rvPrototypeJson?no_esc};
     constructor(javaObject) {
         if (typeof javaObject !== 'undefined') {
             this.javaObject = javaObject;
