@@ -107,21 +107,10 @@ export default {
     async do(requestFunc: () => Promise<AxiosResponse>): Promise<Result> {
         const doRvRequest = wrapRequestFunction(requestFunc);
         let result = await doRvRequest();
-        if (result.successful) {
-            return result;
-        } else {
-            const errorCode = result.errorCode;
-            if (errorCode === 'requireConfirmUpdateSql') {
-                result = await onRequireConfirmUpdateSql(result, doRvRequest);
-                if (result.successful) {
-                    return result;
-                } else {
-                    throw result;
-                }
-            } else {
-                throw result;
-            }
+        if (!result.successful && result.errorCode === 'requireConfirmUpdateSql') {
+            result = await onRequireConfirmUpdateSql(result, doRvRequest);
         }
+        return result;
     },
     async doPost(url: string, data: any): Promise<Result> {
         return this.do(() => axios.post(url, data));
