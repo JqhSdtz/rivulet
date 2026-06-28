@@ -15,4 +15,8 @@ public class AppState {
      * 内部数据模型是否同步完成
      */
     private final EventBus.State<Boolean> allLoadedDataModelSynced = new EventBus.State<>("AllLoadedDataModelSynced", false);
+    /**
+     * 数据模型发生更新
+     */
+    private final EventBus.State<Boolean> dataModelChanged = new EventBus.State<>("dataModelChanged", false);
 }

@@ -1,5 +1,6 @@
 package org.laputa.rivulet.module.jpa_model.service;
 
+import jakarta.annotation.Resource;
 import jakarta.persistence.*;
 import liquibase.ext.hibernate.annotation.DefaultValue;
 import liquibase.ext.hibernate.annotation.TableComment;
@@ -7,7 +8,10 @@ import liquibase.ext.hibernate.annotation.Title;
 import liquibase.ext.hibernate.util.TableRemarkMetaInfo;
 import liquibase.ext.hibernate.util.TableRemarkMetaInfoUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.Comment;
+import org.laputa.rivulet.common.state.AppState;
+import org.laputa.rivulet.common.state.EventBus;
 import org.laputa.rivulet.module.jpa_model.entity.RvProperty;
 import org.laputa.rivulet.module.jpa_model.entity.RvPrototype;
 import org.laputa.rivulet.module.jpa_model.enums.PropertyType;
@@ -18,7 +22,6 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
-import org.hibernate.annotations.Cache;
 import org.springframework.util.ClassUtils;
 
 import java.lang.reflect.Field;
@@ -26,12 +29,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
 @Order(1002)
 @Slf4j
 public class JpaModelService implements ApplicationRunner {
+    @Resource
+    private AppState appState;
 
     private static String cascadeTypesToString(CascadeType[] cascadeTypes) {
         StringBuilder sb = new StringBuilder();
@@ -41,8 +45,15 @@ public class JpaModelService implements ApplicationRunner {
         return sb.toString();
     }
 
-    public List<RvPrototype> getRvPrototypesByReflection() {
-        List<RvPrototype> rvPrototypes = new CopyOnWriteArrayList<>();
+    private static List<RvPrototype> rvPrototypeList;
+
+    /**
+     * 此处通过类生成RvPrototype的方法
+     * 和{@link org.laputa.rivulet.common.hibernate.RvAdditionalMappingContributor#convertRvPrototypeToEntityClass(RvPrototype)}互补
+     * 这里从类生成RvPrototype对象的操作和上述方法中从RvPrototype对象生成类的操作要保证一致，<b>一个地方改，另一个地方也要改</b>
+     */
+    private static void setRvPrototypeListByReflection() {
+        List<RvPrototype> rvPrototypes = new ArrayList<>();
         Reflections reflections = new Reflections(Scanners.TypesAnnotated);
         Set<Class<?>> entityClasses = reflections.getTypesAnnotatedWith(Entity.class);
         for (Class<?> entityClass : entityClasses) {
@@ -168,10 +179,27 @@ public class JpaModelService implements ApplicationRunner {
             }
             rvPrototypes.add(rvPrototype);
         }
-        return rvPrototypes;
+        rvPrototypeList = rvPrototypes;
+    }
+
+    public List<RvPrototype> getRvPrototypeList() {
+        return rvPrototypeList;
+    }
+
+    /**
+     * 根据prototype的code获取prototype。在js代码里会调用到
+     * @param prototypeCode
+     * @return
+     */
+    public RvPrototype getRvPrototype(String prototypeCode) {
+        return rvPrototypeList.stream().filter(prototype -> prototypeCode != null && prototypeCode.equals(prototype.getCode())).findFirst().orElse(null);
     }
 
     public void run(ApplicationArguments args) throws Exception {
-
+        setRvPrototypeListByReflection();
+        // 每次数据模型更新后都重新获取一遍
+        EventBus.registerStateChangeCallback(appState.getDataModelChanged(), 1, state -> {
+            setRvPrototypeListByReflection();
+        });
     }
 }

@@ -126,9 +126,7 @@ export default {
         const baseUrl = withTransaction ? '/js/runWithTransaction' : '/js/run';
         return await this.doRaw(() => axios.post(baseUrl + '?filename=' + filename, data));
     },
-    async runJsSchema(filename: string, data: any = {}) {
-        const rawResponse = await this.runJs('/src/schemas/' + filename, data, false);
-        const result = rawResponse.data;
+    executeJsSchema(result: Result) {
         const deepTranslate = _root => {
             if (typeof _root === 'string' && _root.length > 7 && _root.substring(0, 7) === '$RvFun$') {
                 return eval(_root.substring(7, _root.length));
@@ -142,6 +140,15 @@ export default {
         result.payload = deepTranslate(result.payload);
         // 这里是为schema中通过wrapFunctionToStr包裹的函数传递上下文，因为其函数最终都是在当前上下文中执行，所以直接通过this就可以设置上下文
         this.$rvScope = getRvScope(result.payload.rvInjected);
+    },
+    async runJsSchema(filename: string, data: any = {}) {
+        const rawResponse = await this.runJs('/src/schemas/' + filename, data, false);
+        this.executeJsSchema(rawResponse.data);
+        return rawResponse;
+    },
+    async runJsSchemaGenerator(param: {prototypeCode: string, [key: string]: any}) {
+        const rawResponse = await this.runJs('/src/generator/index.mjs', param, false);
+        this.executeJsSchema(rawResponse.data);
         return rawResponse;
     },
     async runJsServiceRaw(filename: string, data: any = {}): Promise<Result> {

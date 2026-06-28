@@ -15,7 +15,9 @@ const SchemaField = createSchemaField({
 
 export default () => {
     const form = useFormInstance();
-    const {data, loading} = useRequest(() => RvRequest.runJsSchema('dbms_model/MainTable.mjs'));
+    const {data, loading} = useRequest(() => RvRequest.runJsSchemaGenerator({
+        prototypeCode: 'rv_prototype'
+    }));
     return loading ? <PageLoading/> : (
         <FormProvider form={form}>
             <SchemaField schema={data.data.payload.schema}/>

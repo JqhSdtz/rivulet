@@ -3,7 +3,6 @@ package org.laputa.rivulet.module.app.service;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ReflectUtil;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -21,7 +20,6 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.laputa.rivulet.module.app.property.GitProperty;
 import org.laputa.rivulet.module.dbms_model.entity.RvTable;
 import org.laputa.rivulet.module.jpa_model.entity.RvPrototype;
-import org.laputa.rivulet.module.jpa_model.repository.RvPrototypeRepository;
 import org.laputa.rivulet.module.jpa_model.service.JpaModelService;
 import org.reflections.Reflections;
 import org.springframework.boot.ApplicationArguments;
@@ -124,7 +122,7 @@ public class GitService implements ApplicationRunner {
     public void createJsPrototypes(List<Class<?>> tableClasses) {
         if (tableClasses.isEmpty()) return;
         AddCommand addCommand = gitRepo.add();
-        List<RvPrototype> rvPropertyList = jpaModelService.getRvPrototypesByReflection();
+        List<RvPrototype> rvPropertyList = jpaModelService.getRvPrototypeList();
         Map<String, RvPrototype> rvPrototypeMap = new HashMap<>();
         rvPropertyList.forEach(rvPrototype -> {
             TableRemarkMetaInfo metaInfo = TableRemarkMetaInfoUtil.getMetaInfo(rvPrototype.getRemark());

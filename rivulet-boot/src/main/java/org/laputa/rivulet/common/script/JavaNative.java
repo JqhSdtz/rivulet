@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import org.laputa.rivulet.common.util.JpaUtil;
 import org.laputa.rivulet.module.auth.session.AuthSessionAccessor;
+import org.laputa.rivulet.module.jpa_model.service.JpaModelService;
 import org.springframework.stereotype.Component;
 
 /**
@@ -31,5 +32,8 @@ public class JavaNative {
 
     @Resource
     private JpaUtil jpaUtil;
+
+    @Resource
+    private JpaModelService jpaModelService;
 
 }
