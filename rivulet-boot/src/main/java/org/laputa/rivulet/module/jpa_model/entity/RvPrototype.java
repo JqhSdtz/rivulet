@@ -55,6 +55,11 @@ public class RvPrototype extends RvBaseEntity<String> {
     @Column(name = "code", nullable = false)
     private String code;
 
+    @Title("模型类名")
+    @Comment("模型类名，即模型对应的实体类的的类名。包含包路径。")
+    @Column(name = "class_name", nullable = false)
+    private String className;
+
     @Title("同步标记")
     @Comment("同步标记用于标识在系统中展示的模型结构是否已经同步到hibernate的metadata当中")
     @DefaultValue(Strings.FALSE)
@@ -82,6 +87,11 @@ public class RvPrototype extends RvBaseEntity<String> {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "update_time")
     private Date updateTime;
+
+    @Title("页面配置")
+    @Comment("该配置为模型创建或修改时在页面配置标签页里进行配置的参数对象转成的Json字符串")
+    @Column(name = "display_config_json")
+    private String displayConfigJson;
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @Cache(region = "defaultCache", usage = CacheConcurrencyStrategy.READ_WRITE)

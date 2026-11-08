@@ -61,6 +61,7 @@ public class JpaModelService implements ApplicationRunner {
             Table tableAnnotation = entityClass.getAnnotation(Table.class);
             if (tableAnnotation == null) continue;
             rvPrototype.setCode(tableAnnotation.name());
+            rvPrototype.setClassName(entityClass.getName());
             Title titleAnnotation = entityClass.getAnnotation(Title.class);
             if (titleAnnotation != null) {
                 rvPrototype.setTitle(titleAnnotation.value());
@@ -84,7 +85,7 @@ public class JpaModelService implements ApplicationRunner {
                 rvProperty.setPrototype(rvPrototype);
                 rvProperty.setOrderNum(i);
                 Class<?> fieldClassType = field.getType();
-                if (ClassUtils.isPrimitiveOrWrapper(fieldClassType)) {
+                if (ClassUtils.isPrimitiveOrWrapper(fieldClassType) || fieldClassType == String.class) {
                     rvProperty.setValueClassType(PropertyValueClassType.Basic);
                 } else if (Collection.class.isAssignableFrom(fieldClassType)) {
                     rvProperty.setValueClassType(PropertyValueClassType.Collector);
@@ -193,6 +194,15 @@ public class JpaModelService implements ApplicationRunner {
      */
     public RvPrototype getRvPrototype(String prototypeCode) {
         return rvPrototypeList.stream().filter(prototype -> prototypeCode != null && prototypeCode.equals(prototype.getCode())).findFirst().orElse(null);
+    }
+
+    /**
+     * 根据prototype的className获取prototype。在js代码里会调用到
+     * @param className
+     * @return
+     */
+    public RvPrototype getRvPrototypeByClassName(String className) {
+        return rvPrototypeList.stream().filter(prototype -> className != null && className.equals(prototype.getClassName())).findFirst().orElse(null);
     }
 
     public void run(ApplicationArguments args) throws Exception {

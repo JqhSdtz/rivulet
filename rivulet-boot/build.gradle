@@ -93,11 +93,12 @@ dependencies {
 //    implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.springframework.session:spring-session-core:3.4.1'
     implementation 'org.springframework.session:spring-session-data-redis:3.4.1'
-    implementation 'org.postgresql:postgresql:42.7.11'
+    implementation 'org.postgresql:postgresql:42.7.14'
 //    implementation 'com.alibaba:druid-spring-boot-3-starter:1.2.24'
     implementation 'org.redisson:redisson-spring-boot-starter:3.44.0'
     implementation 'org.liquibase:liquibase-core:4.31.1'
     implementation 'org.liquibase.ext:liquibase-hibernate6:4.31.0-alpha'
+//    implementation 'org.liquibase.ext:liquibase-hibernate6:4.31.0-SNAPSHOT'
     implementation 'org.hibernate.common:hibernate-commons-annotations:7.0.3.Final'
     //    springboot jpa中的hibernate还是6.6.5，所以这里版本也设置为6.6.5
     implementation 'org.hibernate:hibernate-envers:6.6.5.Final'
@@ -135,7 +136,7 @@ dependencies {
 dependencies {
     liquibaseRuntime 'org.liquibase:liquibase-core:4.31.0'
     liquibaseRuntime 'org.springframework.boot:spring-boot-starter-data-jpa'
-    liquibaseRuntime 'org.postgresql:postgresql:42.7.2'
+    liquibaseRuntime 'org.postgresql:postgresql:42.7.14'
     liquibaseRuntime 'org.liquibase:liquibase-groovy-dsl:3.0.2'
     liquibaseRuntime 'org.hibernate:hibernate-core:6.6.5.Final'
     liquibaseRuntime 'info.picocli:picocli:4.6.3'

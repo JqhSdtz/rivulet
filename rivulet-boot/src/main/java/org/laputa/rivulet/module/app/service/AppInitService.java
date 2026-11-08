@@ -5,6 +5,8 @@ import jakarta.annotation.Resource;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.persistence.Table;
+import lombok.Cleanup;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.laputa.rivulet.common.constant.Strings;
@@ -32,6 +34,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.util.List;
 
 /**
@@ -79,10 +84,14 @@ public class AppInitService implements ApplicationRunner {
     @SneakyThrows
     @Override
     public void run(ApplicationArguments args) {
+        if (!verifyRvAdminTableExists()) {
+            appState.getInitAdminCreated().setValue(false);
+        } else {
+            // 启动后先判断应用是否已经初始化，即初始管理员是否已创建
+            appState.getInitAdminCreated().setValue((verifyInitialAdminExists()));
+        }
         EventBus.registerStateChangeCallback(appState.getAllLoadedDataModelSynced(), 2, state -> {
             if (state.getCurrentValue().equals(false)) return;
-            // 启动后先判断应用是否已经初始化，即初始管理员是否已创建
-            appState.getInitAdminCreated().setValue((testAppInitialized()));
             // 若应用未初始化，则启动后获取一个初始化密钥
             if (!appState.getInitAdminCreated().getCurrentValue()) {
                 String timeStr = TimeUnitUtil.format(terminalKeyProperty.getTimeout(), terminalKeyProperty.getTimeUnit());
@@ -132,7 +141,7 @@ public class AppInitService implements ApplicationRunner {
         // 在分布式锁中执行，避免创建多个初始用户
         // 创建初始用户是一次性操作，所以如果已经被锁定则无需再执行任何操作
         return redissonLockUtil.doWithLock("createInitialAdmin", () -> {
-            if (!testAppInitialized()) {
+            if (!verifyInitialAdminExists()) {
                 // 设置ID后，save就会执行update操作。jpa没有单独的update
                 rvAdmin.setId(getInitialAdminId());
                 rvAdmin.setPassword(PasswordUtil.encode(rvAdmin.getPassword()));
@@ -176,11 +185,22 @@ public class AppInitService implements ApplicationRunner {
      *
      * @return
      */
-    private boolean testAppInitialized() {
+    private boolean verifyInitialAdminExists() {
         Query query = entityManager
                 .createQuery("select count(id) from RvAdmin where adminType = :adminType and active = true")
                 .setParameter("adminType", AdminType.INITIAL_ADMIN);
         long count = (Long) query.getSingleResult();
         return count > 0;
+    }
+
+    @SneakyThrows
+    private boolean verifyRvAdminTableExists() {
+        Table tableAnnotation = RvAdmin.class.getAnnotation(Table.class);
+        String tableName = tableAnnotation.name();
+        @Cleanup Connection connection = dataSource.getConnection();
+        DatabaseMetaData metaData = connection.getMetaData();
+        String catalog = connection.getCatalog();
+        @Cleanup ResultSet rs = metaData.getTables(catalog, null, tableName, new String[]{"TABLE"});
+        return rs.next();
     }
 }

@@ -11,6 +11,7 @@ import loginRouteWrapper from '@/wrappers/loginRouteWrapper';
 import InitApp from '@/pages/InitApp';
 import initAppRouteWrapper from '@/wrappers/initAppRouteWrapper';
 import ModelDetail from '@/pages/DataModel/ModelDetail';
+import Generator from '@/pages/Generator';
 
 export interface RouteConfig {
     children?: RouteConfig[];
@@ -44,6 +45,10 @@ const routesConfig: RouteObject[] = [
                         component: ModelDetail
                     }
                 ]
+            },
+            {
+                path: 'generator',
+                component: Generator
             },
             {
                 path: 'test',

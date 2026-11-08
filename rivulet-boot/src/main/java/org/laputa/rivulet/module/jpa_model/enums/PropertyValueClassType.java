@@ -4,13 +4,23 @@ public enum PropertyValueClassType {
     /**
      * 基础类如String
      */
-    Basic,
+    Basic("Basic"),
     /**
      * 集合类如List
      */
-    Collector,
+    Collector("Collector"),
     /**
      * 业务类如RvPrototype
      */
-    Business
+    Business("Business");
+
+    private final String value;
+
+    PropertyValueClassType(String value) {
+        this.value = value;
+    }
+
+    public String getValue() {
+        return value;
+    }
 }

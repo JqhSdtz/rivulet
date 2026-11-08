@@ -83,6 +83,12 @@ const config: MenuConfigItem[] = [
         ]
     },
     {
+        name: '页面生成',
+        path: '/generator?rvPrototypeCode=rv_prototype&schemaGeneratorName=prototypeEditSchema',
+        icon: <SmileOutlined/>,
+        testPath
+    },
+    {
         name: '测试5',
         path: '/test?v=5',
         icon: <SmileOutlined/>,
